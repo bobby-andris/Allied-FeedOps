@@ -1,8 +1,8 @@
 # Architecture Research
 
-**Domain:** FastAPI pipeline decomposition + LLM provider abstraction
+**Domain:** Data infrastructure hardening + dead code cleanup for existing Python/FastAPI content generation pipeline
 **Researched:** 2026-03-03
-**Confidence:** HIGH (codebase directly inspected; patterns verified against official FastAPI docs and community consensus)
+**Confidence:** HIGH (based on direct codebase inspection, live database constraint analysis, and pre-existing research files at /tmp/)
 
 ---
 
@@ -10,448 +10,426 @@
 
 ### System Overview
 
-The current system is a FastAPI monolith where a single 3,737-line `main.py` owns everything:
-routes, Pydantic schemas, business logic, batch job processors, helper functions, and telemetry.
-The target architecture separates concerns into layers that can be developed, tested, and replaced
-independently.
+The existing architecture is a dual-layer system: a Python/FastAPI Cloud Run pipeline for content generation and data collection, and a Next.js/Vercel dashboard for review and publishing. The v1.1 milestone operates exclusively on the Python layer and database schema — the dashboard is explicitly out of scope.
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         API Entry Layer                              │
-│  main.py (<500 lines) — CORSMiddleware, lifespan, router mounts,    │
-│  run_async_in_thread(), http middleware                              │
-├────────────┬──────────────┬──────────────┬──────────────────────────┤
-│  Route     │  Route       │  Route       │  Route                   │
-│  Modules   │  Modules     │  Modules     │  Modules                 │
-│ (generation│ (regenerate) │ (batch /     │ (backfill, score-intent, │
-│  /health)  │              │  hybrid)     │  perf, images)           │
-├────────────┴──────────────┴──────────────┴──────────────────────────┤
-│                       Service / Logic Layer                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐   │
-│  │  JobRunner   │  │FinishService │  │  GenerationService       │   │
-│  │ (unified     │  │(placeholder  │  │ (wraps generate_per_     │   │
-│  │  batch +     │  │ contract,    │  │  platform; metrics       │   │
-│  │  hybrid)     │  │ parity)      │  │  wrapper; prompt build)  │   │
-│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────────┘   │
-├─────────┴─────────────────┴──────────────────────┴───────────────────┤
-│                       Provider Abstraction Layer                      │
-│  providers/base.py (LLMProvider ABC, LLMError, close_provider)       │
-│  providers/factory.py (get_provider, FallbackProvider)               │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐   │
-│  │ OpenAIProvider   │  │  ClaudeProvider  │  │  GeminiProvider  │   │
-│  │ (GPT-5.2, bugs   │  │  (NEW — Anthropic │  │  (image gen)     │   │
-│  │  to fix here)    │  │  Messages API)   │  │                  │   │
-│  └──────────────────┘  └──────────────────┘  └──────────────────┘   │
-├──────────────────────────────────────────────────────────────────────┤
-│                       Infrastructure Layer                            │
-│  schemas/          persistence/      telemetry/       db/            │
-│  (Pydantic models  (supabase write   (metrics,        (supabase_    │
-│  extracted from     helpers, upsert   log_event,       client,      │
-│  main.py)           patterns)         cost estimator)  queries)     │
-└──────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                    Next.js Dashboard (Vercel)                      │
+│  ensure-data.ts (auto-triggers baseline/search collection)         │
+│  funnel-snapshots/capture/route.ts (Cloud Scheduler, 6 AM UTC)     │
+└─────────────────────┬──────────────────────┬───────────────────────┘
+                      │ HTTP                  │ HTTP
+┌─────────────────────▼──────────────────────▼───────────────────────┐
+│              Python FastAPI — Cloud Run                            │
+│                                                                    │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │  API Entry (main.py + routes.py)                            │  │
+│  │  Content: /optimize-sku /regenerate /batch-optimize         │  │
+│  │  Data:    /performance/* /search-insights/* /backfill/*     │  │
+│  └─────────────────────────────────────────────────────────────┘  │
+│                              │                                     │
+│  ┌──────────────────┐  ┌─────▼────────────┐  ┌──────────────────┐  │
+│  │ generation/      │  │ backfill.py      │  │ performance_     │  │
+│  │ executor.py      │  │ (4 job types:    │  │ baseline.py      │  │
+│  │                  │  │  search_terms,   │  │ + performance_   │  │
+│  │ [IMAGE GAP HERE] │  │  perf_metrics,   │  │ impact.py        │  │
+│  │ image= not wired │  │  keyword_planner,│  │                  │  │
+│  │ in modern path   │  │  custom_labels)  │  │ [SNAPSHOT BUG]   │  │
+│  └──────────────────┘  └────────┬─────────┘  └──────┬───────────┘  │
+│                                 │                    │             │
+│  ┌──────────────────────────────▼────────────────────▼───────────┐  │
+│  │              Integration Layer                                │  │
+│  │  google_ads_performance.py  (shopping_performance_view)       │  │
+│  │  google_ads_search_terms.py (search_term_view + KW planner)   │  │
+│  │  LLM providers (Claude Sonnet 4.6)                            │  │
+│  └──────────────────────────────────────┬──────────────────────┘  │
+│              run_async_in_thread()       │                         │
+│              (non-daemon thread pattern) │                         │
+└─────────────────────────────────────────┼──────────────────────────┘
+                           Cloud Scheduler │ (3 jobs)
+                           2:15 AM /backfill/start
+                           2:45 AM /performance/capture-snapshot
+                           6:00 AM /api/funnel-snapshots/capture (Vercel)
+                                          │
+┌─────────────────────────────────────────▼──────────────────────────┐
+│                    Supabase PostgreSQL                              │
+│                                                                    │
+│  variant_index (72K) ← central entity hub                         │
+│  performance_baselines (274 rows — on-demand only)                │
+│  performance_snapshots (179 rows — BROKEN upsert, should be 2500+)│
+│  performance_impact_scores (0 rows — blocked by snapshot failure)  │
+│  search_queries (189K rows — healthy)                              │
+│  keyword_metrics (1.5K rows — healthy)                             │
+│  funnel_snapshots_daily (5K rows — healthy)                        │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Component Responsibilities
 
-| Component | Responsibility | Lives In |
-|-----------|---------------|----------|
-| `main.py` | App factory, CORS, lifespan, middleware, `run_async_in_thread`, router mounts | `api/main.py` |
-| Route modules | Request parsing, response serialization, call into service layer | `api/routers/` (new) |
-| `schemas/` | All Pydantic `BaseModel` classes moved out of `main.py` | `api/schemas/` (new) |
-| `JobRunner` | Unified `process_batch_job` + `process_hybrid_batch_job` | `api/job_runner.py` or `jobs/runner.py` |
-| `FinishService` | Finish placeholder contract, parity enforcement, fallback sentences | `pipeline/finish_service.py` |
-| `GenerationService` | `_generate_with_metrics` wrapper, prompt assembly, generate-then-persist flow | `api/generation_service.py` |
-| `LLMProvider` ABC | Common interface: `generate()`, `health_check()`, `aclose()`, `name` | `providers/base.py` (already exists) |
-| `OpenAIProvider` | GPT-5.2 calls with bug fixes | `providers/openai_provider.py` (exists, to be fixed) |
-| `ClaudeProvider` | Anthropic Messages API, `json_schema` strict mode | `providers/claude_provider.py` (new) |
-| `GeminiProvider` | Imagen calls for lifestyle images | `providers/gemini_provider.py` (exists) |
-| `factory.py` | Provider selection, `FallbackProvider` | `providers/factory.py` (exists) |
-| `generation_telemetry.py` | Cost estimator, token extraction, provider label | `api/generation_telemetry.py` (exists) |
-| `persistence.py` | Supabase upsert helpers, content ID lookups | `generation/persistence.py` (exists) |
+| Component | Responsibility | File |
+|-----------|----------------|------|
+| `routes.py` | FastAPI route handlers (thin delegates) | `src/feedops/api/routes.py` |
+| `generation.py` | Content generation orchestration | `src/feedops/api/generation.py` |
+| `executor.py` | Per-platform task execution (modern path) | `src/feedops/generation/executor.py` |
+| `generator.py` | Legacy generation (optimize.py CLI + tests) | `src/feedops/pipeline/generator.py` |
+| `backfill.py` | Bulk data collection job management (4 types) | `src/feedops/api/backfill.py` |
+| `performance_baseline.py` | API routes: capture-baseline, collect-daily, compute-impact | `src/feedops/api/performance_baseline.py` |
+| `performance_impact.py` | Snapshot collector + diff-in-diff scorer | `src/feedops/monitoring/performance_impact.py` |
+| `google_ads_performance.py` | shopping_performance_view client (batch + single) | `src/feedops/integrations/google_ads_performance.py` |
+| `google_ads_search_terms.py` | SearchTermsClient + KeywordPlannerClient | `src/feedops/integrations/google_ads_search_terms.py` |
+| `persistence.py` | Supabase write operations | `src/feedops/api/persistence.py` |
+| `job_management.py` | Job state machine | `src/feedops/api/job_management.py` |
+| `alerts.py` | Slack webhook + Resend email notifications | `src/feedops/observability/alerts.py` |
+| `telemetry.py` | `run_async_in_thread()` background task lifecycle | `src/feedops/api/telemetry.py` |
+| `variant_index` table | Central entity hub: GMC offer ID ↔ master_sku ↔ Shopify ↔ finish | Supabase |
 
 ---
 
-## Recommended Project Structure
+## What Is New vs. What Is Modified
 
-After decomposition, `src/feedops/api/` becomes:
+### New (v1.1 only creates one file)
 
-```
-src/feedops/
-├── api/
-│   ├── main.py                    # <500 lines: app factory only
-│   ├── routers/                   # New: one file per endpoint group
-│   │   ├── __init__.py
-│   │   ├── generation.py          # /optimize-sku, /regenerate, /regenerate/{job_id}
-│   │   ├── batch.py               # /batch-optimize, /batch-status/{job_id}
-│   │   ├── hybrid.py              # /hybrid-generate
-│   │   ├── images.py              # /generate-images
-│   │   └── admin.py               # /health, /backfill/*, /score-intent
-│   ├── schemas/                   # New: extracted Pydantic models
-│   │   ├── __init__.py
-│   │   ├── generation.py          # OptimizeRequest/Response, RegenerateRequest/Response
-│   │   ├── batch.py               # BatchOptimizeRequest, BatchJobResponse, BatchStatusResponse
-│   │   ├── hybrid.py              # HybridGenerateRequest, HybridJobResponse
-│   │   └── intent.py              # ScoreIntentRequest/Response
-│   ├── job_runner.py              # New: unified JobRunner replacing process_batch_job + process_hybrid_batch_job
-│   ├── generation_service.py      # Extract: _generate_with_metrics, prompt assembly helpers
-│   ├── generation_telemetry.py    # Already exists — no change needed
-│   ├── prompt_builder.py          # Already exists — no change needed
-│   ├── prompt_loader.py           # Already exists — no change needed
-│   ├── hybrid_generation.py       # Already exists — no change needed
-│   ├── multi_sku_detection.py     # Already exists — no change needed
-│   ├── sku_alias.py               # Already exists — no change needed
-│   ├── runtime_controls.py        # Already exists — no change needed
-│   ├── env_contract.py            # Already exists — no change needed
-│   ├── supabase_loader.py         # Already exists — no change needed
-│   ├── backfill.py                # Already exists — no change needed
-│   ├── search_insights.py         # Already exists — no change needed
-│   ├── monitoring.py              # Already exists — no change needed
-│   ├── gmc_sync.py                # Already exists — no change needed
-│   └── performance_baseline.py    # Already exists — no change needed
-├── providers/
-│   ├── base.py                    # Already exists — LLMProvider ABC (solid)
-│   ├── factory.py                 # Already exists — get_provider, FallbackProvider
-│   ├── openai_provider.py         # Exists — fix 5 GPT-5.2 bugs here
-│   ├── claude_provider.py         # New: Anthropic Messages API implementation
-│   ├── gemini_provider.py         # Already exists — image gen
-│   └── reliability.py             # Already exists — circuit breaker, backoff
-├── pipeline/
-│   ├── finish_service.py          # Extract: _enforce_finish_sentence_parity + helpers
-│   │                              # Currently: _enforce_finish_sentence_parity in main.py (lines 1496-1600)
-│   └── ...                        # Everything else already extracted
-└── generation/
-    ├── persistence.py             # Already exists — task result helpers
-    └── ...
-```
+| New Component | Type | Purpose |
+|--------------|------|---------|
+| `src/feedops/api/utils.py` | Python module | Shared utilities (_require_request_id) to break circular import between persistence.py and job_management.py |
+| Migration `036_performance_snapshot_constraint.sql` | SQL migration | Adds unique constraint on performance_snapshots (master_sku, platform, environment, snapshot_date) |
 
-### Structure Rationale
+### Modified (existing files changed in v1.1)
 
-- **`api/routers/`**: FastAPI's native `APIRouter` pattern. Each router is included in `main.py` with `app.include_router()`. This is the standard pattern documented by FastAPI for larger applications — already used by `search_insights`, `monitoring`, `gmc_sync`, `performance_baseline`. Extend to the remaining routes in `main.py`.
-- **`api/schemas/`**: Pydantic models have zero business logic. Extracting them removes ~150 lines from `main.py` and makes them importable for unit tests without spinning up the full app.
-- **`api/job_runner.py`**: `process_batch_job()` (lines 2792–3072) and `process_hybrid_batch_job()` (lines 3072–3615) share the same structure: set job to processing, iterate SKUs, generate, persist, update status, handle failures. ~60% identical code. A single `JobRunner` class with a `run()` method parameterized by job type eliminates the duplication.
-- **`pipeline/finish_service.py`**: `_enforce_finish_sentence_parity()` (lines 1496–1600) is a self-contained operation with well-defined inputs/outputs. It touches finish placeholder logic, LLM call, and validation — belongs in the pipeline layer, not the route handler.
-- **`providers/claude_provider.py`**: The `LLMProvider` ABC already defines the correct interface. A Claude provider is an additive change: new file, new factory entry, no existing code modified.
+| File | Change Type | What Changes |
+|------|------------|-------------|
+| `src/feedops/api/main.py` | Dead code removal | Remove ~130-line re-export block (after updating 5 test files) |
+| `src/feedops/api/routes.py` | Dead code removal | Remove ~14 unused imports |
+| `src/feedops/api/generation.py` | Dead code removal | Remove re-exports of finish_processing internals; deprecate _build_generation_user_prompt |
+| `src/feedops/api/finish_processing.py` | Dead code removal | Remove unused _provider_label re-export |
+| `src/feedops/api/persistence.py` | Refactor | Import _require_request_id from utils.py instead of defining locally |
+| `src/feedops/api/job_management.py` | Refactor | Import _require_request_id from utils.py instead of defining locally |
+| `src/feedops/generation/executor.py` | Feature | Wire image parameter: fetch image from parent_sku, pass to llm.generate() (~15 lines) |
+| `src/feedops/generation/tasks.py` | Dead code removal | Remove build_variant_adaptation_prompt(), VARIANT_*_TASK_SCHEMA |
+| `src/feedops/generation/persistence.py` | Dead code removal | Remove serialize_task_result() |
+| `src/feedops/pipeline/generator.py` | Dead code removal | Remove 5 orphaned functions, then 6 variant generation functions (after test updates) |
+| `src/feedops/monitoring/performance_impact.py` | No code change | Upsert already correct — works after migration 036 is applied |
+| Multiple test files (~8) | Test updates | Update import paths to point at actual modules, not main.py re-exports |
 
 ---
 
 ## Architectural Patterns
 
-### Pattern 1: APIRouter Extraction
+### Pattern 1: Schema Migration Before Code Fix
 
-**What:** Move route handler functions from `main.py` into dedicated `APIRouter` modules. Each router is imported and mounted in `main.py` with `app.include_router(router)`.
+**What:** Add the missing unique constraint to `performance_snapshots` as a Supabase migration — no Python code change needed. The upsert code in `performance_impact.py:461` already specifies the correct ON CONFLICT columns. The database just lacks the constraint.
 
-**When to use:** Any time a group of routes shares a common prefix, tag, or concern. Already proven in this codebase: `search_insights_router`, `monitoring_router`, `gmc_sync_router`, `performance_baseline_router` are all already extracted.
+**When to use:** Any time an upsert silently fails with PostgreSQL error 42P10 (no matching unique constraint). The fix is always a migration, never a code rewrite.
 
-**Trade-offs:** Routes that depend on module-level state (e.g., the `run_async_in_thread` helper defined in `main.py`) need that helper passed explicitly or moved to a shared location (`api/thread_runner.py`).
-
-**Example:**
-```python
-# api/routers/generation.py
-from fastapi import APIRouter
-from feedops.api.schemas.generation import OptimizeRequest, OptimizeResponse
-from feedops.api.generation_service import GenerationService
-
-router = APIRouter(tags=["Generation"])
-
-@router.post("/optimize-sku", response_model=OptimizeResponse)
-async def optimize_single_sku(request: OptimizeRequest):
-    ...
-
-# api/main.py
-from feedops.api.routers.generation import router as generation_router
-app.include_router(generation_router)
-```
-
-### Pattern 2: Unified JobRunner (Template Method)
-
-**What:** Replace `process_batch_job()` and `process_hybrid_batch_job()` with a single `JobRunner` that owns the shared lifecycle (DB status transitions, error handling, thread safety) and delegates per-item work to a callable.
-
-**When to use:** Two or more background job functions with identical lifecycle code but different per-item logic. This codebase has exactly that.
-
-**Trade-offs:** Adds one abstraction layer. The payoff is that lifecycle bugs (stuck "processing" status, failed job recovery) get fixed in one place instead of two. The `run_async_in_thread()` pattern must be preserved — `JobRunner.run()` is still called from within a `run_async_in_thread` wrapper, not via `BackgroundTasks`.
+**Trade-offs:** Migration is one-way in production. Test with a dry-run `EXPLAIN` to confirm the planner will use the constraint before deploying.
 
 **Example:**
-```python
-# api/job_runner.py
-class JobRunner:
-    def __init__(self, job_id: str, supabase, options: dict):
-        self.job_id = job_id
-        self.supabase = supabase
-        self.options = options
-
-    async def run(self, skus: list[str], process_sku_fn: Callable) -> JobResult:
-        self._mark_processing()
-        completed, failed = 0, 0
-        for sku in skus:
-            try:
-                await process_sku_fn(sku)
-                completed += 1
-            except Exception as exc:
-                failed += 1
-                self._record_failure(sku, exc)
-            self._update_progress(completed, failed)
-        self._mark_complete(completed, failed)
-        return JobResult(completed=completed, failed=failed)
+```sql
+-- Migration: 036_performance_snapshot_constraint.sql
+ALTER TABLE performance_snapshots
+ADD CONSTRAINT uq_snapshots_sku_platform_env_date
+UNIQUE (master_sku, platform, environment, snapshot_date);
 ```
 
-### Pattern 3: LLM Provider ABC with Named Constructor
+### Pattern 2: Test-First Dead Code Removal
 
-**What:** The `LLMProvider` ABC already exists and is the right pattern. The missing piece is a `ClaudeProvider` implementation. The factory (`get_provider`) selects providers based on environment variables — adding Claude requires only: new file, new factory branch for `ANTHROPIC_API_KEY`, new `claude` option in `preferred` parameter.
+**What:** Dead code in this codebase is entangled with test imports. The correct sequence is: update the test import → verify tests pass → delete the dead code. Never delete code first.
 
-**When to use:** Any new LLM provider. The ABC enforces the contract: `generate()`, `health_check()`, `aclose()`, `name`.
+**When to use:** Every item in the "Requires test updates first" category (5 groups, ~8 test files).
 
-**Trade-offs:** The ABC's `generate()` signature uses `reasoning_effort` and `max_completion_tokens` — these are OpenAI-centric parameter names. For Claude (which uses `thinking` budget tokens), the implementation maps internally. The interface stays stable.
+**Trade-offs:** Slightly more granular PRs, but prevents silently breaking the test suite. The test suite is the only safety net for these cleanup changes.
 
-**Example:**
-```python
-# providers/claude_provider.py
-import anthropic
-from feedops.providers.base import LLMProvider, LLMError, ImageInput
-
-class ClaudeProvider(LLMProvider):
-    def __init__(self, api_key: str, model: str = "claude-opus-4-6"):
-        self._client = anthropic.AsyncAnthropic(api_key=api_key)
-        self._model = model
-
-    @property
-    def name(self) -> str:
-        return f"claude/{self._model}"
-
-    async def generate(
-        self,
-        prompt: str,
-        schema: dict,
-        image: ImageInput | None = None,
-        system_prompt: str | None = None,
-        reasoning_effort: str | None = None,
-        max_completion_tokens: int | None = None,
-    ) -> dict:
-        # Map reasoning_effort to Claude's thinking budget
-        thinking = None
-        if reasoning_effort:
-            budget = {"low": 1024, "medium": 4096, "high": 16000}.get(reasoning_effort)
-            if budget:
-                thinking = {"type": "enabled", "budget_tokens": budget}
-
-        response = await self._client.messages.create(
-            model=self._model,
-            system=system_prompt or "",
-            messages=[{"role": "user", "content": prompt}],
-            tools=[{
-                "name": "output",
-                "description": "Return structured output",
-                "input_schema": schema,
-            }],
-            tool_choice={"type": "tool", "name": "output"},
-            thinking=thinking,
-            max_tokens=max_completion_tokens or 4096,
-        )
-        # Extract tool_use block
-        for block in response.content:
-            if block.type == "tool_use":
-                return block.input
-        raise LLMError("No tool_use block in response", provider=self.name)
-
-    async def health_check(self) -> bool:
-        return bool(self._client.api_key)
-
-    async def aclose(self) -> None:
-        await self._client.close()
+**Example sequence:**
+```
+1. Edit test_prompt_sanitization_contract.py:
+   from feedops.generation.executor import _platform_reasoning_effort
+   (was: from feedops.pipeline.generator import _platform_reasoning_effort)
+2. Run: PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v
+3. Confirm all tests pass
+4. Delete _platform_reasoning_effort() from generator.py
+5. Run tests again — confirm still passing
 ```
 
-### Pattern 4: Schema Module Extraction
+### Pattern 3: Additive Image Wiring (Not a Refactor)
 
-**What:** Move all Pydantic `BaseModel` classes from `main.py` into `api/schemas/` submodules grouped by concern.
+**What:** Wire the `image` parameter through `executor.py`'s `execute_generation_bundle()` to `_generate_with_provider_compat()` to `llm.generate()`. The provider layer (Claude, OpenAI) already accepts this parameter. This is a pure addition — callers with no image get `image=None` behavior unchanged.
 
-**When to use:** When schemas are needed in tests or multiple route modules. Extraction allows `from feedops.api.schemas.generation import OptimizeRequest` without importing the full FastAPI app.
+**When to use:** Any time the modern per-platform path needs to send multimodal input to the LLM. The legacy `generate_candidates()` path already does this correctly in generator.py.
 
-**Trade-offs:** Import paths change. Since schemas are currently private to `main.py` (callers go through HTTP), no external Python callers are affected. Test files may need updated imports.
+**Trade-offs:** Adds one async network call (image fetch) per SKU during generation. Acceptable since `fetch_image()` is async and product images are used by Claude for visual context.
+
+**Example (executor.py, ~15 lines total):**
+```python
+# In execute_generation_bundle(), before the task loop:
+from feedops.pipeline.images import fetch_image  # existing utility
+
+image = None
+if parent_sku.variants:
+    main_image_url = parent_sku.variants[0].main_image_url
+    if main_image_url:
+        image = await fetch_image(main_image_url)
+
+# In _generate_with_provider_compat(), add image to signature and forward:
+async def _generate_with_provider_compat(
+    llm: LLMProvider, prompt, schema, ..., image=None
+) -> dict:
+    return await llm.generate(prompt, schema, ..., image=image)
+    # Skip image for finish sentence tasks:
+    # if task_kind == GenerationTaskKind.FINISH_SENTENCE: image = None
+```
+
+### Pattern 4: Circular Import Resolution via Shared Utility Module
+
+**What:** `_require_request_id()` is duplicated in `persistence.py` and `job_management.py` because importing from each other creates a cycle. Extract to `feedops.api.utils` — a new module that neither of them imports from.
+
+**When to use:** Any utility function needed by two modules in the same package that mutually import each other.
+
+**Trade-offs:** Adds one new file but eliminates duplication and removes the misleading "duplicated here to avoid circular import" comment.
 
 ---
 
 ## Data Flow
 
-### Single-SKU Generation Request
+### Critical Path: Daily Snapshot Collection (Currently Broken → Fixed by Migration 036)
 
 ```
-POST /optimize-sku
-    ↓
-api/routers/generation.py::optimize_single_sku()
-    ↓ deserialize OptimizeRequest
-api/generation_service.py::GenerationService.generate()
-    ↓ load product data
-api/supabase_loader.py::load_parent_sku_from_supabase()
-    ↓ build prompts
-api/prompt_builder.py::build_core_prompt()
-    ↓ call LLM
-providers/factory.py::get_provider()
-providers/openai_provider.py::OpenAIProvider.generate()
-    ↓ validate finish sentences
-pipeline/finish_service.py::FinishService.enforce_parity()
-    ↓ persist result
-generation/persistence.py::persist_finish_sentences()
-    ↓ return
-api/schemas/generation.py::OptimizeResponse
+Cloud Scheduler (2:45 AM ET)
+    → POST /performance/capture-snapshot
+        → capture_snapshot_compat()
+            → collect_daily_performance_snapshots()
+                1. Load all publish_events (treated SKUs, last 365 days)
+                2. Load ALL variant_index rows (72K) for control SKU set
+                3. For D-1, D-2, D-3 rolling dates:
+                   a. fetch_batch_product_performance() [25 IDs/chunk, 5 threads]
+                   b. Aggregate by master_sku
+                   c. Label treated vs control cohorts
+                   d. UPSERT performance_snapshots  ← NOW SUCCEEDS (after migration 036)
+            → compute_and_store_impact_scores()
+                1. Load snapshots (now populated)
+                2. Compute diff-in-diff lift
+                3. UPSERT performance_impact_scores  ← NOW REACHED
+    → send_slack_notification()  ← reports SUCCESS instead of FAILED
 ```
 
-### Batch Job Flow
+**Before migration 036:** Step 3d raises PostgreSQL 42P10 every night. Result: 179 snapshot rows, 0 impact score rows, daily Slack FAILED alerts.
+
+**After migration 036:** Step 3d upserts correctly. Rows accumulate daily. Impact scores populate. Slack reports success.
+
+### Path: Performance Baseline Collection (On-Demand, Working — Coverage Gap)
 
 ```
-POST /batch-optimize
-    ↓
-api/routers/batch.py::batch_optimize()
-    ↓ create DB job record
-    ↓ launch thread
-api/main.py::run_async_in_thread(job_runner.run, job_id=..., skus=...)
-                                     [non-daemon thread, new event loop]
-    ↓ (returns job_id immediately to caller)
-
-[background thread]:
-api/job_runner.py::JobRunner.run()
-    ↓ for each SKU: call GenerationService
-    ↓ update batch_generation_jobs progress
-    ↓ on completion: mark complete
+User triggers regeneration or SKU selection
+    → ensureSkuData() [dashboard, ensure-data.ts]
+        → POST /performance/capture-baseline [Cloud Run]
+            → For each master_sku in request:
+                1. Query variant_index → get all gmc_offer_ids
+                2. fetch_batch_product_performance() [25 IDs/chunk, 5 threads]
+                3. Aggregate metrics across all variants
+                4. UPSERT performance_baselines (master_sku, platform)  ← WORKS
 ```
 
-### Provider Selection
+**Coverage gap:** Only 274 of ~2,500 master SKUs have baselines because collection is on-demand. The backfill job type `performance_metrics` closes this gap when run via `/backfill/start`. No code change needed — the infrastructure exists.
+
+### Path: Bulk Data Backfill (Existing Infrastructure, Available for Full Coverage)
 
 ```
-get_provider(preferred=None)
-    ↓
-  ANTHROPIC_API_KEY set? → ClaudeProvider (new)
-  OPENAI_API_KEY set?    → OpenAIProvider (default)
-  GEMINI_API_KEY set?    → GeminiProvider
-  FEEDOPS_FORCE_PROVIDER_FALLBACK? → FallbackProvider(primary, secondary)
+POST /backfill/start { job_type: "performance_metrics" }
+    → create backfill job record
+    → run_async_in_thread(collect_performance_batch)
+        → Load all master_skus from variant_index
+        → For each SKU (with google_ads_limiter, 10 QPS):
+            → fetch_batch_product_performance()
+            → UPSERT performance_baselines
+        → Slack notification on completion
 ```
 
-### Key Data Flows
-
-1. **Finish sentence contract:** Base description → `strip_hardcoded_finish_names()` → `normalize_base_description_with_finish_placeholder()` → LLM finish call → `normalize_and_validate_finish_sentences()` → persisted with `{FINISH_NAME}` placeholder intact.
-
-2. **Prompt authority chain:** `prompt_builder.py` (orchestrator) → `prompts.py` (SYSTEM_PROMPT) → `prompt_loader.py` (DB gold examples) → `shopping_intelligence.py` (YAML config). This chain must not be disturbed during extraction — only route-to-service boundaries move.
-
-3. **Job recovery:** On startup (`lifespan`), stale `processing` jobs older than 2 hours are set to `failed`. After extraction, this recovery sweep stays in `main.py` lifespan or moves to `job_runner.py` as a class method `JobRunner.recover_stale()`.
+Available job types: `search_terms`, `performance_metrics`, `keyword_planner`, `custom_labels`, `full_backfill` (all four sequentially).
 
 ---
 
-## Build Order
-
-The dependency graph determines what must be extracted before what else can be tested.
+## Entity Relationships
 
 ```
-Phase 1: Schemas (no dependencies — standalone Pydantic models)
-    ↓
-Phase 2: FinishService (depends on pipeline imports already extracted)
-    ↓
-Phase 3: GenerationService (depends on providers, prompt_builder — all exist)
-    ↓
-Phase 4: JobRunner (depends on GenerationService + FinishService)
-    ↓
-Phase 5: Route routers (depend on schemas + service layer)
-    ↓
-Phase 6: main.py slim-down (mounts all routers, <500 lines)
+variant_index (72K rows) — CENTRAL HUB
+    │
+    ├── master_sku ──────────► performance_baselines (274 rows)
+    │                    ├──── performance_snapshots (179 rows — BROKEN)
+    │                    └──── search_queries_by_master_sku (7.4K rows)
+    │
+    ├── gmc_offer_id ────────► Google Ads shopping_performance_view
+    │                          (product_item_id field)
+    │
+    ├── shopify_product_id ──► Shopify product API
+    ├── shopify_variant_id ──► Shopify variant API
+    └── finish_code ─────────► 28 finish variants
+
+publish_events
+    ├── master_sku ──────────► links content changes to SKUs
+    ├── published_at ────────► timestamp for pre/post window calculation
+    └── id ──────────────────► performance_impact_scores.publish_event_id (FK)
+                                performance_snapshots.publish_event_id (FK)
+
+search_queries (189K rows) — variant-level
+    └── gmc_offer_id ────────► variant_index.gmc_offer_id (soft ref, no FK)
 ```
 
-Provider work (Claude) is independent and can happen in parallel with phases 1–4:
-```
-Parallel track: OpenAI bug fixes → ClaudeProvider → factory update → evaluation harness
-```
+**Offer ID case handling:** `variant_index` stores lowercase `shopify_us_`, Google Ads returns uppercase `shopify_US_`. Search terms code normalizes correctly. Performance code uses `variant_index` values directly (already lowercase, matches Google Ads queries that use the same values).
 
 ---
 
-## Scaling Considerations
+## Build Order (Dependency-Aware)
 
-This is a single Cloud Run service with a bounded SKU catalog. Scaling concerns are operational, not architectural.
+### Step 1: Schema Migration — Fix Snapshot Upsert
 
-| Scale Concern | Current State | After Decomposition |
-|--------------|--------------|---------------------|
-| Unit testability | Zero (3,737-line file) | Each module independently testable |
-| Prompt sensitivity | Changes require full deploy+test | Unchanged — prompt files not touched |
-| Background job reliability | Duplicate bug fix surface (2 functions) | Single `JobRunner`, bugs fixed once |
-| Provider switching | Manual code change | `ANTHROPIC_API_KEY` env var toggles Claude |
-| Batch throughput | Limited by per-SKU LLM latency | Unchanged — parallel SKU processing not in scope |
+**What:** Write and deploy migration 036 (`UNIQUE (master_sku, platform, environment, snapshot_date)` on `performance_snapshots`).
+
+**Why first:** Single highest-value change. Unblocks daily snapshot collection and impact scores. Zero Python code changes, zero regression risk. The constraint does not break any existing reads.
+
+**Verification:** After deploying, manually call `POST /performance/capture-snapshot`. Check Slack for success message (not FAILED). Query `SELECT COUNT(*) FROM performance_snapshots` and confirm rows increasing. Query `SELECT COUNT(*) FROM performance_impact_scores` and confirm rows appearing.
+
+**Files changed:** One new migration SQL file only.
+
+---
+
+### Step 2: Trivial Dead Code Removal — No Test Dependencies
+
+**What:** Remove 8 orphaned items with zero runtime or test callers.
+
+| Item | File | Lines |
+|------|------|-------|
+| `_payload_value_lengths()` | generator.py | 138-148 |
+| `_schema_hash()` | generator.py | 184-187 |
+| `_prompt_hash()` | generator.py | 190-193 |
+| `_generate_with_provider_compat()` | generator.py | 151-181 |
+| `_provider_label` re-export | finish_processing.py | 7 |
+| Finish processing re-exports | generation.py | 26-30 |
+| `build_variant_adaptation_prompt()` | tasks.py | 162-236 |
+| `serialize_task_result()` | generation/persistence.py | 38-58 |
+
+**Why second:** No dependencies on any other step. Fast, risk-free wins.
+
+**Verification:** `PYTHONPATH=./src .venv/bin/python -m pytest tests/ -v` — must pass with zero failures.
+
+---
+
+### Step 3: Image Wiring in executor.py — Additive Feature
+
+**What:** Thread `image: ImageInput | None` through `execute_generation_bundle()` → `_generate_with_provider_compat()` → `llm.generate()`. ~15 lines. Import `fetch_image` from `feedops.pipeline.images`.
+
+**Why third:** Additive, no removals. Independent of Steps 2 and 4.
+
+**Verification:** Trigger `/regenerate` for one SKU that has a `main_image_url` in `variant_index`. Verify generation succeeds and Cloud Run logs show image was fetched and sent to Claude.
+
+---
+
+### Step 4: Test-Dependent Dead Code Removal — In Sub-Steps
+
+Execute each sub-step as update-test → run tests → remove code:
+
+**4a.** Update `test_prompt_sanitization_contract.py` imports → remove `_platform_reasoning_effort()` and `_platform_completion_cap()` from `generator.py`.
+
+**4b.** Update `test_pipeline.py` to remove `build_variant_prompt` import → remove 6 variant generation functions from `generator.py` (lines 423-937).
+
+**4c.** Update `tests/api/test_generation.py` (3 functions) to call `build_core_prompt()` directly → remove `_build_generation_user_prompt()` from `generation.py`.
+
+**Why fourth:** Requires coordination across multiple test files. Do one sub-step at a time with a full test run between each.
+
+---
+
+### Step 5: main.py Re-export Block Removal
+
+**What:** Update the 5 test files that monkeypatch via `feedops.api.main.*` to import from actual module locations. Then remove the ~130-line re-export block from `main.py`.
+
+**Why last among dead code:** Most impactful but highest coordination cost. Touching 5+ test files in one PR. Do after Steps 2-4 establish confidence in the test-update pattern.
+
+**Files:** `tests/test_phase7_observability_reliability.py`, `tests/test_generation_runtime_scope_contract.py`, `tests/test_query_intent_lineage.py`, `tests/api/test_finish_prompt_source_contract.py`, `tests/api/test_main_master_sku_alias_runtime.py`
+
+---
+
+### Step 6: Shared Utils Extraction — Optional Cleanup
+
+**What:** Create `feedops/api/utils.py`, move `_require_request_id()` from both `persistence.py` and `job_management.py`. Update import sites.
+
+**Why optional/last:** No runtime bugs caused by this duplication. The comment in `persistence.py` documents why it's duplicated (circular import). Low urgency — can be a follow-up PR post-v1.1.
 
 ---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Touching Prompt Files During Extraction
+### Anti-Pattern 1: Fix the Upsert Code Instead of Adding the Constraint
 
-**What people do:** Move/rename `SYSTEM_PROMPT` or prompt builder functions as "cleanup" during extraction.
+**What people do:** Change `on_conflict="master_sku,platform,environment,snapshot_date"` in `performance_impact.py` to use a different conflict target, or switch to INSERT-only (no upsert).
 
-**Why it's wrong:** Phase 27 confirmed GPT-5.2 strict JSON mode fails silently on ANY system prompt text change. Even cosmetic renames of variables that are string-interpolated into prompts can shift content.
+**Why it's wrong:** The upsert logic is correct. The deduplication it provides is necessary — without it, every daily run creates new rows instead of updating existing ones, bloating the table indefinitely. The code is fine; the schema is wrong.
 
-**Do this instead:** Extract every module EXCEPT prompt content. `prompts.py`, `prompt_builder.py`, and `prompt_loader.py` are moved by reference (import) not by content change. Zero text changes to prompt strings during extraction.
+**Do this instead:** Add the unique constraint via migration. The Python code does not need to change.
 
-### Anti-Pattern 2: Replacing run_async_in_thread with BackgroundTasks
+### Anti-Pattern 2: Removing Code Before Updating Test Imports
 
-**What people do:** When moving batch routes to a router module, switch to `BackgroundTasks` because it's the "FastAPI way" for async work.
+**What people do:** Delete the dead function from `generator.py`, then discover tests fail because they import it from there.
 
-**Why it's wrong:** Cloud Run containers scale to zero. `BackgroundTasks` are killed when the container shuts down after the HTTP response. `run_async_in_thread()` uses a non-daemon thread with a dedicated event loop that outlives the request.
+**Why it's wrong:** Test failures block the PR and require a revert or an extra fix commit. The research already catalogued exactly which tests import each function.
 
-**Do this instead:** Keep `run_async_in_thread()` in `main.py` (or extract to `api/thread_runner.py`). Inject it into route handlers via dependency injection or import. Never call `background_tasks.add_task()` for long-running generation jobs.
+**Do this instead:** Update the test import, run pytest, then delete the function. In that order, every time.
 
-### Anti-Pattern 3: Monolithic JobRunner with Provider as Instance Variable
+### Anti-Pattern 3: Bulk Removal of main.py Re-exports
 
-**What people do:** Store the LLM provider as a `JobRunner.__init__` attribute so it's shared across all SKUs in a batch.
+**What people do:** Delete the entire ~130-line re-export block from `main.py` in one pass, then run tests to see what breaks.
 
-**Why it's wrong:** `get_provider()` returns a fresh client instance. Provider lifecycle (create → generate → `close_provider()`) must be scoped per-SKU, not per-job. The current `process_batch_job` already calls `get_provider()` inside the SKU loop and `close_provider()` in a `finally`. Hoisting the provider to job level causes connection state leaks across SKUs.
+**Why it's wrong:** Multiple test files monkeypatch via `feedops.api.main.*`. A bulk deletion creates a cascade of import errors across 5+ test files simultaneously, making it hard to attribute which removal broke which test.
 
-**Do this instead:** `JobRunner.run()` calls `get_provider()` and `close_provider()` per SKU iteration, matching the existing pattern.
+**Do this instead:** Work through the 5 test files one at a time. Update each file's imports to point at the actual module, run pytest, confirm it still passes, then delete that symbol from the re-export block.
 
-### Anti-Pattern 4: Claude Provider Using chat/completions Endpoint
+### Anti-Pattern 4: Adding a New Scheduler Job for Search Term Sync
 
-**What people do:** Implement `ClaudeProvider.generate()` using the OpenAI-compatible endpoint (`/v1/chat/completions`) that Anthropic exposes, to reuse existing JSON parsing code.
+**What people do:** Because search term sync is on-demand only, add a fourth Cloud Scheduler job calling `/search-insights/sync` directly to get automated coverage.
 
-**Why it's wrong:** The OpenAI-compatible endpoint does not support `thinking` (extended reasoning), tool use with strict input schema, or prompt cache retention. Using the native Anthropic SDK (`anthropic.AsyncAnthropic`) is required for full feature parity.
+**Why it's wrong:** The backfill infrastructure already has a `search_terms` job type with rate limiting (10 QPS), idempotent upserts, and Slack notifications. Adding a direct Scheduler job would duplicate the mechanism and create competing sync jobs with no coordination.
 
-**Do this instead:** Use `anthropic.AsyncAnthropic.messages.create()` with `tool_choice={"type": "tool", "name": "output"}` for structured JSON output. Map `reasoning_effort` to Claude's `thinking.budget_tokens` internally.
+**Do this instead:** If automated search term sync is needed, point a Cloud Scheduler job at `/backfill/start` with `job_type: "search_terms"`. It handles all the same logic with proper backfill controls.
 
-### Anti-Pattern 5: Extracting Schemas Without Updating Test Imports
+### Anti-Pattern 5: Triggering Full SKU Baseline Backfill Through Dashboard ensure-data.ts
 
-**What people do:** Move `OptimizeRequest` to `api/schemas/generation.py` but leave test files importing from `feedops.api.main`.
+**What people do:** To close the 274/2500 baseline coverage gap, call the dashboard's `/api/sku-selection/generate` endpoint for all SKUs, which auto-triggers `ensureSkuData()` on each.
 
-**Why it's wrong:** Tests that `from feedops.api.main import OptimizeRequest` still work because Python will resolve the name if it's re-exported — but they're fragile and import the entire application.
+**Why it's wrong:** That path is designed for per-SKU on-demand collection triggered by user actions. Running it for 2,500 SKUs through the dashboard would create 2,500 sequential HTTP calls to Cloud Run without rate limiting.
 
-**Do this instead:** Update test imports to point at the schema module directly. Add `__all__` to each schema module for explicit public surface.
+**Do this instead:** Call `POST /backfill/start` with `job_type: "performance_metrics"`. The backfill infrastructure handles rate limiting (10 QPS), chunking (25 offer IDs per query), parallelism (5 threads), and progress tracking.
 
 ---
 
 ## Integration Points
 
-### External Services
+### External Boundaries (Unchanged by v1.1)
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| OpenAI (GPT-5.2) | `providers/openai_provider.py` via `AsyncOpenAI` | 5 bugs to fix in this file |
-| Anthropic (Claude) | `providers/claude_provider.py` via `AsyncAnthropic` | New file — ABC interface already defined |
-| Supabase | `db/supabase_client.py::get_client()` | Called per-request, not a persistent connection |
-| Google Ads | `integrations/google_ads_*` | Not in decomposition scope |
-| Cloud Run | `run_async_in_thread()` — non-daemon threads | Must be preserved exactly |
+| Service | Integration Pattern | v1.1 Impact |
+|---------|---------------------|------------|
+| Google Ads API | `google_ads_performance.py` + `google_ads_search_terms.py` | No changes |
+| Supabase | `db/supabase_client.py::get_client()` per-request | Schema change (migration 036) only |
+| Cloud Scheduler (3 jobs) | OIDC auth to Cloud Run + CRON_SECRET to Vercel | No changes — snapshot job starts succeeding |
+| Claude Sonnet 4.6 | `providers/claude_provider.py` via AsyncAnthropic | executor.py now passes image= parameter |
+| Slack webhook | `observability/alerts.py` via urllib | No changes — just sends success instead of failure |
 
-### Internal Boundaries
+### Internal Module Boundaries After v1.1
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Route module ↔ GenerationService | Direct function/class call | No HTTP, no queue |
-| GenerationService ↔ providers | `LLMProvider.generate()` ABC | Stable interface — never call provider internals |
-| JobRunner ↔ GenerationService | Callback / direct call | JobRunner owns lifecycle; GenerationService owns LLM call |
-| JobRunner ↔ Supabase | `get_client()` direct | Job status updates every SKU iteration |
-| FinishService ↔ providers | `LLMProvider.generate()` | Finish sentences are a second LLM call per SKU |
-| prompt_builder ↔ prompt_loader | Direct function call | No change during extraction |
+| Boundary | Communication | Change |
+|----------|---------------|--------|
+| `persistence.py` ↔ `job_management.py` | Both import `_require_request_id` from new `utils.py` | New file; circular import resolved |
+| `executor.py` → `fetch_image()` | Direct async call | New import and call site in executor.py |
+| `executor.py` → `llm.generate()` | Existing LLMProvider ABC | image= kwarg now forwarded |
+| `performance_impact.py` → Supabase upsert | `on_conflict` spec already correct | Works after migration 036 |
 
 ---
 
 ## Sources
 
-- [FastAPI Bigger Applications — Official Docs](https://fastapi.tiangolo.com/tutorial/bigger-applications/) — HIGH confidence
-- [FastAPI Best Practices (zhanymkanov)](https://github.com/zhanymkanov/fastapi-best-practices) — MEDIUM confidence (community, widely cited)
-- [Building Production-Ready FastAPI Applications with Service Layer Architecture in 2025](https://medium.com/@abhinav.dobhal/building-production-ready-fastapi-applications-with-service-layer-architecture-in-2025-f3af8a6ac563) — MEDIUM confidence
-- [Multi-LLM Systems with Abstract Classes in Python (2025)](https://medium.com/algomart/multi-llm-systems-with-abstract-classes-in-python-038cd6ce78d5) — MEDIUM confidence
-- [Interoperability Patterns to Abstract Large Language Model Providers](https://brics-econ.org/interoperability-patterns-to-abstract-large-language-model-providers) — MEDIUM confidence
-- Codebase direct inspection: `src/feedops/api/main.py` (3,737 lines), `src/feedops/providers/` — HIGH confidence
+- `/tmp/dead-code-research.md` — Direct codebase inspection of all dead code items (HIGH confidence)
+- `/tmp/google-ads-import-research.md` — Live database constraint analysis + source code trace to bug location (HIGH confidence)
+- `src/feedops/monitoring/performance_impact.py:461` — Confirmed upsert bug location (HIGH confidence)
+- `src/feedops/api/backfill.py` — Backfill job type routing and rate limiter configuration (HIGH confidence)
+- `.planning/PROJECT.md` — v1.1 milestone scope and out-of-scope constraints (HIGH confidence)
 
 ---
 
-*Architecture research for: FastAPI pipeline decomposition + LLM provider abstraction (Allied-FeedOps)*
+*Architecture research for: Allied-FeedOps v1.1 data infrastructure hardening and dead code cleanup*
 *Researched: 2026-03-03*

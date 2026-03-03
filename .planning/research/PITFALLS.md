@@ -1,159 +1,222 @@
 # Pitfalls Research
 
-**Domain:** FastAPI monolith decomposition + LLM provider abstraction + model evaluation
+**Domain:** Dead code removal from decomposed Python pipeline + PostgreSQL schema migrations on live production data + entity relationship hardening for a multi-platform e-commerce content pipeline
 **Researched:** 2026-03-03
-**Confidence:** HIGH (project-specific pitfalls verified against actual codebase; ecosystem pitfalls MEDIUM from multiple sources)
+**Confidence:** HIGH (all pitfalls grounded in actual codebase state from `/tmp/dead-code-research.md`, `/tmp/google-ads-import-research.md`, and direct source inspection)
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Breaking GPT-5.2 JSON Output With System Prompt Changes
+### Pitfall 1: Removing Dead Code That Tests Import via Backward-Compat Re-exports
 
 **What goes wrong:**
-Refactoring `prompts.py` — even moving text, reformatting, or changing section headers — causes GPT-5.2 in strict JSON mode to return empty strings or placeholder-only content. Phase 27 proved this: removing `self_score` and `scoring_rubric` fields, or changing `=== ===` headers, caused Google and Bing platforms to return only `{FINISH_SENTENCE}` with empty descriptions. Shopify returned empty string. All three test approaches failed identically.
+A function appears dead (no runtime callers, grep shows zero production usage) but is still imported by tests through the backward-compat re-export chain. You remove it from `generator.py`, the function is gone, but tests import from `feedops.pipeline.generator` via the re-export block and fail with `ImportError`. The failure only surfaces in CI — local smoke tests pass because the developer only ran the module directly.
+
+The specific instances in this codebase (confirmed from dead-code-research.md):
+- `_platform_reasoning_effort()` in `generator.py` — imported by `tests/test_prompt_sanitization_contract.py` line 13
+- `_platform_completion_cap()` in `generator.py` — imported by `tests/test_prompt_sanitization_contract.py` line 14
+- `build_variant_prompt()` in `generator.py` — imported by `tests/test_pipeline.py`
+- `_build_generation_user_prompt()` in `generation.py` — imported by `tests/api/test_generation.py` (3 functions)
+- ~60 symbols in `main.py` re-export block (lines 174-304) — imported by 9 test files via `import feedops.api.main as api_main`
 
 **Why it happens:**
-GPT-5.2 strict JSON mode (`json_schema` with `strict: true`) creates a constrained grammar from the schema AND the system prompt together. The model's fine-tuning locks certain output patterns to specific prompt structures. Even cosmetic changes shift token positions enough to defeat the internal routing that produces valid field content. `self_score` and `scoring_rubric` are load-bearing because they signal to the model to produce substantive content — without them the model satisfies the schema with minimally valid (but useless) placeholders.
+The DECOMP-09 decomposition created a re-export shim: "remove code from location A, add re-export from A to B so old imports still work." Over time, some of the re-exported symbols became dead in production but tests never got updated to import from the canonical new location. The test import path and the runtime code path diverged silently.
 
 **How to avoid:**
-- Never batch prompt changes. Deploy and test with `curl` against production Cloud Run after EACH individual change.
-- Treat `prompts.py` as a config artifact that requires regression testing, not a code file that can be refactored freely.
-- Before touching any line in `SYSTEM_PROMPT`, run a baseline curl against a known SKU (e.g. `920D-6`) and capture the response. After the change, repeat and diff character counts and field values.
-- Preserve `self_score` and `scoring_rubric` as load-bearing fields — do not remove them in the GPT-5.2 bug-fix phase without isolated testing.
-- The `=== headers → XML tags` migration (one of the 5 GPT-5.2 bugs) MUST be tested as a single isolated change with full curl verification before anything else touches the prompt.
+Never remove a function from its original location until you have:
+1. Run `grep -r "function_name" tests/` and verified zero test imports
+2. Updated any test imports to point at the canonical new module
+3. Run the full test suite (`pytest tests/ -v`) and confirmed green
+4. Removed the function from the source module
+
+The correct sequence for each item is: update test → run pytest → remove dead code → run pytest again. Do not batch across multiple functions.
 
 **Warning signs:**
-- Google/Bing descriptions returning only `{FINISH_SENTENCE}` and nothing else
-- Shopify descriptions returning empty string `""`
-- All three platforms failing simultaneously (not one at a time)
-- The schema validates (correct JSON structure) but field values are trivially short
+- `grep` of production source shows zero callers but `grep tests/` shows imports
+- The function is re-exported from `main.py` or from `generator.py` with a `# noqa: F401` comment
+- CI fails with `ImportError` but local `python -m feedops.api.main` succeeds
+- The re-export block in `main.py` lines 174-304 still references the symbol after removal
 
-**Phase to address:** Phase: GPT-5.2 bug fixes — must be decomposed into 5 individual PRs, one per bug, each with curl verification before the next begins.
+**Phase to address:** Phase: Dead code removal — process every item in the "Requires test updates first" table from dead-code-research.md before touching the corresponding source location.
 
 ---
 
-### Pitfall 2: Breaking `run_async_in_thread` During Decomposition
+### Pitfall 2: Adding a Unique Constraint to a Table With Existing Duplicate Rows
 
 **What goes wrong:**
-During decomposition, `process_batch_job` and `process_hybrid_batch_job` get moved to new modules. The new modules import `run_async_in_thread` from `main.py`, creating a circular import: `main.py` imports from the new module, new module imports from `main.py`. The fix is to move `run_async_in_thread` to a shared utility module — but if the function is reimplemented incorrectly, background jobs on Cloud Run start dying silently.
+`ALTER TABLE performance_snapshots ADD CONSTRAINT uq_snapshots_sku_platform_env_date UNIQUE (master_sku, platform, environment, snapshot_date)` fails with `ERROR: could not create unique index — Key (master_sku, platform, environment, snapshot_date) is duplicated` if any existing rows violate the constraint. The table currently has 179 rows (from early inserts before the ON CONFLICT bug was introduced). If any two rows share the same `(master_sku, platform, environment, snapshot_date)` tuple, the migration fails mid-execution and the table is left in an inconsistent state.
 
-The specific failure mode: replacing `daemon=False` with `daemon=True` (or switching to `asyncio.create_task` or `BackgroundTasks`) causes jobs to be killed when the HTTP response completes or when Cloud Run scales the container. Jobs appear to start but never complete; the database row stays `processing` forever.
+This is especially dangerous because the migration file may have already executed DDL statements before the constraint fails — leaving the schema partially applied.
 
 **Why it happens:**
-Cloud Run's container lifecycle terminates non-HTTP work when scaling to zero. `BackgroundTasks` runs in the same asyncio event loop as the HTTP handler — when the response is sent and the loop moves to the next request, pending background tasks can be abandoned. The non-daemon threading pattern (`daemon=False` + dedicated `asyncio.new_event_loop()` per thread) is the only reliable pattern for this environment. It is counterintuitive because daemon threads are the "normal" default.
+Developers assume a nearly-empty table (179 rows) has no duplicates. But the ON CONFLICT bug that caused most inserts to fail also meant that when early inserts succeeded (before the bug was introduced or for unique date combinations), they may have inserted duplicate rows across retry attempts or re-runs of the snapshot collector.
 
 **How to avoid:**
-- Extract `run_async_in_thread` to `feedops/api/job_runner.py` or `feedops/utils/threading.py` as the FIRST step of decomposition, before moving any job processors.
-- Never change `daemon=False` to `daemon=True`.
-- Never replace the pattern with `asyncio.create_task()`, `BackgroundTasks`, or `concurrent.futures.ThreadPoolExecutor`.
-- Write a unit test that verifies the thread is non-daemon before the function is moved: `assert thread.daemon == False`.
-- The `run_async_in_thread` implementation must include the crash handler that writes `status=failed` to `batch_generation_jobs` on exception — do not strip this during extraction.
+Before writing the migration, run the deduplication check:
+```sql
+SELECT master_sku, platform, environment, snapshot_date, COUNT(*) as cnt
+FROM performance_snapshots
+GROUP BY master_sku, platform, environment, snapshot_date
+HAVING COUNT(*) > 1;
+```
+If any rows are returned, deduplicate first:
+```sql
+DELETE FROM performance_snapshots
+WHERE id NOT IN (
+    SELECT MIN(id)
+    FROM performance_snapshots
+    GROUP BY master_sku, platform, environment, snapshot_date
+);
+```
+Only then add the constraint. Structure the migration file to run the dedup DELETE before the ALTER TABLE, so it is idempotent.
 
 **Warning signs:**
-- Batch jobs stuck in `processing` state after container restarts
-- Jobs completing successfully in local dev but silently dying in Cloud Run
-- No `completed_at` timestamp written to `batch_generation_jobs`
-- Thread daemon flag set to `True` in any implementation
+- Migration fails with `ERROR: could not create unique index`
+- Supabase migration history shows the migration as "failed" but the table structure is partially changed
+- Running the migration a second time causes a different error than the first (schema already partially altered)
 
-**Phase to address:** Phase 1 (module extraction) — extract `run_async_in_thread` first, before touching batch/hybrid processors.
+**Phase to address:** Phase: Schema migration for performance_snapshots — run dedup query against production before writing the migration file, not after.
 
 ---
 
-### Pitfall 3: Shared State Across Extracted Modules (Global Provider, Supabase Client)
+### Pitfall 3: ON CONFLICT Upsert Silently Succeeds After Constraint Is Added But Updates Wrong Rows
 
 **What goes wrong:**
-`main.py` currently calls `get_provider()` inside each SKU loop iteration and calls `get_client()` inline. When `process_batch_job` and `process_hybrid_batch_job` are moved to separate modules, developers centralize the provider instantiation at module load time (e.g., `provider = OpenAIProvider(...)` at the top of a module). This creates shared mutable state across concurrent background threads, leading to race conditions on `_last_usage`, `_last_parse_details`, and `_last_retry_counts` properties of `OpenAIProvider`, which are instance variables mutated during every `generate()` call.
+The `performance_snapshots` upsert in `performance_impact.py:461` uses `on_conflict="master_sku,platform,environment,snapshot_date"`. After the unique constraint is added, the upsert stops failing — but it may UPDATE existing rows with stale data instead of inserting new rows. The Supabase client's `upsert()` with `on_conflict=` does a `INSERT ... ON CONFLICT DO UPDATE SET ...` which overwrites ALL columns on conflict, including `fetched_at`, `roas`, `impressions`, and critically `cohort_type`.
+
+If the daily snapshot collector runs twice in the same day (e.g., manual trigger + scheduled trigger), the second run overwrites the first run's data for that `snapshot_date`. If the `cohort_type` assignment logic changed between runs (e.g., a new publish event was added), the row silently flips from "control" to "treated" or vice versa.
 
 **Why it happens:**
-It looks cleaner to instantiate the provider once. The OpenAI SDK is expensive to initialize. The mistake is that `OpenAIProvider` is stateful — it stores per-call diagnostics as instance state, making it unsafe to share across concurrent calls without locking.
+After fixing the constraint bug, developers verify "the upsert no longer throws 42P10" and consider the fix complete. The semantic correctness of what happens on conflict is not tested — only that the operation no longer errors.
 
 **How to avoid:**
-- Keep the pattern of calling `get_provider()` inside each SKU processing iteration and calling `await close_provider(provider)` in a `finally` block, exactly as done today in `process_batch_job` (lines 2843-2865).
-- When unifying batch/hybrid processors into `JobRunner`, pass `get_provider` as a factory callable rather than a pre-instantiated provider.
-- Never instantiate `OpenAIProvider` at module level. Never store it as a class attribute on `JobRunner`.
-- For the Claude provider: verify that `anthropic.AsyncAnthropic` is similarly stateless at the call level before assuming the same pattern holds.
+After adding the constraint, verify upsert idempotency:
+1. Insert a test snapshot row manually
+2. Run the upsert again with the same `(master_sku, platform, environment, snapshot_date)` but different metric values
+3. Confirm the row count stays the same (no duplicate inserted)
+4. Confirm the metric values are updated (not silently ignored)
+5. If you want insert-only semantics (don't update existing snapshots), use `on_conflict="...", ignore_duplicates=True` — but this means re-runs are completely idempotent (existing data wins)
+
+The safer default for time-series snapshot data is `ignore_duplicates=True`: the first write for a given `(sku, platform, env, date)` wins. Re-runs don't corrupt historical data.
 
 **Warning signs:**
-- `last_usage` telemetry showing wrong token counts for a SKU
-- Batch jobs reporting mismatched retry counts in logs vs. actual behavior
-- Race condition errors from `AsyncOpenAI` client under concurrent load
+- Row count in `performance_snapshots` grows slower than expected after the fix
+- `cohort_type` values in `performance_snapshots` differ from what's expected based on `publish_events`
+- `performance_impact_scores` shows wildly different pre/post windows than the publish date
 
-**Phase to address:** Phase 1 (module extraction) and Phase 3 (JobRunner unification).
+**Phase to address:** Phase: Schema migration for performance_snapshots — test upsert semantics with real data immediately after constraint is added.
 
 ---
 
-### Pitfall 4: Circular Imports During Decomposition
+### Pitfall 4: Offer ID Case Mismatch Corrupts Entity Relationships During Bulk Data Operations
 
 **What goes wrong:**
-As 30+ Pydantic models and 50+ functions are moved out of `main.py`, new modules start importing from each other. The most common failure pattern: a new `schemas.py` module imports from `generation.py` for a type hint, `generation.py` imports from `job_runner.py`, and `job_runner.py` imports from `schemas.py`. Python raises `ImportError: cannot import name X from partially initialized module Y`.
+`variant_index` stores offer IDs in lowercase (`shopify_us_{product_id}_{variant_id}`). Google Ads API returns them in uppercase (`shopify_US_{product_id}_{variant_id}`). The search terms code normalizes case before lookup/save (confirmed working). The performance code relies on `variant_index.gmc_offer_id` directly (also lowercase, matching Google Ads API output when query goes through `variant_index` first). But when building a bulk offer ID set for a new data operation — such as "fetch baselines for all 2,500 master SKUs" — it is easy to mix sources: some IDs come from `variant_index` (lowercase), some from Google Ads API responses (uppercase), and some from Google Sheets (mixed or uppercase). Joins fail silently: the offer ID exists in both places but the case mismatch means the lookup returns zero rows instead of an error.
+
+The concrete failure mode: `fetch_batch_product_performance()` receives a mix of cases in its `offer_ids` list, queries Google Ads with those IDs, and Google Ads returns data keyed by the format it received. When results are written back and matched to `variant_index` by `gmc_offer_id`, uppercase IDs don't match lowercase rows — those SKUs appear to have zero impressions, which triggers incorrect "no data" branching.
 
 **Why it happens:**
-`main.py` currently has everything in one namespace, so there are no circular imports to worry about. The first decomposition attempt naturally groups by responsibility, but responsibilities in this codebase are tightly intertwined (Pydantic request/response schemas reference domain types; domain types reference persistence types).
+Each integration layer handles case independently. The search terms integration normalizes deliberately. The performance integration trusts `variant_index` values. New code that assembles offer IDs from multiple sources (e.g., a bulk backfill script) is unlikely to normalize consistently unless there's a shared utility function enforcing the invariant.
 
 **How to avoid:**
-- Create a `feedops/api/schemas.py` module for all Pydantic request/response models as the very first extraction. Nothing else imports from it except `main.py` and route handlers.
-- Create a `feedops/api/types.py` or use existing `feedops/models/` for domain types. `schemas.py` may import from `types.py` but not vice versa.
-- Use `TYPE_CHECKING` guards for type-hint-only imports: `if TYPE_CHECKING: from feedops.api.schemas import BatchRequest`.
-- Run `python -c "import feedops.api.main"` after every extraction step to catch import errors before they compound.
-- Decompose in strict dependency order: types → schemas → utilities → persistence → processors → routes.
+Create a single normalization utility used by ALL offer ID assembly points:
+```python
+def normalize_offer_id(offer_id: str) -> str:
+    """Canonical DB format: lowercase shopify_us_..."""
+    return offer_id.replace("shopify_US_", "shopify_us_")
+```
+Apply this at the boundary where offer IDs enter any data pipeline function. Never allow uppercase offer IDs to enter the DB or to be used in DB lookups. The Google Ads query itself uses `product_item_id` which Google returns in its own casing — normalize immediately after receiving the API response, before any join to `variant_index`.
 
 **Warning signs:**
-- `ImportError: cannot import name X from partially initialized module`
-- `AttributeError: partially initialized module` at startup
-- Tests that only fail when the full module graph is imported together
+- A master SKU has `variant_index` rows but shows zero impressions in performance queries
+- `performance_baselines` has zero rows for SKUs that definitely have Google Ads traffic
+- A join between a Google Ads result set and `variant_index` returns fewer rows than expected
+- Any code that assembles offer IDs from two different sources without a normalization step
 
-**Phase to address:** Phase 1 (module extraction) — define the import DAG before writing any code.
+**Phase to address:** Phase: Entity relationship design and bulk data collection — add normalization utility before writing any bulk fetch code.
 
 ---
 
-### Pitfall 5: Claude Provider Schema Incompatibility
+### Pitfall 5: Bulk Baseline Fetch for All 2,500 SKUs Triggers Google Ads Rate Limiting
 
 **What goes wrong:**
-The Claude provider is implemented by copying the OpenAI provider pattern, passing the same schema dict. Claude's structured outputs API uses `output_config.format` with `type: json_schema` — which looks the same as OpenAI's format. But Claude applies schema compilation (converts to a grammar at request time), and complex schemas with many nested objects produce very large grammars that significantly increase time-to-first-token. Schemas that are fine for GPT-5.2 (8-12 field flat objects) may work fine for Claude, but deeply nested or heavily constrained schemas can produce 2-5x latency increases.
+`fetch_batch_product_performance()` chunks offer IDs into batches of 25 and runs up to 5 parallel threads. For 2,500 master SKUs × ~29 offer IDs per SKU (72K rows / 2,500 SKUs) = ~72,000 offer IDs total. At 25 per GAQL query with 5 threads, this is ~2,880 parallel API requests in rapid succession. Google Ads API enforces per-customer-ID rate limits. The current limit for the Reporting API is 15,000 requests per day per customer. A single bulk baseline fetch for all SKUs would consume ~2,880 requests — 19% of the daily quota in one shot — and if retried (due to errors), can exhaust the quota entirely.
 
-Additionally, Claude structured outputs require the `anthropic-version: 2023-06-01` header AND are ZDR (Zero Data Retention) — responses are not stored by Anthropic. The Python SDK handles the header automatically, but the ZDR constraint means prompt caching (which this project uses via `extra_body={"prompt_cache_retention": "24h"}`) does not apply to the `output_config` path. Prompt caching still works for the messages/system prompt, but the JSON schema itself is cached separately for up to 24 hours.
+Additionally, Google Ads API returns `QUOTA_ERROR` (not an HTTP 429) with an error code of `RESOURCE_EXHAUSTED`. The current retry logic in `google_ads_performance.py` may not handle this specific error type, causing the bulk operation to fail silently with incomplete data.
 
 **Why it happens:**
-The `LLMProvider` base class (`base.py`) has a clean `generate()` interface that suggests both providers can receive the same inputs. The schema format looks identical. Developers assume behavioral parity and don't test Claude's structured output path separately with production-complexity schemas.
+The `fetch_batch_product_performance()` function was designed for on-demand single-SKU and small-batch operations (the current use case is ~274 baselines). Scaling it to 2,500 SKUs is a 9x increase in request volume that nobody has stress-tested.
 
 **How to avoid:**
-- Test the Claude provider with the actual feedops response schema (7-9 platform content fields) against a real SKU before declaring the provider abstraction complete.
-- Measure time-to-first-token for Claude structured outputs vs. no structured outputs on the same prompt to detect grammar compilation overhead.
-- The Claude provider's `generate()` must pass schema via `output_config={"format": {"type": "json_schema", "schema": schema}}`, NOT via `response_format` (OpenAI's parameter name). The base class interface must accommodate provider-specific kwarg routing.
-- Verify that `extra_body={"prompt_cache_retention": "24h"}` passed to the OpenAI provider is silently ignored by the Anthropic SDK (not an error) — or strip it at the provider level.
+- Do NOT run the bulk baseline fetch as a single operation. Spread it across multiple days or run at a low-traffic time with throttling between chunks.
+- Add an inter-batch delay (e.g., 200ms between chunks) when fetching baselines for more than 100 master SKUs.
+- Implement `RESOURCE_EXHAUSTED` / `QUOTA_ERROR` detection in `fetch_batch_product_performance()` with exponential backoff (minimum 60s) and a max-retry limit.
+- Track completion in the database (`baseline_fetch_jobs` table or use the existing backfill job tracking) so that a failed bulk fetch can resume from the last successful SKU rather than restarting from the beginning.
+- Cap concurrent threads at 3 (not 5) for bulk operations to reduce burst pressure.
 
 **Warning signs:**
-- `TypeError: unexpected keyword argument 'response_format'` from Anthropic SDK
-- Claude provider latency 3-5x higher than GPT-5.2 on same prompt
-- Schema validation errors that only appear with Claude, not GPT-5.2
+- `googleads.errors.GoogleAdsException` with `error.code = RESOURCE_EXHAUSTED`
+- Performance baselines filling in for the first few hundred SKUs then stopping
+- Google Ads API response latency increasing steadily during the bulk fetch
+- Daily quota consumed before noon (visible in Google Ads API Center)
 
-**Phase to address:** Phase: Claude provider implementation — test with production schema before the evaluation phase.
+**Phase to address:** Phase: Bulk data collection scale-out — implement throttling and quota monitoring before running the first bulk fetch.
 
 ---
 
-### Pitfall 6: Evaluation Bias When Claude Is Writing the Eval Rubric
+### Pitfall 6: Cloud Scheduler Jobs Fail Silently With No Retry
 
 **What goes wrong:**
-The head-to-head evaluation (Claude vs. GPT-5.2) uses the existing `quality_rubric.yaml` as the scoring rubric. If the evaluation scoring is also done by Claude, there is self-preference bias: Claude rates Claude outputs higher regardless of actual quality. Conversely, if GPT-5.2 is the judge, it will favor GPT-5.2 outputs. Research from 2025 shows 48.4% of pairwise verdicts can reverse simply by swapping the order in which outputs are presented to the judge (positional bias).
+The three Cloud Scheduler jobs (daily incremental backfill at 2:15 AM ET, daily snapshot capture at 2:45 AM ET, daily funnel snapshot at 6 AM UTC) all send HTTP POST requests to Cloud Run or Vercel endpoints. If the endpoint returns a non-2xx status (e.g., the `performance_snapshots` upsert throws 42P10 and the handler returns 500), Cloud Scheduler marks the job as failed and — depending on its retry configuration — either retries with exponential backoff or gives up silently.
+
+The current snapshot collector (`collect_daily_performance_snapshots`) catches exceptions inside the loop and continues processing other dates. But the final HTTP response is 200 OK regardless — meaning Cloud Scheduler NEVER knows the job failed. The Slack alert is the only failure signal, and it only fires if the Slack webhook URL is configured and the exception surfaces to the top-level handler.
+
+After the schema fix (adding the unique constraint), the upsert will succeed — but if `SLACK_WEBHOOK_URL` is not bound to the Cloud Run revision, Slack alerts are silently swallowed. The operator has no visibility into whether the daily job actually ran.
 
 **Why it happens:**
-The natural implementation is "use the best available LLM to judge quality" — which means Claude or GPT-5.2. Neither is a neutral judge of their own output. The rubric was designed for GPT-5.2 optimization, making it structurally biased toward GPT-5.2's output style.
+The common pattern in Python APIs is to catch all exceptions inside a background worker and return 200 so the HTTP request layer doesn't retry (which would cause duplicate processing). But this means monitoring depends entirely on explicit alerting code paths working correctly. If the alert mechanism fails, failures are invisible.
 
 **How to avoid:**
-- Use Robert's manual review as the ground truth for the 10 evaluation SKUs. Human judgment is the only unbiased signal.
-- If automated scoring is used, use a different model family (e.g., Gemini) as judge, not Claude or GPT-5.2.
-- Present outputs to the human judge blind (labels removed, order randomized) to prevent the 98%-approval-rate anchoring effect from biasing evaluation of Claude's different style.
-- Evaluate on concrete, objective criteria from the existing approval patterns: `{FINISH_NAME}` first in title, no hardcoded finish names in descriptions, no fabricated specs, collection keyword present. Count rule violations, don't just score holistically.
-- Record cost and latency per SKU alongside quality — these are objective and should be a primary evaluation dimension.
+- After fixing the `performance_snapshots` constraint, explicitly verify the Slack webhook is bound to the Cloud Run service: `gcloud run services describe feedops-pipeline --project=bobbys-project-346400 --format='value(spec.template.spec.containers[0].env)'` and confirm `SLACK_WEBHOOK_URL` is present.
+- Add an observability check to the health endpoint: `GET /health` should return the last successful run time and row count for each scheduled job. If the last run was >26 hours ago, `/health` should flag it.
+- After the schema fix is deployed, manually trigger `POST /performance/capture-snapshot` and verify the Slack message arrives within 5 minutes.
+- Consider whether Cloud Scheduler retry policy should be set to retry on 5xx (currently: if the endpoint returns 200 on exception, retries are never triggered — which is intentional to avoid duplicate processing, but means monitoring depends entirely on Slack).
 
 **Warning signs:**
-- Claude scores consistently higher than GPT-5.2 when Claude is the judge
-- GPT-5.2 scores consistently higher when GPT-5.2 is the judge
-- Scores don't correlate with Robert's subjective preference
-- Evaluation results not actionable (no clear recommendation to switch vs. stay)
+- `SLACK_WEBHOOK_URL` missing from `gcloud run services describe` output
+- `performance_snapshots` row count unchanged after 48 hours despite the schema fix being deployed
+- `performance_impact_scores` still has 0 rows 72 hours after the constraint fix
+- Cloud Scheduler job history shows "success" but Slack received no notification
 
-**Phase to address:** Phase: Model evaluation — design the evaluation protocol before running any comparisons.
+**Phase to address:** Phase: Schema migration for performance_snapshots — verify Slack webhook is bound before declaring the fix complete.
+
+---
+
+### Pitfall 7: Removing the Legacy `generate_candidates` Path Breaks the optimize.py CLI
+
+**What goes wrong:**
+`optimize.py` (the CLI pipeline) calls `generate_candidates()` from `generator.py`, which calls `build_split_prompt()`, which calls `build_prompt()`. This entire chain — approximately 450 lines in `generator.py` — looks dead because the modern API path uses `generate_per_platform()` → `executor.execute_generation_legacy_payload()`. Removing it to "clean up" dead code breaks the CLI pipeline, which may still be the mechanism for local development and bulk optimization runs outside the API.
+
+From dead-code-research.md: "build_prompt() — Used by optimize.py (line 318)" and "generate_candidate()/generate_candidates() — Used by optimize.py (line 149)." These are explicitly marked as NOT safe to remove.
+
+**Why it happens:**
+The dead code audit correctly identifies these functions as "legacy" and developers interpret "legacy = remove." But legacy in this codebase means "superseded by the modern API path" — not "unused by any caller." The CLI may be the primary tool for the user's local development workflow.
+
+**How to avoid:**
+Before removing any function that `optimize.py` depends on:
+1. Confirm with the team whether `optimize.py` is still actively used (check git log for recent changes to the file)
+2. If `optimize.py` is still needed, keep the legacy path intact OR migrate `optimize.py` to call the API endpoints instead
+3. Only remove the legacy path after `optimize.py` has been migrated or explicitly retired
+
+The safe cleanup order from dead-code-research.md is: trivially dead items first (no dependencies), then test-blocked items (update tests first), then architectural decisions (evaluate optimize.py dependency before touching the legacy generation chain).
+
+**Warning signs:**
+- `git log src/feedops/pipeline/optimize.py` shows recent commits (file is still maintained)
+- Any developer workflow documentation that mentions `python -m feedops.pipeline.optimize`
+- Tests in `test_pipeline.py` that import `generate_candidates` — if the test exists, the function is likely still valued
+
+**Phase to address:** Phase: Dead code removal — make the optimize.py dependency decision explicit in the phase plan before any cleanup begins.
 
 ---
 
@@ -163,12 +226,12 @@ Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Keep all Pydantic models in `main.py` during decomposition | Avoids circular import work | Tests cannot import schemas without importing all of main.py; test suite becomes slow | Never — schemas must be extracted first |
-| One `process_batch_job` function handles both batch and hybrid paths via flags | Avoids creating JobRunner | Grows to 1000+ lines; adding a third job type requires understanding all existing logic | Never in this codebase — unified logic must be extracted clean |
-| Skip unit tests for extracted modules, rely on integration tests | Faster extraction | Bugs in extracted modules are only caught by full Cloud Run deploys; debug cycle is 10+ minutes | Only acceptable for lifespan/middleware code that cannot be unit tested |
-| Import `process_batch_job` back into `main.py` via lazy import inside the route handler | Quick fix for circular import | Hidden dependency, import errors only surface at runtime | Acceptable temporarily if flagged with a TODO and fixed in the same PR |
-| Reuse the same `OpenAIProvider` instance across SKUs in a batch | Avoids per-SKU init overhead | Race conditions on `_last_usage` etc. in concurrent runs | Never — provider init cost is negligible vs. LLM call latency |
-| Fix all 5 GPT-5.2 bugs in one PR | Fewer deploys | If one bug fix breaks output, impossible to isolate which change caused it | Never — each bug fix must be a separate PR with curl verification |
+| Run dedup + constraint migration as two separate Supabase migrations | Separates concerns, easier to debug | If dedup succeeds but constraint migration fails, the table has no duplicates but also no constraint — state is inconsistent until migration is retried | Never — dedup DELETE and ALTER TABLE must be in the same migration file |
+| Remove re-export from `main.py` without updating test imports | Cleaner `main.py` immediately | `ImportError` in CI; production deploy fails if tests gate the deploy | Never — update test imports first, in the same PR |
+| Normalize offer IDs at query time with LOWER() in SQL instead of a Python utility | Works immediately without code changes | Every future query must remember to normalize; one forgotten LOWER() causes silent data loss | Only as a temporary emergency measure; add TODO to migrate to Python normalization |
+| Increase bulk fetch thread count to 10 to finish faster | Faster bulk baseline population | Google Ads quota exhausted in one run; subsequent 24 hours have no API access | Never for bulk operations — keep at 3 concurrent threads |
+| Add `ignore_duplicates=True` to all upserts to avoid conflict errors | No 42P10 errors | Silent data loss — if a duplicate row exists with different data, the new data is silently ignored | Only acceptable for idempotent re-runs of historical data; never for primary data collection |
+| Skip the Slack webhook verification step after constraint fix | Faster deployment | Daily job can fail silently for weeks; no visibility into snapshot collection health | Never — Slack verification takes 2 minutes and prevents silent data loss |
 
 ---
 
@@ -178,12 +241,11 @@ Common mistakes when connecting to external services.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| OpenAI GPT-5.2 | Passing `temperature=0.7` when `reasoning_effort` is also set | These are mutually exclusive on GPT-5.2. Current code at line 372-374 already handles this correctly — do not regress it during refactoring |
-| OpenAI GPT-5.2 | Assuming `FEEDOPS_REASONING_EFFORT` env var is always set | Default is `"high"` in `openai_provider.py:334` — must set a sensible default, not leave unset |
-| Anthropic Claude | Using `response_format=` parameter (OpenAI syntax) | Claude uses `output_config={"format": {...}}` — different parameter name entirely |
-| Anthropic Claude | Assuming `prompt_cache_retention` in `extra_body` works the same way | OpenAI uses `extra_body`; Claude uses `cache_control` headers on specific message blocks |
-| Supabase | Writing raw batch job status inside a module that's also imported by `main.py` lifespan | Lifespan runs at startup, before background jobs exist — recovery sweep logic in `_app_lifespan` must stay in `main.py` or a dedicated startup module |
-| Cloud Run | Assuming `BackgroundTasks` survives container scale-down | It does not. Only `daemon=False` threads with dedicated event loops survive. See `run_async_in_thread` implementation |
+| Google Ads API | Assuming `QUOTA_ERROR` is returned as HTTP 429 | Google Ads returns quota errors as `GoogleAdsException` with `error.code = RESOURCE_EXHAUSTED` — must catch this specific exception type, not just HTTP status codes |
+| Google Ads API | Mixing uppercase/lowercase offer IDs in a GAQL `WHERE product_item_id IN (...)` clause | Google Ads API is case-sensitive for `product_item_id` — always normalize to the format the API uses (uppercase `shopify_US_`), then normalize back to DB format (lowercase) on the way in |
+| Supabase upsert | Using `on_conflict=` without a matching unique constraint | PostgreSQL raises error 42P10 silently caught by the Python client; verify constraint exists before relying on upsert semantics |
+| Cloud Scheduler | Assuming a 200 HTTP response means the job succeeded | The snapshot collector returns 200 even on internal failures — monitor via Slack alert presence, not scheduler status |
+| Cloud Run | Assuming a new env var binding takes effect immediately | After adding a secret binding or env var, Cloud Run creates a NEW revision — traffic may still route to the old revision. Always verify with `gcloud run revisions list` after changes |
 
 ---
 
@@ -193,10 +255,22 @@ Patterns that work at small scale but fail as usage grows.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Provider instantiated once at module level, shared across all SKUs | Works fine for single-SKU runs; fails with race conditions in batch | Instantiate provider per SKU inside the processing loop | Any batch larger than 1 with concurrent SKUs |
-| Importing `from feedops.api.main import *` in tests | Tests pass in isolation, fail when run together due to state leakage | Import only specific functions/classes, never star-import from main | When test count exceeds ~20 |
-| Using `asyncio.run()` inside `run_async_in_thread` instead of `loop.run_until_complete()` | `asyncio.run()` creates AND closes a loop — double-close errors on cleanup | Use `asyncio.new_event_loop()` + `loop.run_until_complete()` + `loop.close()` in `finally` | Every time on Python 3.10+ |
-| System prompt cache misses in GPT-5.2 batch runs | Prompt tokens not being cached between SKUs; cost 2x higher than expected | Ensure system prompt is passed as separate `system` message (not embedded in user prompt) and that `prompt_cache_retention: "24h"` is set | After every batch >5 SKUs |
+| Fetching all 72K `variant_index` rows into memory for offer ID lookup | Works for search term sync (current use case) — `_preload_variant_cache()` loads all rows once per job | For bulk baseline fetch running in parallel threads, each thread loading 72K rows creates memory pressure on the 2GB Cloud Run container | At >3 parallel threads doing bulk data operations simultaneously |
+| Daily snapshot query building offer_id sets from ALL of `variant_index` | Works currently at 179 snapshot rows (mostly failing) | Once snapshots start succeeding for all ~2,500 treated + 500 control SKUs, the daily snapshot API call processes ~87,500 offer IDs — 3× the current search term scale | At >500 actively tracked SKUs |
+| Performance impact score computation in-memory diff-in-diff | Fine for 0 rows (current state) | Once snapshots exist for 2,500 SKUs × 90-day window × 3 refresh dates = ~675K rows, loading all snapshots into memory for diff-in-diff computation will OOM | At >50K snapshot rows loaded simultaneously |
+| `pytest tests/ -v` running all tests without module isolation | Fine at current test count | After dead code cleanup modifies import paths in 5+ test files, tests that pass individually may fail together due to import order side effects | After any batch import path refactor |
+
+---
+
+## Security Mistakes
+
+Domain-specific security issues beyond general web security.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Committing a Google Ads performance baseline dump to git (for debugging a bulk fetch issue) | Google Ads impression/click/cost data is commercially sensitive — competitor analysis if leaked | Never write raw API responses to files in the repo; use `/tmp/` only; confirm `.gitignore` covers `*.json` debug dumps |
+| Logging full GAQL queries with inline offer ID lists (72K IDs) | Logs become unmanageable; Cloud Run log size limits cause log loss | Log the count and a sample (first 3 IDs), not the full list |
+| Hardcoding the Google Ads customer ID (`6253381786`) in bulk fetch scripts | If the script is shared or the customer ID changes, all historical data becomes unattributable | Always read customer ID from env var `GOOGLE_ADS_CUSTOMER_ID`; never hardcode |
 
 ---
 
@@ -204,13 +278,13 @@ Patterns that work at small scale but fail as usage grows.
 
 Things that appear complete but are missing critical pieces.
 
-- [ ] **Module extraction complete:** Each extracted module has its own unit test file — verify `tests/api/test_[module].py` exists for every new file
-- [ ] **`run_async_in_thread` moved:** Verify `thread.daemon == False` in the new location — easy to accidentally flip during copy/paste
-- [ ] **GPT-5.2 bug fixes complete:** After each bug fix, run `curl -X POST $FEEDOPS_PIPELINE_URL/optimize-sku -d '{"master_sku":"920D-6"}'` and verify description length >500 chars and no placeholder-only content
-- [ ] **Claude provider complete:** Test with ALL three platforms (google, bing, shopify) — not just one. Bing is where the `{FINISH_NAME}` placeholder requirement is most commonly violated
-- [ ] **Bing `{FINISH_NAME}` bug fixed:** Run `SELECT COUNT(*) FROM generated_content WHERE platform='bing' AND candidate_content::text LIKE '%Polished%' OR candidate_content::text LIKE '%Satin%'` — should be 0 after fix
-- [ ] **JobRunner unification:** Verify both `/batch-optimize` and `/hybrid-generate` endpoints use the unified runner by checking that `process_batch_job` and `process_hybrid_batch_job` functions no longer exist as separate definitions
-- [ ] **Provider abstraction complete:** `get_provider()` returns a `ClaudeProvider` instance when `FEEDOPS_PROVIDER=claude` env var is set — not just a factory that exists but isn't wired
+- [ ] **Dead code removed:** After each removal, run `pytest tests/ -v` — not just `python -c "import feedops.api.main"`. Import errors and test failures are separate failure modes.
+- [ ] **`performance_snapshots` constraint added:** Verify with `SELECT constraint_name FROM information_schema.table_constraints WHERE table_name = 'performance_snapshots' AND constraint_type = 'UNIQUE'` — the constraint name `uq_snapshots_sku_platform_env_date` should appear.
+- [ ] **Daily snapshot actually running:** After constraint fix + deployment, manually trigger `POST /performance/capture-snapshot` and check: (a) row count in `performance_snapshots` increases, (b) Slack notification arrives, (c) `performance_impact_scores` gains rows within 5 minutes.
+- [ ] **Offer ID normalization applied everywhere:** Run `grep -r "shopify_US_\|shopify_us_" src/feedops/` and verify every occurrence either (a) normalizes immediately after use or (b) is the normalization utility itself.
+- [ ] **Image wiring in executor.py:** After the 15-line wiring fix, run `/optimize-sku` for a SKU with a known product image URL and verify the generated Google title/description shows image-informed content (not just text-only generation).
+- [ ] **Bulk baseline fetch tested with throttling:** Before running against all 2,500 SKUs, test against a 50-SKU sample with the throttling delay in place and confirm no `RESOURCE_EXHAUSTED` errors.
+- [ ] **Backward-compat re-exports removed from main.py:** Verify by running `grep -c "noqa: F401" src/feedops/api/main.py` — should be 0 after cleanup (or only legitimate ones remain).
 
 ---
 
@@ -220,11 +294,12 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| GPT-5.2 prompt change causes empty output | MEDIUM | `git revert` the specific prompts.py commit; verify revert fixes output with curl; re-attempt the change in isolation with smaller scope |
-| `run_async_in_thread` daemon=True in production | HIGH | Immediate revert and redeploy; manually update stuck `batch_generation_jobs` rows to `failed` via Supabase; audit any jobs that started during the regression window |
-| Circular import breaks startup | LOW | `ImportError` at startup is immediately visible in Cloud Run logs; `git revert` the offending extraction commit; restructure import DAG before retrying |
-| Claude provider returns wrong schema | LOW | Claude structured output errors are explicit (schema violation) unlike GPT-5.2 silent placeholder output; fix schema mapping in provider and test locally before deploying |
-| Evaluation bias produces wrong recommendation | MEDIUM | Re-run evaluation blind with Robert as judge; discard automated scoring results; use cost/latency as tiebreaker when human scores are similar |
+| Dead code removal breaks test imports | LOW | `git revert` the removal commit; update test imports to canonical locations first; re-remove in new PR |
+| Migration fails with duplicate constraint violation | LOW | The migration fails before applying the constraint — no schema change occurred. Run the dedup query manually in Supabase SQL editor, then re-run the migration |
+| Migration partially applied (dedup ran, ALTER failed) | MEDIUM | Run `SELECT constraint_name FROM information_schema.table_constraints WHERE table_name = 'performance_snapshots'` to confirm constraint is missing; then run only the ALTER TABLE statement manually |
+| Bulk baseline fetch exhausts Google Ads quota | HIGH | Wait 24 hours for quota reset; run with 3-thread cap and 500ms inter-batch delay on retry; split across 2-3 days if needed; check quota consumption at [Google Ads API Center](https://ads.google.com/aw/apicenter) |
+| Offer ID case mismatch corrupts baseline data | MEDIUM | Run `DELETE FROM performance_baselines WHERE impressions = 0 AND clicks = 0` to remove zero-data rows caused by failed lookups; add normalization utility; re-run baseline fetch |
+| Snapshot collector runs successfully but impact scores stay at 0 | LOW | Run `SELECT COUNT(*) FROM performance_snapshots WHERE published_event_id IS NOT NULL` — if 0, no treated SKUs exist yet (publish_events table is empty for recent publishes); impact scoring requires at least one publish event with post-publish snapshot data |
 
 ---
 
@@ -234,28 +309,30 @@ How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| GPT-5.2 prompt sensitivity | GPT-5.2 bug fixes phase — one bug per PR, curl after each | curl `/optimize-sku` for 920D-6; description length >500 chars; no placeholder-only content |
-| `run_async_in_thread` breaking | Module extraction — extract helper first, write daemon=False test | `pytest tests/api/test_job_runner.py::test_thread_is_non_daemon` |
-| Shared provider state | Module extraction + JobRunner unification | Run batch of 3 SKUs concurrently; verify `last_usage` tokens match logs per SKU |
-| Circular imports | Module extraction — define import DAG before writing code | `python -c "import feedops.api.main"` passes with zero warnings after each extraction step |
-| Claude provider schema mismatch | Claude provider implementation | Run `curl` against Claude provider with production schema for 3 diverse SKUs; verify all fields populated |
-| Evaluation bias | Model evaluation phase — design protocol before running | All 10 evaluation SKUs reviewed blind by Robert before automated scores are generated |
-| Bing `{FINISH_NAME}` bug | Bing fix phase | SQL check: 0 rows with hardcoded finish names in Bing candidate_content |
+| Dead code removal breaks test imports | Dead code cleanup — update test imports before removing source | `pytest tests/ -v` green after each removal |
+| Duplicate rows block constraint migration | Schema migration — run dedup query before writing migration file | Zero rows from `GROUP BY ... HAVING COUNT(*) > 1` |
+| Upsert overwrites historical snapshots | Schema migration — choose `ignore_duplicates=True` semantics explicitly | Second upsert of same snapshot returns same row (no change) |
+| Offer ID case mismatch in bulk fetch | Entity relationship design — add normalization utility as first step | `grep` of all offer ID assembly points shows normalization applied |
+| Google Ads quota exhaustion during bulk fetch | Bulk data collection scale-out — add throttling before scale-out | 50-SKU test run completes with no `RESOURCE_EXHAUSTED` errors |
+| Cloud Scheduler fails silently after fix | Schema migration deployment — verify Slack webhook binding | Manual trigger of snapshot capture produces Slack message within 5 minutes |
+| Removing optimize.py's legacy generation dependency | Dead code cleanup — explicit decision on optimize.py status before cleanup | `python -m feedops.pipeline.optimize --help` still works after cleanup (or is intentionally retired) |
+| Bulk in-memory data operations OOM at scale | Bulk data collection scale-out — implement pagination/streaming before full scale | Memory usage stays <1.5GB during 500-SKU test batch |
 
 ---
 
 ## Sources
 
-- Project post-mortem: Phase 27 prompt sensitivity (`CLAUDE.md` + `memory/MEMORY.md` — Phase 27 critical discovery)
-- Project audit: `docs/audit/background-task-fix-2026-02-08.md` — `run_async_in_thread` rationale
-- Codebase: `src/feedops/api/main.py` lines 243-287 — actual `run_async_in_thread` implementation
-- Codebase: `src/feedops/providers/openai_provider.py` lines 333-374 — temperature/reasoning_effort conflict handling
-- Official: [Claude Structured Outputs API](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) — schema API shape, ZDR constraints (MEDIUM confidence — API shape confirmed current)
-- Official: [FastAPI Background Tasks](https://fastapi.tiangolo.com/tutorial/background-tasks/) — confirms BackgroundTasks lifecycle limitation (HIGH confidence)
-- Community: [FastAPI circular import patterns](https://github.com/fastapi/fastapi/issues/2848) — common circular import solutions (MEDIUM confidence)
-- Research: [LLM evaluation bias 2025](https://www.mdpi.com/2078-2489/16/8/652) — positional bias in pairwise comparisons (MEDIUM confidence)
-- Research: [LLM-as-judge self-preference bias](https://cameronrwolfe.substack.com/p/llm-as-a-judge) — self-preference bias documentation (MEDIUM confidence)
+- Codebase audit: `/tmp/dead-code-research.md` (2026-03-03) — direct source inspection of all dead code locations and test import dependencies (HIGH confidence)
+- Codebase audit: `/tmp/google-ads-import-research.md` (2026-03-03) — live DB row counts, constraint analysis, scheduler job details, ON CONFLICT bug root cause (HIGH confidence)
+- Source: `src/feedops/monitoring/performance_impact.py:461` — confirmed upsert with missing constraint
+- Source: `src/feedops/integrations/google_ads_performance.py` — confirmed 25-per-chunk, 5-thread architecture
+- Source: `tests/test_prompt_sanitization_contract.py:11-14` — confirmed test imports of generator.py dead code
+- Source: `src/feedops/api/main.py:174-304` — confirmed re-export block scope and test file count (9 test files)
+- Official: [Google Ads API rate limits and quotas](https://developers.google.com/google-ads/api/docs/best-practices/quotas) — 15,000 requests/day per customer limit (MEDIUM confidence — limit details may vary by API version)
+- Official: [PostgreSQL ON CONFLICT documentation](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT) — confirms constraint requirement for `ON CONFLICT (columns)` syntax (HIGH confidence)
+- Project history: `CLAUDE.md` — offer ID case mismatch pattern documented as critical known issue (HIGH confidence)
+- Project history: `memory/MEMORY.md` — Phase 27 prompt sensitivity learnings preserved (HIGH confidence)
 
 ---
-*Pitfalls research for: Pipeline Reliability Rewrite + Model Evaluation*
+*Pitfalls research for: Dead code cleanup + data infrastructure hardening (v1.1)*
 *Researched: 2026-03-03*
