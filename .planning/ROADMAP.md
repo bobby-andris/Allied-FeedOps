@@ -100,7 +100,10 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   3. Bobby and Robert complete blind scoring on all 20 outputs (title quality, description quality, brand voice, accuracy) before labels are revealed
   4. A comparison table exists with cost-per-SKU, p50/p95 latency, and average blind score for each provider
   5. A written recommendation exists stating which provider to use for which scenarios, backed by the evaluation data
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] 06-01-PLAN.md — SKU selection script + evaluation script + run full 3-way evaluation
+  - [ ] 06-02-PLAN.md — Create blind scoring sheet + Bobby/Robert complete scoring
+  - [ ] 06-03-PLAN.md — Analysis: comparison table + written recommendation
 
 ### Phase 7: Bing Fix
 **Goal**: All Bing titles use `{FINISH_NAME}` placeholder — broken content is replaced, variant expansion produces correct per-finish titles
@@ -125,5 +128,5 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 | 3. JobRunner and Route Extraction | 2/2 | Complete   | 2026-03-03 |
 | 4. GPT-5.2 Bug Fixes | 2/3 | In Progress|  |
 | 5. Claude Provider | 1/2 | In Progress|  |
-| 6. Model Evaluation | 0/TBD | Not started | - |
+| 6. Model Evaluation | 0/3 | Planning complete | - |
 | 7. Bing Fix | 0/TBD | Not started | - |
