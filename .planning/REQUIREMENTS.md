@@ -41,11 +41,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Provider Abstraction
 
-- [ ] **PROV-01**: Provider abstraction layer (`providers/base.py`) with common `generate(system_prompt, user_prompt, schema) -> structured_output` interface
-- [ ] **PROV-02**: OpenAI/GPT-5.2 provider refactored to use abstraction
-- [ ] **PROV-03**: Anthropic/Claude provider implementation with structured JSON output
-- [ ] **PROV-04**: Provider factory supports selection via environment variable
-- [ ] **PROV-05**: Claude provider tested against all 3 content platforms (Google, Bing, Shopify)
+- [x] **PROV-01**: Provider abstraction layer (`providers/base.py`) with common `generate(system_prompt, user_prompt, schema) -> structured_output` interface
+- [x] **PROV-02**: OpenAI/GPT-5.2 provider refactored to use abstraction
+- [x] **PROV-03**: Anthropic/Claude provider implementation with structured JSON output
+- [x] **PROV-04**: Provider factory supports selection via environment variable
+- [x] **PROV-05**: Claude provider tested against all 3 content platforms (Google, Bing, Shopify)
 
 ### Model Evaluation
 
@@ -118,11 +118,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GPT-04 | Phase 4 | Complete |
 | GPT-05 | Phase 4 | Complete |
 | GPT-06 | Phase 4 | Complete |
-| PROV-01 | Phase 5 | Pending |
-| PROV-02 | Phase 5 | Pending |
-| PROV-03 | Phase 5 | Pending |
-| PROV-04 | Phase 5 | Pending |
-| PROV-05 | Phase 5 | Pending |
+| PROV-01 | Phase 5 | Complete |
+| PROV-02 | Phase 5 | Complete |
+| PROV-03 | Phase 5 | Complete |
+| PROV-04 | Phase 5 | Complete |
+| PROV-05 | Phase 5 | Complete |
 | EVAL-01 | Phase 6 | Pending |
 | EVAL-02 | Phase 6 | Pending |
 | EVAL-03 | Phase 6 | Pending |

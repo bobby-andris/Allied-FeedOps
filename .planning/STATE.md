@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 05-01-PLAN.md — ClaudeProvider implementation with structured outputs and 25 tests; Phase 05 Plan 01 complete
-last_updated: "2026-03-03T15:24:05.988Z"
+stopped_at: Completed 05-02-PLAN.md — Claude provider factory wiring with 7 tests; Phase 05 Plan 02 complete
+last_updated: "2026-03-03T15:28:13.074Z"
 last_activity: 2026-03-03 — Plan 04-03 executed
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 100
 ---
 
@@ -54,6 +54,7 @@ Progress: [██████████] 100%
 | Phase 04-gpt52-bug-fixes P02 | 5 | 1 tasks | 1 files |
 | Phase 04-gpt52-bug-fixes P01 | 3 | 2 tasks | 2 files |
 | Phase 05-claude-provider P01 | 3 | 2 tasks | 3 files |
+| Phase 05-claude-provider P02 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 05-claude-provider]: output_config.format with json_schema chosen over tool_use for ClaudeProvider — native GA constrained decoding, no tool definition overhead
 - [Phase 05-claude-provider]: reasoning_effort accepted but deferred to Phase 6 — will map to thinking budget_tokens (low=2000, medium=8000, high=20000)
 - [Phase 05-claude-provider]: _parse_json_payload imported directly from openai_provider — utils.py extraction deferred to Phase 6 cleanup
+- [Phase 05-claude-provider]: Claude not added to FallbackProvider chains — explicit selection only until Phase 6 evaluation confirms quality
+- [Phase 05-claude-provider]: effective_preferred merges programmatic preferred arg with FEEDOPS_PROVIDER env var (arg takes priority when both set)
+- [Phase 05-claude-provider]: FEEDOPS_CLAUDE_SDK_TIMEOUT_SECONDS defaults to 60s vs 45s for OpenAI — Claude requests run longer
 
 ### Pending Todos
 
@@ -98,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03T15:24:05.985Z
-Stopped at: Completed 05-01-PLAN.md — ClaudeProvider implementation with structured outputs and 25 tests; Phase 05 Plan 01 complete
+Last session: 2026-03-03T15:28:13.068Z
+Stopped at: Completed 05-02-PLAN.md — Claude provider factory wiring with 7 tests; Phase 05 Plan 02 complete
 Resume file: None
