@@ -111,7 +111,7 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Schemas Extraction | 0/TBD | Not started | - |
+| 1. Schemas Extraction | 1/2 | In Progress|  |
 | 2. Services Extraction | 0/TBD | Not started | - |
 | 3. JobRunner and Route Extraction | 0/TBD | Not started | - |
 | 4. GPT-5.2 Bug Fixes | 0/TBD | Not started | - |
