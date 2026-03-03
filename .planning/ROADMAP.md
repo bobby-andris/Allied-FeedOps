@@ -10,7 +10,7 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Schemas Extraction** - Extract all Pydantic models into `schemas.py` — no dependencies, unblocks all subsequent extraction
+- [x] **Phase 1: Schemas Extraction** - Extract all Pydantic models into `schemas.py` — no dependencies, unblocks all subsequent extraction
 - [ ] **Phase 2: Services Extraction** - Extract finish processing, intent scoring, telemetry, generation, and persistence into isolated service modules
 - [ ] **Phase 3: JobRunner and Route Extraction** - Unify batch/hybrid job processing into `JobRunner`; slim `main.py` to <500 lines
 - [ ] **Phase 4: GPT-5.2 Bug Fixes** - Fix all 5 known GPT-5.2 bugs as separate PRs with curl verification
@@ -30,8 +30,8 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
   3. All metrics and diagnostics emit identically before and after extraction (curl `/health` returns same structure)
   4. No circular imports: `python -c "import feedops.api.main"` exits 0 after extraction
 **Plans**: 2 plans
-  - [ ] 01-01-PLAN.md — Extract schemas.py and telemetry.py (zero inter-module deps)
-  - [ ] 01-02-PLAN.md — Extract persistence.py and job_management.py + update external callers
+  - [x] 01-01-PLAN.md — Extract schemas.py and telemetry.py (zero inter-module deps)
+  - [x] 01-02-PLAN.md — Extract persistence.py and job_management.py + update external callers
 
 ### Phase 2: Services Extraction
 **Goal**: Business logic for finish processing, intent scoring, and core generation lives in testable, isolated service modules

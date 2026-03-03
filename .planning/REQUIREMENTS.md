@@ -10,8 +10,8 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Decomposition
 
 - [x] **DECOMP-01**: Extract all Pydantic request/response models (~17 classes) into `schemas.py`
-- [ ] **DECOMP-02**: Extract all Supabase read/write functions into `persistence.py`
-- [ ] **DECOMP-03**: Extract job lifecycle functions into `job_management.py`
+- [x] **DECOMP-02**: Extract all Supabase read/write functions into `persistence.py`
+- [x] **DECOMP-03**: Extract job lifecycle functions into `job_management.py`
 - [x] **DECOMP-04**: Extract metrics emission and diagnostics into `telemetry.py`
 - [ ] **DECOMP-05**: Extract query intent and content scoring into `intent_scoring.py`
 - [ ] **DECOMP-06**: Extract finish sentence validation and parity enforcement into `finish_processing.py`
@@ -96,8 +96,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DECOMP-01 | Phase 1 | Complete |
-| DECOMP-02 | Phase 1 | Pending |
-| DECOMP-03 | Phase 1 | Pending |
+| DECOMP-02 | Phase 1 | Complete |
+| DECOMP-03 | Phase 1 | Complete |
 | DECOMP-04 | Phase 1 | Complete |
 | DECOMP-05 | Phase 2 | Pending |
 | DECOMP-06 | Phase 2 | Pending |

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T05:59:11.873Z"
+last_updated: "2026-03-03T06:09:30.000Z"
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -22,28 +22,28 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 1 of 7 (Schemas Extraction)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-03-03 — Completed 01-01 schemas/telemetry extraction
+Phase: 1 of 7 (Schemas Extraction) — COMPLETE
+Plan: 2 of 2 in current phase — COMPLETE
+Status: Phase Complete — ready for Phase 2
+Last activity: 2026-03-03 — Completed 01-02 persistence/job_management extraction
 
-Progress: [█░░░░░░░░░] 5%
+Progress: [██░░░░░░░░] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 6 min
-- Total execution time: 0.1 hours
+- Total plans completed: 2
+- Average duration: 6.5 min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-schemas-extraction | 1/2 | 6 min | 6 min |
+| 01-schemas-extraction | 2/2 | 13 min | 6.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 6 min
+- Last 5 plans: 6, 7 min
 - Trend: —
 
 *Updated after each plan completion*
@@ -61,6 +61,8 @@ Recent decisions affecting current work:
 - [Project]: Never batch prompt changes — one change per PR, deploy, curl `920D-6`, verify >500 chars (Phase 27 learning)
 - [Phase 01-schemas-extraction]: Pure move: zero changes to function signatures — extraction is a pure refactoring
 - [Phase 01-schemas-extraction]: No explicit re-exports from main.py — Python import side effects allow external lazy imports to still resolve until Plan 02 cleanup
+- [Phase 01-02]: _require_request_id duplicated in persistence.py (private copy) to avoid circular imports between sibling modules — job_management.py is the public home
+- [Phase 01-02]: All external callers (search_insights, gmc_sync, backfill) import run_async_in_thread from telemetry.py at module level
 
 ### Pending Todos
 
@@ -75,5 +77,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 01-schemas-extraction/01-01-PLAN.md
+Stopped at: Completed 01-schemas-extraction/01-02-PLAN.md (Phase 1 complete)
 Resume file: None
