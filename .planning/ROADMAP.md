@@ -119,10 +119,12 @@
 **Success Criteria** (what must be TRUE):
   1. Daily Cloud Scheduler snapshot job at 6:00 AM UTC completes without error — Slack alert reports success instead of a 42P10 upsert failure
   2. `performance_impact_scores` table starts populating with real data (was empty due to snapshot job failing)
-  3. `SELECT COUNT(*) FROM performance_snapshots` grows by the expected number of SKUs the morning after migration 036 is applied
+  3. `SELECT COUNT(*) FROM performance_snapshots` grows by the expected number of SKUs the morning after migration 042 is applied
   4. A CHECK constraint rejects any INSERT on platform columns that uses a value outside the allowed set (google, bing, shopify)
   5. `performance_snapshots.publish_event_id` has a FK to `publish_events` — orphaned rows are rejected at the DB layer
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 08-01-PLAN.md — Write and apply migration 042 (dedup + unique constraint + CHECK constraints + FK)
 
 #### Phase 9: Trivial Dead Code Removal
 **Goal**: All zero-caller orphan functions are deleted from the codebase — no test changes required, ruff and pytest stay green after each deletion
@@ -197,7 +199,7 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 9 �
 | 5. Claude Provider | v1.0 | 2/2 | Complete | 2026-03-03 |
 | 6. Model Evaluation | v1.0 | 3/3 | Complete | 2026-03-03 |
 | 7. Bing Fix | v1.0 | 0/TBD | Deferred | - |
-| 8. Schema Hardening | v1.1 | 0/TBD | Not started | - |
+| 8. Schema Hardening | v1.1 | 0/1 | Planned | - |
 | 9. Trivial Dead Code Removal | v1.1 | 0/TBD | Not started | - |
 | 10. Image Wiring | v1.1 | 0/TBD | Not started | - |
 | 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/TBD | Not started | - |
