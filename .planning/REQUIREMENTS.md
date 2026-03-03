@@ -1,93 +1,75 @@
-# Requirements: Pipeline Reliability Rewrite + Model Evaluation
+# Requirements: Allied-FeedOps v1.1
 
 **Defined:** 2026-03-03
-**Core Value:** The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
+**Core Value:** The pipeline produces high-quality product content reliably at scale, backed by accurate performance data that maps seamlessly across Google Ads, Shopify, and Merchant Center.
 
 ## v1 Requirements
 
-Requirements for this milestone. Each maps to roadmap phases.
+Requirements for v1.1 milestone. Each maps to roadmap phases.
 
-### Decomposition
+### Dead Code
 
-- [x] **DECOMP-01**: Extract all Pydantic request/response models (~17 classes) into `schemas.py`
-- [x] **DECOMP-02**: Extract all Supabase read/write functions into `persistence.py`
-- [x] **DECOMP-03**: Extract job lifecycle functions into `job_management.py`
-- [x] **DECOMP-04**: Extract metrics emission and diagnostics into `telemetry.py`
-- [x] **DECOMP-05**: Extract query intent and content scoring into `intent_scoring.py`
-- [x] **DECOMP-06**: Extract finish sentence validation and parity enforcement into `finish_processing.py`
-- [x] **DECOMP-07**: Extract core generation orchestration into `generation.py`
-- [x] **DECOMP-08**: Extract `run_async_in_thread()` into a shared utility module with daemon=False test
-- [x] **DECOMP-09**: Reduce `main.py` to <500 lines (route definitions and request handling only)
-- [x] **DECOMP-10**: All existing API endpoints work identically after extraction
-- [x] **DECOMP-11**: pytest covers each extracted module independently
+- [ ] **DEAD-01**: Remove 8 orphaned functions with zero callers (`_payload_value_lengths`, `_schema_hash`, `_prompt_hash`, `_generate_with_provider_compat` in generator.py; `_provider_label` re-export in finish_processing.py; 3 finish processing re-exports in generation.py)
+- [ ] **DEAD-02**: Update 5 test files to import from actual extracted module locations instead of main.py re-exports
+- [ ] **DEAD-03**: Remove ~130-line backward-compat re-export block from main.py after test imports updated
+- [ ] **DEAD-04**: Remove generator.py duplicate functions already copied to executor.py/hybrid_generation.py (6 functions)
+- [ ] **DEAD-05**: Remove ~500 lines of variant generation code behind never-enabled `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag
+- [ ] **DEAD-06**: Consolidate duplicate `_require_request_id()` and `GenerationBudgetExceededError` to single shared location
 
-### Job Unification
+### Schema
 
-- [x] **JOBS-01**: Replace duplicated `process_batch_job()` and `process_hybrid_batch_job()` with unified `JobRunner` class
-- [x] **JOBS-02**: Single job processing loop with batch/hybrid mode flag
-- [x] **JOBS-03**: Shared retry logic, error handling, and status updates
-- [x] **JOBS-04**: Configurable SKU processing strategy (full generation vs variant adaptation)
-- [x] **JOBS-05**: Proper cancellation support and graceful shutdown
-- [x] **JOBS-06**: Batch and hybrid generation produce identical results to current implementation
+- [ ] **SCHM-01**: Add missing unique constraint on `performance_snapshots(master_sku, platform, environment, snapshot_date)` with dedup of existing 179 rows in same migration
+- [ ] **SCHM-02**: Audit all data import tables for missing or incorrect constraints (performance_baselines, search_queries, keyword_metrics, funnel_snapshots_daily, performance_impact_scores)
+- [ ] **SCHM-03**: Add CHECK constraints on platform columns across data tables to enforce valid values
+- [ ] **SCHM-04**: Add FK constraint on `performance_snapshots.publish_event_id` referencing `publish_events`
 
-### GPT-5.2 Fixes
+### Entity Mapping
 
-- [x] **GPT-01**: Remove `temperature=0.7` when `reasoning_effort` is set (mutually exclusive)
-- [x] **GPT-02**: Default `reasoning_effort` to `"high"` when env var is unset
-- [x] **GPT-03**: Switch from `json_object` to `json_schema` strict mode
-- [x] **GPT-04**: Add `prompt_cache_retention: "24h"` for batch runs
-- [x] **GPT-05**: Restructure system prompt with XML tags (incremental, deploy-and-test per change)
-- [x] **GPT-06**: Each bug fix is a separate PR with curl verification against live endpoint
+- [ ] **ENTM-01**: Create shared offer ID normalization utility for case-insensitive matching between DB (lowercase) and GMC (uppercase)
+- [ ] **ENTM-02**: Apply offer ID normalization consistently across all data codepaths (performance baselines, search terms, snapshots, backfill)
+- [ ] **ENTM-03**: Document entity relationship map showing variant_index as hub linking Google Ads ↔ Shopify ↔ GMC with correct join keys
 
-### Provider Abstraction
+### Data Coverage
 
-- [x] **PROV-01**: Provider abstraction layer (`providers/base.py`) with common `generate(system_prompt, user_prompt, schema) -> structured_output` interface
-- [x] **PROV-02**: OpenAI/GPT-5.2 provider refactored to use abstraction
-- [x] **PROV-03**: Anthropic/Claude provider implementation with structured JSON output
-- [x] **PROV-04**: Provider factory supports selection via environment variable
-- [x] **PROV-05**: Claude provider tested against all 3 content platforms (Google, Bing, Shopify)
+- [ ] **DATA-01**: Implement throttled bulk baseline capture for all ~2,500 master SKUs with Google Ads quota management (50-SKU test gate before full sweep)
+- [ ] **DATA-02**: Verify daily snapshot capture works end-to-end after constraint fix — Slack reports success instead of 42P10 error
+- [ ] **DATA-03**: Verify impact score population works after snapshots are collecting correctly
 
-### Model Evaluation
+### Image Support
 
-- [ ] **EVAL-01**: Select 10 diverse SKUs (mix of categories, single vs multi-SKU products)
-- [ ] **EVAL-02**: Generate content with both providers using identical prompts
-- [ ] **EVAL-03**: Blind human scoring by Bobby/Robert on title quality, description quality, brand voice, accuracy
-- [ ] **EVAL-04**: Compare cost per SKU, latency, and consistency across runs
-- [ ] **EVAL-05**: Clear data on which provider produces better content for which scenarios
-- [ ] **EVAL-06**: Cost/quality tradeoff documented
-
-### Bing Fix
-
-- [ ] **BING-01**: Diagnose why Bing titles don't use `{FINISH_NAME}` placeholder
-- [ ] **BING-02**: Fix the prompt to enforce `{FINISH_NAME}` in Bing titles
-- [ ] **BING-03**: Regenerate the 85 broken Bing titles
-- [ ] **BING-04**: Verify variant expansion works correctly with placeholders
+- [ ] **IMG-01**: Wire image input through executor.py modern generation path so all per-platform generation endpoints receive product images
 
 ## v2 Requirements
 
-Deferred to future milestones. Tracked but not in current roadmap.
+Deferred to future milestone. Tracked but not in current roadmap.
+
+### Bing Content Fix
+
+- **BING-01**: Regenerate 96 Bing titles that have hardcoded finish names instead of `{FINISH_NAME}` placeholder
+- **BING-02**: Verify variant expansion produces correct finish-specific Bing titles after regeneration
+
+### Data Expansion
+
+- **DEXP-01**: Add Bing/Shopify platform data collection (columns exist, no data)
+- **DEXP-02**: Include Performance Max campaigns in search term sync
+- **DEXP-03**: Implement product-level search term attribution (currently campaign-level approximation)
 
 ### Optimization Loop
 
 - **OPT-01**: Performance-informed regeneration (use post-publish metrics to trigger content updates)
 - **OPT-02**: A/B testing framework for generated content
-- **OPT-03**: Automated quality scoring pipeline (currently manual approval)
-
-### Dashboard Intelligence
-
-- **DASH-01**: Tier intelligence redesign (distribution scoring, revenue leakage)
-- **DASH-02**: Intent execution tracking (035b migration tables)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Dashboard UI changes | Pipeline-only milestone — dashboard is stable |
-| Database migrations (034b, 035b) | Not yet evaluated for production readiness |
-| Prompt content rewriting | Phase 27 proved GPT-5.2 is hyper-sensitive; only incremental XML tag changes |
-| Multi-provider fallback chains | Complexity not justified until evaluation data proves value |
-| Automated LLM-as-judge scoring | Evaluation bias risk; human scoring is ground truth for this milestone |
-| New content generation modes | Focus on reliability of existing modes first |
+| Prompt content rewriting | Phase 27 proved GPT-5.2 hyper-sensitive; now on Claude but incremental only |
+| Dashboard UI changes | Pipeline-only milestone |
+| v1.3c tier intelligence redesign | PAUSED — separate milestone |
+| v1.4 closed-loop optimization | Future milestone — depends on v1.1 data infrastructure |
+| Deferred migrations (034b, 035b) | GA4 attribution + intent execution — not yet evaluated |
+| optimize.py CLI retirement | Needs explicit decision on whether legacy path is still used |
+| New content generation modes | Focus on data reliability before new features |
 
 ## Traceability
 
@@ -95,50 +77,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DECOMP-01 | Phase 1 | Complete |
-| DECOMP-02 | Phase 1 | Complete |
-| DECOMP-03 | Phase 1 | Complete |
-| DECOMP-04 | Phase 1 | Complete |
-| DECOMP-05 | Phase 2 | Complete |
-| DECOMP-06 | Phase 2 | Complete |
-| DECOMP-07 | Phase 2 | Complete |
-| DECOMP-08 | Phase 2 | Complete |
-| DECOMP-09 | Phase 3 | Complete |
-| DECOMP-10 | Phase 2 | Complete |
-| DECOMP-11 | Phase 2 | Partial (intent+finish done, generation pending 02-02) |
-| JOBS-01 | Phase 3 | Complete |
-| JOBS-02 | Phase 3 | Complete |
-| JOBS-03 | Phase 3 | Complete |
-| JOBS-04 | Phase 3 | Complete |
-| JOBS-05 | Phase 3 | Complete |
-| JOBS-06 | Phase 3 | Complete |
-| GPT-01 | Phase 4 | Complete |
-| GPT-02 | Phase 4 | Complete |
-| GPT-03 | Phase 4 | Complete |
-| GPT-04 | Phase 4 | Complete |
-| GPT-05 | Phase 4 | Complete |
-| GPT-06 | Phase 4 | Complete |
-| PROV-01 | Phase 5 | Complete |
-| PROV-02 | Phase 5 | Complete |
-| PROV-03 | Phase 5 | Complete |
-| PROV-04 | Phase 5 | Complete |
-| PROV-05 | Phase 5 | Complete |
-| EVAL-01 | Phase 6 | Pending |
-| EVAL-02 | Phase 6 | Pending |
-| EVAL-03 | Phase 6 | Pending |
-| EVAL-04 | Phase 6 | Pending |
-| EVAL-05 | Phase 6 | Pending |
-| EVAL-06 | Phase 6 | Pending |
-| BING-01 | Phase 7 | Pending |
-| BING-02 | Phase 7 | Pending |
-| BING-03 | Phase 7 | Pending |
-| BING-04 | Phase 7 | Pending |
+| DEAD-01 | — | Pending |
+| DEAD-02 | — | Pending |
+| DEAD-03 | — | Pending |
+| DEAD-04 | — | Pending |
+| DEAD-05 | — | Pending |
+| DEAD-06 | — | Pending |
+| SCHM-01 | — | Pending |
+| SCHM-02 | — | Pending |
+| SCHM-03 | — | Pending |
+| SCHM-04 | — | Pending |
+| ENTM-01 | — | Pending |
+| ENTM-02 | — | Pending |
+| ENTM-03 | — | Pending |
+| DATA-01 | — | Pending |
+| DATA-02 | — | Pending |
+| DATA-03 | — | Pending |
+| IMG-01 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38
-- Unmapped: 0
+- v1 requirements: 17 total
+- Mapped to phases: 0
+- Unmapped: 17 ⚠️
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 — traceability populated by roadmap creation*
+*Last updated: 2026-03-03 after initial definition*
