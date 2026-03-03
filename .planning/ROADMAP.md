@@ -68,10 +68,13 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
 **Success Criteria** (what must be TRUE):
   1. `curl /optimize-sku` with SKU `920D-6` returns a description longer than 500 characters after each individual PR merge
   2. `openai_provider.py` never passes `temperature` alongside `reasoning_effort` — verified by code inspection and test
-  3. `reasoning_effort` defaults to `"medium"` when `FEEDOPS_REASONING_EFFORT` env var is unset — verified by unit test
+  3. `reasoning_effort` defaults to `"high"` when `FEEDOPS_REASONING_EFFORT` env var is unset — verified by unit test (locked decision: "high" achieved 98% approval rate)
   4. `json_schema` strict mode is active; no retry-on-invalid-JSON loops in production logs after a batch run
   5. System prompt uses XML section tags instead of `=== ===` headers — and curl verification confirms descriptions unchanged in length and quality
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] 04-01-PLAN.md — GPT-5.2 regression tests (GPT-01 through GPT-05)
+  - [ ] 04-02-PLAN.md — Add prompt_cache_key to OpenAI API calls
+  - [ ] 04-03-PLAN.md — Post-deploy content quality verification script
 
 ### Phase 5: Claude Provider
 **Goal**: Claude can generate structured product content through the same interface as GPT-5.2 — environment variable selects the provider
@@ -118,7 +121,7 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 | 1. Schemas Extraction | 2/2 | Complete | 2026-03-03 |
 | 2. Services Extraction | 0/2 | Planning complete | - |
 | 3. JobRunner and Route Extraction | 2/2 | Complete   | 2026-03-03 |
-| 4. GPT-5.2 Bug Fixes | 0/TBD | Not started | - |
+| 4. GPT-5.2 Bug Fixes | 0/3 | Planning complete | - |
 | 5. Claude Provider | 0/TBD | Not started | - |
 | 6. Model Evaluation | 0/TBD | Not started | - |
 | 7. Bing Fix | 0/TBD | Not started | - |
