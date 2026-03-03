@@ -15,11 +15,11 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **DECOMP-04**: Extract metrics emission and diagnostics into `telemetry.py`
 - [x] **DECOMP-05**: Extract query intent and content scoring into `intent_scoring.py`
 - [x] **DECOMP-06**: Extract finish sentence validation and parity enforcement into `finish_processing.py`
-- [ ] **DECOMP-07**: Extract core generation orchestration into `generation.py`
+- [x] **DECOMP-07**: Extract core generation orchestration into `generation.py`
 - [x] **DECOMP-08**: Extract `run_async_in_thread()` into a shared utility module with daemon=False test
 - [ ] **DECOMP-09**: Reduce `main.py` to <500 lines (route definitions and request handling only)
-- [ ] **DECOMP-10**: All existing API endpoints work identically after extraction
-- [ ] **DECOMP-11**: pytest covers each extracted module independently
+- [x] **DECOMP-10**: All existing API endpoints work identically after extraction
+- [x] **DECOMP-11**: pytest covers each extracted module independently
 
 ### Job Unification
 
@@ -101,10 +101,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DECOMP-04 | Phase 1 | Complete |
 | DECOMP-05 | Phase 2 | Complete |
 | DECOMP-06 | Phase 2 | Complete |
-| DECOMP-07 | Phase 2 | Pending |
+| DECOMP-07 | Phase 2 | Complete |
 | DECOMP-08 | Phase 2 | Complete |
 | DECOMP-09 | Phase 3 | Pending |
-| DECOMP-10 | Phase 2 | Pending |
+| DECOMP-10 | Phase 2 | Complete |
 | DECOMP-11 | Phase 2 | Partial (intent+finish done, generation pending 02-02) |
 | JOBS-01 | Phase 3 | Pending |
 | JOBS-02 | Phase 3 | Pending |

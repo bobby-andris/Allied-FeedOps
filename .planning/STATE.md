@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-03-03T07:15:00Z"
+status: unknown
+last_updated: "2026-03-03T07:25:19.423Z"
 progress:
-  total_phases: 7
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,33 +18,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
-**Current focus:** Phase 2 — Services Extraction
+**Current focus:** Phase 3 — next phase
 
 ## Current Position
 
-Phase: 2 of 7 (Services Extraction) — Plan 1 COMPLETE
-Plan: 1 of 2 in current phase — COMPLETE
-Status: Plan 02-01 Complete — ready for Plan 02-02
-Last activity: 2026-03-03 — Completed 02-01 intent_scoring + finish_processing extraction
+Phase: 2 of 7 (Services Extraction) — COMPLETE
+Plan: 2 of 2 in current phase — COMPLETE
+Status: Phase 02 Complete — all 3 services extracted (intent_scoring, finish_processing, generation)
+Last activity: 2026-03-03 — Completed 02-02 generation.py extraction
 
-Progress: [███░░░░░░░] 21%
+Progress: [████░░░░░░] 29%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 7.3 min
-- Total execution time: 0.37 hours
+- Total plans completed: 4
+- Average duration: 8.25 min
+- Total execution time: 0.55 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-schemas-extraction | 2/2 | 13 min | 6.5 min |
-| 02-services-extraction | 1/2 | 10 min | 10 min |
+| 02-services-extraction | 2/2 | 21 min | 10.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 6, 7, 10 min
+- Last 5 plans: 6, 7, 10, 11 min
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -66,6 +66,8 @@ Recent decisions affecting current work:
 - [Phase 01-02]: All external callers (search_insights, gmc_sync, backfill) import run_async_in_thread from telemetry.py at module level
 - [Phase 02-01]: APIRouter pattern for intent_scoring avoids circular import with main.py (no @app.post)
 - [Phase 02-01]: _get_generate_with_metrics() indirection in finish_processing.py enables monkeypatching without circular import — contract tests updated to patch at finish_processing module
+- [Phase 02-02]: Pure function extraction for generation.py — no APIRouter needed since functions are not route handlers
+- [Phase 02-02]: Dual-namespace monkeypatching pattern: tests must patch both api_main and api_generation after extraction
 
 ### Pending Todos
 
@@ -80,5 +82,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 02-services-extraction/02-01-PLAN.md
+Stopped at: Completed 02-services-extraction/02-02-PLAN.md (Phase 2 complete)
 Resume file: None
