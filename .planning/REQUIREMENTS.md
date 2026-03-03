@@ -35,9 +35,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [ ] **GPT-01**: Remove `temperature=0.7` when `reasoning_effort` is set (mutually exclusive)
 - [ ] **GPT-02**: Default `reasoning_effort` to `"high"` when env var is unset
 - [ ] **GPT-03**: Switch from `json_object` to `json_schema` strict mode
-- [ ] **GPT-04**: Add `prompt_cache_retention: "24h"` for batch runs
+- [x] **GPT-04**: Add `prompt_cache_retention: "24h"` for batch runs
 - [ ] **GPT-05**: Restructure system prompt with XML tags (incremental, deploy-and-test per change)
-- [ ] **GPT-06**: Each bug fix is a separate PR with curl verification against live endpoint
+- [x] **GPT-06**: Each bug fix is a separate PR with curl verification against live endpoint
 
 ### Provider Abstraction
 
@@ -115,9 +115,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GPT-01 | Phase 4 | Pending |
 | GPT-02 | Phase 4 | Pending |
 | GPT-03 | Phase 4 | Pending |
-| GPT-04 | Phase 4 | Pending |
+| GPT-04 | Phase 4 | Complete |
 | GPT-05 | Phase 4 | Pending |
-| GPT-06 | Phase 4 | Pending |
+| GPT-06 | Phase 4 | Complete |
 | PROV-01 | Phase 5 | Pending |
 | PROV-02 | Phase 5 | Pending |
 | PROV-03 | Phase 5 | Pending |

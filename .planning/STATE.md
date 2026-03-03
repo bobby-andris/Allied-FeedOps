@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T10:21:43.181Z"
+last_updated: "2026-03-03T12:38:37.448Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
-**Current focus:** Phase 3 — COMPLETE (both plans done), next phase is Phase 4 (GPT-5.2 bug fixes)
+**Current focus:** Phase 4 — plan 02 complete (prompt_cache_key added); Phase 4 has 1 remaining plan (04-03 verification script)
 
 ## Current Position
 
-Phase: 3 of 7 (JobRunner and Route Extraction) — COMPLETE
-Plan: 2 of 2 in current phase
-Status: Plan 03-02 complete — route handlers extracted to routes.py; main.py -954 lines (304 total)
-Last activity: 2026-03-03 — Plan 03-02 executed
+Phase: 4 of 7 (GPT-5.2 bug fixes) — In Progress
+Plan: 2 of 3 in current phase
+Status: Plan 04-02 complete — prompt_cache_key="feedops-pipeline-v1" added to both create() call paths in openai_provider.py
+Last activity: 2026-03-03 — Plan 04-02 executed
 
-Progress: [█████░░░░░] 42%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [█████░░░░░] 42%
 **Recent Trend:**
 - Last 5 plans: 7, 10, 11, 13, 22 min
 - Trend: Increasing (larger refactors in phase 3)
+| Phase 04-gpt52-bug-fixes P02 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Recent decisions affecting current work:
 - [Phase 03-01]: Dual-namespace monkeypatching: tests patching job processing must target api_job_runner, not api_main
 - [Phase 03-01]: process_regenerate_job left in main.py — JOBS-01 specifies batch+hybrid only
 - [Phase 03-02]: Dual-namespace backward-compat re-exports added to main.py; tests updated to patch both api_main and api_routes modules
+- [Phase 04-gpt52-bug-fixes]: prompt_cache_key is first-class OpenAI SDK param (not extra_body) — static value feedops-pipeline-v1 shared across all batch requests to maximize cache hit rate
 
 ### Pending Todos
 
@@ -85,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 4 context gathered — ready for planning
-Resume file: .planning/phases/04-gpt52-bug-fixes/04-CONTEXT.md
+Stopped at: Completed 04-02-PLAN.md — prompt_cache_key added to both create() paths in openai_provider.py
+Resume file: .planning/phases/04-gpt52-bug-fixes/04-02-SUMMARY.md
