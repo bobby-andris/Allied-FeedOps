@@ -17,7 +17,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **DECOMP-06**: Extract finish sentence validation and parity enforcement into `finish_processing.py`
 - [x] **DECOMP-07**: Extract core generation orchestration into `generation.py`
 - [x] **DECOMP-08**: Extract `run_async_in_thread()` into a shared utility module with daemon=False test
-- [ ] **DECOMP-09**: Reduce `main.py` to <500 lines (route definitions and request handling only)
+- [x] **DECOMP-09**: Reduce `main.py` to <500 lines (route definitions and request handling only)
 - [x] **DECOMP-10**: All existing API endpoints work identically after extraction
 - [x] **DECOMP-11**: pytest covers each extracted module independently
 
@@ -103,7 +103,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DECOMP-06 | Phase 2 | Complete |
 | DECOMP-07 | Phase 2 | Complete |
 | DECOMP-08 | Phase 2 | Complete |
-| DECOMP-09 | Phase 3 | Pending |
+| DECOMP-09 | Phase 3 | Complete |
 | DECOMP-10 | Phase 2 | Complete |
 | DECOMP-11 | Phase 2 | Partial (intent+finish done, generation pending 02-02) |
 | JOBS-01 | Phase 3 | Complete |

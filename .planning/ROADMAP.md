@@ -12,7 +12,7 @@ A safety-first decomposition of the 3,737-line `main.py` monolith into testable 
 
 - [x] **Phase 1: Schemas Extraction** - Extract all Pydantic models into `schemas.py` — no dependencies, unblocks all subsequent extraction
 - [ ] **Phase 2: Services Extraction** - Extract finish processing, intent scoring, telemetry, generation, and persistence into isolated service modules
-- [ ] **Phase 3: JobRunner and Route Extraction** - Unify batch/hybrid job processing into `JobRunner`; slim `main.py` to <500 lines
+- [x] **Phase 3: JobRunner and Route Extraction** - Unify batch/hybrid job processing into `JobRunner`; slim `main.py` to <500 lines (completed 2026-03-03)
 - [ ] **Phase 4: GPT-5.2 Bug Fixes** - Fix all 5 known GPT-5.2 bugs as separate PRs with curl verification
 - [ ] **Phase 5: Claude Provider** - Implement `ClaudeProvider` with structured output and factory support
 - [ ] **Phase 6: Model Evaluation** - Run head-to-head Claude vs GPT-5.2 on 10 diverse SKUs with blind human scoring
@@ -117,7 +117,7 @@ Phases execute in dependency order. Phase 7 depends on Phase 4 (prompt-change pr
 |-------|----------------|--------|-----------|
 | 1. Schemas Extraction | 2/2 | Complete | 2026-03-03 |
 | 2. Services Extraction | 0/2 | Planning complete | - |
-| 3. JobRunner and Route Extraction | 1/2 | In Progress|  |
+| 3. JobRunner and Route Extraction | 2/2 | Complete   | 2026-03-03 |
 | 4. GPT-5.2 Bug Fixes | 0/TBD | Not started | - |
 | 5. Claude Provider | 0/TBD | Not started | - |
 | 6. Model Evaluation | 0/TBD | Not started | - |

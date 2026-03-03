@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T10:03:07.257Z"
+last_updated: "2026-03-03T10:17:39.707Z"
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
-**Current focus:** Phase 3 — Plan 01 complete (JobRunner extracted), Plan 02 next (route extraction)
+**Current focus:** Phase 3 — COMPLETE (both plans done), next phase is Phase 4 (GPT-5.2 bug fixes)
 
 ## Current Position
 
-Phase: 3 of 7 (JobRunner and Route Extraction) — Plan 01 Complete
-Plan: 1 of 2 in current phase
-Status: Plan 03-01 complete — JobRunner extracted to job_runner.py; main.py -817 lines
-Last activity: 2026-03-03 — Plan 03-01 executed
+Phase: 3 of 7 (JobRunner and Route Extraction) — COMPLETE
+Plan: 2 of 2 in current phase
+Status: Plan 03-02 complete — route handlers extracted to routes.py; main.py -954 lines (304 total)
+Last activity: 2026-03-03 — Plan 03-02 executed
 
-Progress: [████░░░░░░] 35%
+Progress: [█████░░░░░] 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 8.8 min
-- Total execution time: 0.62 hours
+- Total plans completed: 6
+- Average duration: 10.7 min
+- Total execution time: 1.09 hours
 
 **By Phase:**
 
@@ -42,11 +42,11 @@ Progress: [████░░░░░░] 35%
 |-------|-------|-------|----------|
 | 01-schemas-extraction | 2/2 | 13 min | 6.5 min |
 | 02-services-extraction | 2/2 | 21 min | 10.5 min |
-| 03-jobrunner-and-route-extraction | 1/2 | 13 min | 13 min |
+| 03-jobrunner-and-route-extraction | 2/2 | 35 min | 17.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 6, 7, 10, 11, 13 min
-- Trend: Stable
+- Last 5 plans: 7, 10, 11, 13, 22 min
+- Trend: Increasing (larger refactors in phase 3)
 
 ## Accumulated Context
 
@@ -70,6 +70,7 @@ Recent decisions affecting current work:
 - [Phase 03-01]: extract_spec_difference is in multi_sku_detection (not hybrid_generation) — research doc had wrong module
 - [Phase 03-01]: Dual-namespace monkeypatching: tests patching job processing must target api_job_runner, not api_main
 - [Phase 03-01]: process_regenerate_job left in main.py — JOBS-01 specifies batch+hybrid only
+- [Phase 03-02]: Dual-namespace backward-compat re-exports added to main.py; tests updated to patch both api_main and api_routes modules
 
 ### Pending Todos
 
@@ -84,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 03-01-PLAN.md (JobRunner extraction)
-Resume file: .planning/phases/03-jobrunner-and-route-extraction/03-02-PLAN.md
+Stopped at: Completed 03-02-PLAN.md (route extraction) — Phase 03 COMPLETE
+Resume file: .planning/phases/04-gpt52-bug-fixes/ (next phase)
