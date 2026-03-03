@@ -95,50 +95,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DECOMP-01 | — | Pending |
-| DECOMP-02 | — | Pending |
-| DECOMP-03 | — | Pending |
-| DECOMP-04 | — | Pending |
-| DECOMP-05 | — | Pending |
-| DECOMP-06 | — | Pending |
-| DECOMP-07 | — | Pending |
-| DECOMP-08 | — | Pending |
-| DECOMP-09 | — | Pending |
-| DECOMP-10 | — | Pending |
-| DECOMP-11 | — | Pending |
-| JOBS-01 | — | Pending |
-| JOBS-02 | — | Pending |
-| JOBS-03 | — | Pending |
-| JOBS-04 | — | Pending |
-| JOBS-05 | — | Pending |
-| JOBS-06 | — | Pending |
-| GPT-01 | — | Pending |
-| GPT-02 | — | Pending |
-| GPT-03 | — | Pending |
-| GPT-04 | — | Pending |
-| GPT-05 | — | Pending |
-| GPT-06 | — | Pending |
-| PROV-01 | — | Pending |
-| PROV-02 | — | Pending |
-| PROV-03 | — | Pending |
-| PROV-04 | — | Pending |
-| PROV-05 | — | Pending |
-| EVAL-01 | — | Pending |
-| EVAL-02 | — | Pending |
-| EVAL-03 | — | Pending |
-| EVAL-04 | — | Pending |
-| EVAL-05 | — | Pending |
-| EVAL-06 | — | Pending |
-| BING-01 | — | Pending |
-| BING-02 | — | Pending |
-| BING-03 | — | Pending |
-| BING-04 | — | Pending |
+| DECOMP-01 | Phase 1 | Pending |
+| DECOMP-02 | Phase 1 | Pending |
+| DECOMP-03 | Phase 1 | Pending |
+| DECOMP-04 | Phase 1 | Pending |
+| DECOMP-05 | Phase 2 | Pending |
+| DECOMP-06 | Phase 2 | Pending |
+| DECOMP-07 | Phase 2 | Pending |
+| DECOMP-08 | Phase 2 | Pending |
+| DECOMP-09 | Phase 3 | Pending |
+| DECOMP-10 | Phase 2 | Pending |
+| DECOMP-11 | Phase 2 | Pending |
+| JOBS-01 | Phase 3 | Pending |
+| JOBS-02 | Phase 3 | Pending |
+| JOBS-03 | Phase 3 | Pending |
+| JOBS-04 | Phase 3 | Pending |
+| JOBS-05 | Phase 3 | Pending |
+| JOBS-06 | Phase 3 | Pending |
+| GPT-01 | Phase 4 | Pending |
+| GPT-02 | Phase 4 | Pending |
+| GPT-03 | Phase 4 | Pending |
+| GPT-04 | Phase 4 | Pending |
+| GPT-05 | Phase 4 | Pending |
+| GPT-06 | Phase 4 | Pending |
+| PROV-01 | Phase 5 | Pending |
+| PROV-02 | Phase 5 | Pending |
+| PROV-03 | Phase 5 | Pending |
+| PROV-04 | Phase 5 | Pending |
+| PROV-05 | Phase 5 | Pending |
+| EVAL-01 | Phase 6 | Pending |
+| EVAL-02 | Phase 6 | Pending |
+| EVAL-03 | Phase 6 | Pending |
+| EVAL-04 | Phase 6 | Pending |
+| EVAL-05 | Phase 6 | Pending |
+| EVAL-06 | Phase 6 | Pending |
+| BING-01 | Phase 7 | Pending |
+| BING-02 | Phase 7 | Pending |
+| BING-03 | Phase 7 | Pending |
+| BING-04 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 (roadmap will populate)
+- Mapped to phases: 38
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 — traceability populated by roadmap creation*
