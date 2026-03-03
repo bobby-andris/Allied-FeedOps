@@ -1,6 +1,6 @@
 from pydantic import ValidationError
 
-from feedops.api.main import RegenerateResponse
+from feedops.api.schemas import RegenerateResponse
 
 
 def test_regenerate_response_requires_prompt_hash_and_request_id() -> None:
