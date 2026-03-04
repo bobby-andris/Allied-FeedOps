@@ -43,7 +43,6 @@ async def test_generate_per_platform_uses_task_scoped_prompts(monkeypatch) -> No
 
     monkeypatch.setattr(gen, "execute_generation_legacy_payload", _fake_execute_generation_legacy_payload)
     monkeypatch.setattr(gen, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(gen, "filter_evidence_for_copy_context", lambda rows: rows)
     monkeypatch.setattr(gen, "build_keyword_placement_plan", lambda *_args, **_kwargs: {})
     monkeypatch.setattr(gen, "format_keyword_placement_section", lambda _plan: "")
     monkeypatch.setattr(gen, "get_category_guidance", lambda _category: "")

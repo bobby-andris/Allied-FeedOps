@@ -23,11 +23,6 @@ from feedops.api.generation_telemetry import (
     provider_label as _provider_label,
     safe_int as _safe_int,
 )
-from feedops.api.finish_processing import (  # noqa: F401 - used in type hints / external callers
-    _build_finish_sentences_user_prompt,
-    _validate_finish_sentences_payload,
-    _enforce_finish_sentence_parity,
-)
 from feedops.api.intent_scoring import _extract_query_intent_generation_diagnostics
 from feedops.api.job_management import _regeneration_idempotency_key
 from feedops.api.prompt_loader import get_platform_system_prompt_hash
@@ -41,7 +36,7 @@ from feedops.providers import get_provider
 from feedops.providers.base import close_provider
 from feedops.pipeline.generator import generate_per_platform
 from feedops.generation.persistence import persist_finish_sentences
-from feedops.observability import get_request_id, log_event
+from feedops.observability import log_event
 
 logger = logging.getLogger(__name__)
 
