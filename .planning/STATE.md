@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: planning
-stopped_at: Completed 08.1-03-PLAN.md
-last_updated: "2026-03-04T03:12:48.470Z"
+stopped_at: Completed 08.1-01-PLAN.md
+last_updated: "2026-03-04T03:12:56.220Z"
 last_activity: "2026-03-04 — Phase 8 complete: migration 042 applied, daily snapshot job verified (1,866 rows, 622 SKUs)"
 progress:
   total_phases: 14
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 8.1 (Data Model Gap Audit — inserted after Phase 8)
-Plan: Not yet planned
-Status: Ready to plan
-Last activity: 2026-03-04 — Phase 8 complete: migration 042 applied, daily snapshot job verified (1,866 rows, 622 SKUs)
+Plan: 01 complete — 02 next
+Status: In progress
+Last activity: 2026-03-04 — Phase 8.1 Plan 01 complete: offer ID utility created (13 tests), migration 043 applied (variant performance tables)
 
 Progress: [████████░░] 80%
 
@@ -45,6 +45,7 @@ Progress: [████████░░] 80%
 |-------|-------|-------|----------|
 | 08-schema-hardening | 1 | 30 min | 30 min |
 | Phase 08.1-data-model-gap-audit P03 | 2 | 1 tasks | 1 files |
+| Phase 08.1-data-model-gap-audit P01 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
@@ -68,6 +69,9 @@ Progress: [████████░░] 80%
 - Phase 8: FK already existed as performance_snapshots_publish_event_id_fkey — SCHM-04 guard updated to check ANY FK on column to prevent duplicate creation
 - Phase 8: Orphaned publish_event_id rows NULLed rather than deleted — metrics data preserved
 - Phase 8: Unique constraint columns (master_sku, platform, environment, snapshot_date) match performance_impact.py:461 on_conflict parameter exactly
+- Phase 8.1-01: normalize_offer_id() uses .lower() — simple, safe, idempotent; to_gmc_format() uses .replace() — targeted, idempotent at publish boundary only
+- Phase 8.1-01: Unique constraint columns (gmc_offer_id, platform, environment, snapshot_date) match on_conflict parameter Plan 02 will use exactly
+- Phase 8.1-01: Supabase keychain token format is go-keyring-base64:{b64} — split on colon before decoding
 
 ### Blockers/Concerns
 - Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
@@ -77,6 +81,6 @@ Progress: [████████░░] 80%
 
 ## Session Continuity
 
-Last session: 2026-03-04T03:12:35.034Z
-Stopped at: Completed 08.1-03-PLAN.md
+Last session: 2026-03-04T03:12:56.218Z
+Stopped at: Completed 08.1-01-PLAN.md
 Resume file: None

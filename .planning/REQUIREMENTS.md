@@ -25,14 +25,14 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 
 ### Entity Mapping
 
-- [ ] **ENTM-01**: Create shared offer ID normalization utility for case-insensitive matching between DB (lowercase) and GMC (uppercase)
+- [x] **ENTM-01**: Create shared offer ID normalization utility for case-insensitive matching between DB (lowercase) and GMC (uppercase)
 - [ ] **ENTM-02**: Apply offer ID normalization consistently across all data codepaths (performance baselines, search terms, snapshots, backfill)
 - [x] **ENTM-03**: Document entity relationship map showing variant_index as hub linking Google Ads ↔ Shopify ↔ GMC with correct join keys
 
 ### Data Coverage
 
 - [ ] **DATA-01**: Implement throttled bulk baseline capture for all ~2,500 master SKUs with Google Ads quota management (50-SKU test gate before full sweep)
-- [ ] **DATA-02**: Verify daily snapshot capture works end-to-end after constraint fix — Slack reports success instead of 42P10 error
+- [x] **DATA-02**: Verify daily snapshot capture works end-to-end after constraint fix — Slack reports success instead of 42P10 error
 - [ ] **DATA-03**: Verify impact score population works after snapshots are collecting correctly
 
 ### Image Support
