@@ -28,6 +28,7 @@ creds/
 credentials.json
 token.json
 service-account*.json
+feedops-auth.json
 
 # Reports and exports (generated, potentially contain PII)
 reports/
