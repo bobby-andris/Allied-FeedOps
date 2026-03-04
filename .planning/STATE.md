@@ -103,9 +103,10 @@ Progress: [█████████░] 88%
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Execute comprehensive dashboard UAT test plan with agent-browser | 2026-03-04 | 96b1d246 | [1-execute-comprehensive-dashboard-uat-test](./quick/1-execute-comprehensive-dashboard-uat-test/) |
+| 2 | Fix 3 UAT bugs: SKU exclusion scope, phantom finish generation, publish validation | 2026-03-04 | cf17d6ec | [2-fix-3-uat-bugs-sku-exclusion-phantom-fin](./quick/2-fix-3-uat-bugs-sku-exclusion-phantom-fin/) |
 
 ## Session Continuity
 
-Last session: 2026-03-04T08:03:57.527Z
-Stopped at: Completed 12-shared-utils-extraction/12-01-PLAN.md
+Last session: 2026-03-04T18:37:00Z
+Stopped at: Completed quick task 2 — fix 3 UAT bugs (SKU exclusion, finish, publish)
 Resume file: None
