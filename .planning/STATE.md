@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
 stopped_at: Completed 08.1-04-PLAN.md — bulk backfill script created, live verification deferred to post-Cloud Run deployment
-last_updated: "2026-03-04T03:42:32.697Z"
+last_updated: "2026-03-04T03:46:22.251Z"
 last_activity: "2026-03-04 — Phase 8.1 Plan 02 complete: offer ID normalization applied to 4 codepaths (ENTM-02), variant snapshot dual-write wired to performance_snapshots_variant"
 progress:
   total_phases: 14
