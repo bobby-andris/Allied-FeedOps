@@ -27,7 +27,7 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 
 - [ ] **ENTM-01**: Create shared offer ID normalization utility for case-insensitive matching between DB (lowercase) and GMC (uppercase)
 - [ ] **ENTM-02**: Apply offer ID normalization consistently across all data codepaths (performance baselines, search terms, snapshots, backfill)
-- [ ] **ENTM-03**: Document entity relationship map showing variant_index as hub linking Google Ads ↔ Shopify ↔ GMC with correct join keys
+- [x] **ENTM-03**: Document entity relationship map showing variant_index as hub linking Google Ads ↔ Shopify ↔ GMC with correct join keys
 
 ### Data Coverage
 
@@ -87,12 +87,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCHM-02 | Phase 8 | Complete |
 | SCHM-03 | Phase 8 | Complete |
 | SCHM-04 | Phase 8 | Complete |
-| ENTM-01 | Phase 12 | Pending |
-| ENTM-02 | Phase 12 | Pending |
-| ENTM-03 | Phase 12 | Pending |
-| DATA-01 | Phase 12 | Pending |
-| DATA-02 | Phase 12 | Pending |
-| DATA-03 | Phase 12 | Pending |
+| ENTM-01 | Phase 8.1 | Pending (moved from Phase 12) |
+| ENTM-02 | Phase 8.1 | Pending (moved from Phase 12) |
+| ENTM-03 | Phase 8.1 | Pending (moved from Phase 12) |
+| DATA-01 | Phase 8.1 | Pending (moved from Phase 12) |
+| DATA-02 | Phase 8.1 | Pending (moved from Phase 12) |
+| DATA-03 | Phase 8.1 | Pending (moved from Phase 12) |
 | IMG-01 | Phase 10 | Pending |
 
 **Coverage:**
