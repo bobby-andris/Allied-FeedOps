@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
 stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-04T04:55:14.575Z"
+last_updated: "2026-03-04T05:00:03.062Z"
 last_activity: "2026-03-04 — Phase 8.1 Plan 02 complete: offer ID normalization applied to 4 codepaths (ENTM-02), variant snapshot dual-write wired to performance_snapshots_variant"
 progress:
   total_phases: 14
