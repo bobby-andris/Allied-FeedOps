@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
-stopped_at: Phase 11 context gathered
-last_updated: "2026-03-04T06:09:38.121Z"
+stopped_at: Completed 11-test-import-cleanup-re-export-removal/11-01-PLAN.md
+last_updated: "2026-03-04T07:08:34.621Z"
 last_activity: "2026-03-04 — Phase 10 Plan 01 complete: product image wired through executor.py to ClaudeProvider via fetch-once bundle pattern with finish-task guard (IMG-01)"
 progress:
   total_phases: 14
   completed_phases: 9
-  total_plans: 22
-  completed_plans: 19
+  total_plans: 24
+  completed_plans: 20
   percent: 86
 ---
 
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 10 (Image Wiring)
-Plan: 01 complete — next plan TBD
+Phase: 11 (Test-Import Cleanup and Re-export Removal)
+Plan: 01 complete — next plan is 11-02
 Status: In progress
-Last activity: 2026-03-04 — Phase 10 Plan 01 complete: product image wired through executor.py to ClaudeProvider via fetch-once bundle pattern with finish-task guard (IMG-01)
+Last activity: 2026-03-04 — Phase 11 Plan 01 complete: 4 test files migrated to canonical imports, main.py re-export block deleted (DEAD-02, DEAD-03)
 
-Progress: [█████████░] 86%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [█████████░] 86%
 | Phase 09-trivial-dead-code-removal P01 | 4 | 2 tasks | 4 files |
 | Phase 09-trivial-dead-code-removal P02 | 15 | 2 tasks | 4 files |
 | Phase 10-image-wiring P01 | 12 | 2 tasks | 2 files |
+| Phase 11-test-import-cleanup-re-export-removal P01 | 13 | 2 tasks | 6 files |
 
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
@@ -84,6 +85,8 @@ Progress: [█████████░] 86%
 - Phase 10-01: fetch_image called once at bundle level before task loop — single network call efficiency
 - Phase 10-01: Finish tasks always receive image=None — finish sentences are text-only by design
 - Phase 10-01: Image forwarded via existing inspect.signature pattern in _generate_with_provider_compat — consistent with reasoning_effort/max_completion_tokens forwarding
+- Phase 11-01: get_request_id monkeypatches for job_runner tests patch at feedops.api.job_management (where _resolve_execution_request_id resolves the name), not api_job_runner directly
+- Phase 11-01: test_query_intent_lineage.py migrated as Rule 1 auto-fix — not in DEAD-02 list but relied on re-export block (broke when block was removed)
 
 ### Blockers/Concerns
 - Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
@@ -93,6 +96,6 @@ Progress: [█████████░] 86%
 
 ## Session Continuity
 
-Last session: 2026-03-04T06:09:38.116Z
-Stopped at: Phase 11 context gathered
-Resume file: .planning/phases/11-test-import-cleanup-re-export-removal/11-CONTEXT.md
+Last session: 2026-03-04T07:08:34.619Z
+Stopped at: Completed 11-test-import-cleanup-re-export-removal/11-01-PLAN.md
+Resume file: None
