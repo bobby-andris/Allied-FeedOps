@@ -4,9 +4,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-import feedops.api.main as api_main
+import feedops.api.routes as api_routes
+import feedops.api.schemas as api_schemas
 import feedops.api.generation as api_generation
 import feedops.api.job_runner as api_job_runner
+import feedops.api.job_management as api_job_management
+from feedops.api.prompt_loader import get_finish_list
 from feedops.api.multi_sku_detection import MultiSkuFamily
 from tests.test_phase7_observability_reliability import (
     _CaptureSupabase,
@@ -19,7 +22,7 @@ async def _google_description_payload() -> dict:
     platform = "google"
     finish_sentences = {
         finish: f"{finish} complements this wall-mounted towel bar profile."
-        for finish in api_main.get_finish_list()
+        for finish in get_finish_list()
     }
     return {
         "google_description": (
@@ -95,7 +98,7 @@ async def _google_title_payload_with_fallback_finish_sentences() -> dict:
         # Legacy payloads always include this key even when no finish task ran.
         "finish_sentences": {
             finish: f"{finish} complements this wall-mounted towel bar profile."
-            for finish in api_main.get_finish_list()
+            for finish in get_finish_list()
         },
     }
 
@@ -105,7 +108,7 @@ async def test_process_batch_job_scopes_generation_to_requested_platforms(monkey
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-scope")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-batch-scope")
 
     captured_calls: list[dict] = []
 
@@ -132,7 +135,7 @@ async def test_process_batch_job_closes_provider(monkeypatch):
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-close")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-batch-close")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
@@ -157,7 +160,7 @@ async def test_process_batch_job_description_scope_aggregates_finish_telemetry(m
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-telemetry")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-batch-telemetry")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload_with_finish_telemetry()
@@ -190,7 +193,7 @@ async def test_process_batch_job_title_only_skips_finish_sentence_writes(monkeyp
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-title-only")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-batch-title-only")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_title_payload_with_fallback_finish_sentences()
@@ -218,16 +221,15 @@ async def test_regenerate_description_persists_finish_sentences_without_finish_t
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-finish-persist")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-regen-finish-persist")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
     monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
-    response = await api_main.regenerate_content(
-        api_main.RegenerateRequest(
+    response = await api_routes.regenerate_content(
+        api_schemas.RegenerateRequest(
             master_sku="1031/18",
             platform="google",
             content_type="description",
@@ -253,16 +255,15 @@ async def test_regenerate_description_persists_finish_prompt_lineage(monkeypatch
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-finish-lineage")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-regen-finish-lineage")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
     monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
-    response = await api_main.regenerate_content(
-        api_main.RegenerateRequest(
+    response = await api_routes.regenerate_content(
+        api_schemas.RegenerateRequest(
             master_sku="1031/18",
             platform="google",
             content_type="description",
@@ -297,7 +298,7 @@ async def test_regenerate_feedback_passes_raw_session_feedback_to_generate_per_p
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-regen-feedback-raw")
+    monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-regen-feedback-raw")
 
     captured: dict[str, object] = {}
 
@@ -305,11 +306,10 @@ async def test_regenerate_feedback_passes_raw_session_feedback_to_generate_per_p
         captured.update(kwargs)
         return await _google_title_payload_with_fallback_finish_sentences()
 
-    monkeypatch.setattr(api_main, "generate_per_platform", _fake_generate_per_platform)
     monkeypatch.setattr(api_generation, "generate_per_platform", _fake_generate_per_platform)
 
-    response = await api_main.regenerate_content(
-        api_main.RegenerateRequest(
+    response = await api_routes.regenerate_content(
+        api_schemas.RegenerateRequest(
             master_sku="1031/18",
             platform="google",
             content_type="title",
@@ -328,7 +328,7 @@ async def test_process_hybrid_batch_job_uses_adaptation_for_family_variants(monk
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-scope")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-hybrid-scope")
 
     def _load_parent(master_sku: str):
         sku = _sample_parent_sku()
@@ -379,7 +379,7 @@ async def test_process_hybrid_batch_job_description_scope_aggregates_finish_tele
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-telemetry")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-hybrid-telemetry")
 
     def _load_parent(master_sku: str):
         sku = _sample_parent_sku()
@@ -432,7 +432,7 @@ async def test_process_batch_job_persists_finish_prompt_lineage(monkeypatch):
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-finish-lineage")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-batch-finish-lineage")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
@@ -465,7 +465,7 @@ async def test_process_hybrid_batch_job_persists_finish_prompt_lineage(monkeypat
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-finish-lineage")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-hybrid-finish-lineage")
 
     def _load_parent(master_sku: str):
         sku = _sample_parent_sku()
@@ -517,7 +517,7 @@ async def test_process_hybrid_batch_job_closes_provider(monkeypatch):
     supabase = _CaptureSupabase()
     provider = object()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-hybrid-close")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-hybrid-close")
 
     async def _fake_generate_per_platform(**_kwargs):
         return await _google_description_payload()
