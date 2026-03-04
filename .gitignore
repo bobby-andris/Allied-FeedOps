@@ -19,7 +19,6 @@ creds/
 .env.production
 
 # Samples directory may contain anonymized examples (allowed)
-# But raw data exports should stay gitignored
 !samples/
 
 # API credentials and tokens
@@ -30,12 +29,12 @@ token.json
 service-account*.json
 feedops-auth.json
 
-# Reports and exports (generated, potentially contain PII)
+# Reports, exports, and evaluation data (generated, potentially contain PII)
 reports/
 exports/
-# But allow dashboard_data reports (curated for demo)
-!dashboard_data/lifestyle-eval/reports/
-!dashboard_data/lifestyle-eval-candidate/reports/
+dashboard_data/
+
+# Worktrees
 .worktrees/
 
 # Node/TypeScript
@@ -57,15 +56,16 @@ venv/
 
 # IDE
 .vscode/
+.cursor/
 *.swp
 *.swo
 .DS_Store
-RUN_EVAL_BATCH_INSTRUCTIONS.md
+
+# Stale top-level docs (removed from repo)
 CURSOR_PROMPT_IMAGE_IMPROVEMENTS.md
 CODE_REVIEW_RESULTS.md
+RUN_EVAL_BATCH_INSTRUCTIONS.md
 LIFESTYLE_IMAGES_CONTEXT.md
-dashboard_data/lifestyle-eval-candidate/reports/pilot-selection-report-detailed.html
-dashboard_data/lifestyle-eval-candidate/reports/pilot-selection-report-detailed.pdf
 
 # Supabase temp files
 supabase/.temp/
@@ -73,11 +73,14 @@ supabase/.temp/
 # Test output artifacts
 test_output/
 
-# Git bundle files (backup artifacts, not stored in repo)
+# Git bundle files (backup artifacts)
 *.bundle
+backups/
+
+# MCP config (local)
 .mcp.json
 
-# macOS system directories (accidentally created in repo root)
+# macOS system directories
 Library/
 
 # iCloud/Finder duplicate files (files with " 2" suffix)
@@ -87,7 +90,7 @@ Library/
 *\ 2.log
 
 # Agent skills (installed locally, not tracked)
-.agent/skills/
+.agent/
 .agents/skills/
 # .claude/skills/ — tracked in git so Cloud Build can copy to Cloud Run container
 .cursor/skills/
@@ -98,10 +101,13 @@ Library/
 # npm artifacts
 .npm/
 
-# GSD planning artifacts (local-only)
+# GSD planning artifacts (local-only state files)
 .planning/debug/
 .planning/v1.1-MILESTONE-AUDIT.md
-.planning/STATE.md.bak-2026-02-23T18-10-45
+.planning/STATE.md.bak-*
 
-# Archived planning directory (17MB, already in git history)
-.planning-archive-v1.3c/
+# Archived planning directories
+.planning-archive-*/
+
+# Log files
+logs/

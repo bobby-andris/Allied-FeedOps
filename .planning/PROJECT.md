@@ -8,17 +8,14 @@ A content generation and feed optimization platform for Allied Brass Manufacturi
 
 The pipeline produces high-quality product content reliably at scale, backed by accurate performance data that maps seamlessly across Google Ads, Shopify, and Merchant Center.
 
-## Current Milestone: v1.1 Dead Code Cleanup + Data Infrastructure
+## Current Milestone: (Planning next milestone)
 
-**Goal:** Remove dead code from the v1.0 pipeline decomposition, then fix and harden the Google Ads data import layer — correct schema constraints, proper entity relationships, full lifecycle data collection scaled to all SKUs.
+**Previous:** v1.0 Pipeline Reliability Rewrite (shipped 2026-03-03), v1.1 Dead Code Cleanup + Data Infrastructure (shipped 2026-03-04)
 
-**Target features:**
-- Dead code removal (generator.py legacy paths, backward-compat re-exports, unused imports)
-- Fix performance snapshot upsert constraint bug (daily Slack failures)
-- Audit and correct all data table schemas and constraints
-- Proper entity relationship mapping across Google Ads ↔ variant_index ↔ Shopify ↔ GMC
-- Full lifecycle data collection (baselines → snapshots → impact scores) for all SKUs
-- Image support wiring in executor.py
+**Next milestone candidates:**
+- Pipeline reliability rewrite (see `docs/setup/pipeline-rewrite-brief.md`)
+- Bing content fix (96 SKUs with hardcoded finish names)
+- Dashboard data model migration (master_sku → gmc_offer_id joins)
 
 ## Requirements
 
@@ -43,17 +40,19 @@ The pipeline produces high-quality product content reliably at scale, backed by 
 - ✓ Claude provider with structured output — v1.0
 - ✓ Model evaluation: Claude Sonnet 4.6 live in production — v1.0
 - ✓ Deploy checklist workflow — v1.0
+- ✓ Dead code removal (8 orphan functions, ~500-line feature flag, ~130-line re-export block, 6 duplicate functions) — v1.1
+- ✓ Schema hardening (unique constraints, CHECK constraints, FK on performance_snapshots) — v1.1
+- ✓ Offer ID normalization across all data codepaths — v1.1
+- ✓ Entity relationship documentation (variant_index as hub) — v1.1
+- ✓ Bulk baseline capture for all ~2,500 master SKUs — v1.1
+- ✓ Image wiring through executor.py to Claude provider — v1.1
+- ✓ Shared utils extraction (utils.py canonical location) — v1.1
 
 ### Active
 
-<!-- Current scope — v1.1 -->
+<!-- Next milestone scope — TBD -->
 
-- [ ] Remove dead code from pipeline decomposition
-- [ ] Fix performance snapshot schema constraints
-- [ ] Audit and correct all data import table schemas
-- [ ] Design proper entity relationships for cross-platform data mapping
-- [ ] Scale data collection to all SKUs (not just on-demand subset)
-- [ ] Wire image support in executor.py
+(No active requirements — run `/gsd:new-milestone` to define next scope)
 
 ### Out of Scope
 
@@ -66,13 +65,11 @@ The pipeline produces high-quality product content reliably at scale, backed by 
 
 ## Context
 
-**Codebase state:** 58+ PRs merged across v1.0–v1.0. Pipeline decomposed from 3,737-line monolith to 9 focused modules. Claude Sonnet 4.6 serving all production traffic (84% cheaper, 2x faster than GPT-5.2).
+**Codebase state:** 60+ PRs merged across v1.0–v1.1. Pipeline decomposed from 3,737-line monolith to 9 focused modules + shared utils. Claude Sonnet 4.6 serving all production traffic (84% cheaper, 2x faster than GPT-5.2). ~1,200 lines of dead code removed in v1.1.
 
-**Dead code:** ~500 lines of never-used variant generation behind `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag, 7 duplicated functions in generator.py, ~130 lines of backward-compat re-exports in main.py, unused imports in extracted modules. See `/tmp/dead-code-research.md`.
+**Data infrastructure:** Schema constraints hardened (unique, CHECK, FK). Offer ID normalization applied across all 4 Python data codepaths. Variant-level performance tables created. Bulk baseline capture available for all ~2,500 master SKUs.
 
-**Data import issues:** Daily snapshot capture failing since launch — `performance_snapshots` table missing unique constraint for upsert. Only 274/2,500 master SKUs have baselines (on-demand only). Search term attribution approximate (campaign-level). Performance Max campaigns excluded. Offer ID case mismatch handled inconsistently. See `/tmp/google-ads-import-research.md`.
-
-**Entity mapping:** `variant_index` (72K rows) is the central hub linking GMC offer IDs ↔ master SKUs ↔ Shopify product/variant IDs ↔ finish codes. Google Ads data flows through this table but the relationships aren't enforced or optimized at the schema level.
+**Entity mapping:** `variant_index` (72K rows) is the documented central hub linking GMC offer IDs ↔ master SKUs ↔ Shopify product/variant IDs ↔ finish codes. Entity relationships documented with Mermaid ER diagrams.
 
 ## Constraints
 
@@ -91,8 +88,8 @@ The pipeline produces high-quality product content reliably at scale, backed by 
 | Incremental prompt changes only | Phase 27 proved GPT-5.2 crashes on batch changes | ✓ Good |
 | Preserve run_async_in_thread | Container lifecycle kills BackgroundTasks on scale-to-zero | ✓ Good |
 | Claude Sonnet 4.6 as primary provider | 84% cheaper, 2x faster, 8.85/10 blind score | ✓ Good |
-| Dead code before data infra | Low-risk cleanup reduces noise before schema changes | — Pending |
-| variant_index as entity hub | Already 72K rows, central to all cross-platform mapping | — Pending |
+| Dead code before data infra | Low-risk cleanup reduces noise before schema changes | ✓ Good |
+| variant_index as entity hub | Already 72K rows, central to all cross-platform mapping | ✓ Good |
 
 ---
-*Last updated: 2026-03-03 after v1.1 milestone initialization*
+*Last updated: 2026-03-04 after v1.1 milestone completion*
