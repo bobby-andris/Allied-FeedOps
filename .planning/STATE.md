@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
-stopped_at: Checkpoint at 08.1-04 Task 2 — bulk baseline backfill script created, awaiting human verification of data pipeline
-last_updated: "2026-03-04T03:31:09.254Z"
+stopped_at: Completed 08.1-04-PLAN.md — bulk backfill script created, live verification deferred to post-Cloud Run deployment
+last_updated: "2026-03-04T03:42:32.697Z"
 last_activity: "2026-03-04 — Phase 8.1 Plan 02 complete: offer ID normalization applied to 4 codepaths (ENTM-02), variant snapshot dual-write wired to performance_snapshots_variant"
 progress:
   total_phases: 14
@@ -48,6 +48,7 @@ Progress: [████████░░] 79%
 | Phase 08.1-data-model-gap-audit P01 | 3 | 2 tasks | 4 files |
 | Phase 08.1-data-model-gap-audit P02 | 8 | 2 tasks | 4 files |
 | Phase 08.1-data-model-gap-audit P04 | 10 | 1 tasks | 1 files |
+| Phase 08.1-data-model-gap-audit P04 | 45 | 2 tasks | 1 files |
 
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
@@ -86,6 +87,6 @@ Progress: [████████░░] 79%
 
 ## Session Continuity
 
-Last session: 2026-03-04T03:31:09.250Z
-Stopped at: Checkpoint at 08.1-04 Task 2 — bulk baseline backfill script created, awaiting human verification of data pipeline
+Last session: 2026-03-04T03:42:32.695Z
+Stopped at: Completed 08.1-04-PLAN.md — bulk backfill script created, live verification deferred to post-Cloud Run deployment
 Resume file: None
