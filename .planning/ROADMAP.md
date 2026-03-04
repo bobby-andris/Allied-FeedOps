@@ -181,7 +181,11 @@ Plans:
   3. The 6 functions duplicated between generator.py and executor.py exist only in executor.py — generator.py has no copies
   4. `pytest tests/` passes with zero failures throughout the entire sequential update process
   5. `python -c "import feedops.api.main"` exits 0 (no import errors after re-exports removed)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Migrate 4 test files to canonical imports (DEAD-02) + delete re-export block (DEAD-03)
+- [ ] 11-02-PLAN.md — Remove duplicate functions from generator.py (DEAD-04)
 
 #### Phase 12: Entity Mapping and Bulk Coverage
 **Goal**: ABSORBED — Requirements ENTM-01 through DATA-03 moved to Phase 8.1 (Data Model Gap Audit). This phase will be re-scoped or removed based on Phase 8.1 audit findings.
@@ -218,6 +222,6 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 8.1 
 | 8.1. Data Model Gap Audit | 4/4 | Complete   | 2026-03-04 | - |
 | 9. Trivial Dead Code Removal | 1/2 | In Progress|  | - |
 | 10. Image Wiring | 1/1 | Complete    | 2026-03-04 | - |
-| 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/TBD | Not started | - |
+| 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/2 | Not started | - |
 | 12. Entity Mapping and Bulk Coverage | v1.1 | 0/TBD | Not started | - |
 | 13. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |
