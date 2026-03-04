@@ -60,6 +60,7 @@ from feedops.cli.defaults import (
 from feedops.cli.performance import performance_app
 from feedops.cli.publish import publish_app
 from feedops.loaders.catalog_resolver import resolve_catalog_path
+from feedops.utils.offer_id import normalize_offer_id as _normalize_offer_id_canonical
 from feedops.loaders.unified_loader import (
     get_cached_shopify_age_hours,
     load_parent_sku_unified,
@@ -71,8 +72,6 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
-
-_SHOPIFY_REGION_PREFIX_RE = re.compile(r"^shopify_([a-z]{2})_", re.IGNORECASE)
 
 # Register publish-related commands
 for command in publish_app.registered_commands:
@@ -91,13 +90,11 @@ def _parse_bool_env(name: str, default: bool = True) -> bool:
 
 
 def _normalize_offer_id(value: str | None) -> str:
+    """Normalize offer ID to canonical lowercase form. Delegates to canonical utility."""
     raw = str(value or "").strip()
     if not raw:
         return ""
-    match = _SHOPIFY_REGION_PREFIX_RE.match(raw)
-    if not match:
-        return raw
-    return raw.replace(match.group(0), f"shopify_{match.group(1).lower()}_", 1)
+    return _normalize_offer_id_canonical(raw) or raw
 
 
 def _extract_label0(custom_labels: object) -> str:

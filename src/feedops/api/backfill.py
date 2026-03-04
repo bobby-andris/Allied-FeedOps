@@ -147,21 +147,6 @@ def compute_date_range(days_lookback: int = 180) -> tuple[str, str]:
     return start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
 
 
-def normalize_offer_id(offer_id: str) -> str:
-    """Ensure offer ID uses lowercase 'us' for API queries (DATA-08).
-
-    Database stores offer IDs as shopify_us_* but GMC uses shopify_US_*.
-    For API queries, we need lowercase format.
-
-    Args:
-        offer_id: Offer ID in any case format
-
-    Returns:
-        Offer ID with lowercase 'us': shopify_us_{product_id}_{variant_id}
-    """
-    return offer_id.replace("shopify_US_", "shopify_us_")
-
-
 def _get_worker_config(job_type: str) -> tuple:
     """Get the worker function and rate limiter for a job type.
 

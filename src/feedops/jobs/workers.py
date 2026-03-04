@@ -603,18 +603,13 @@ _gmc_cache_time: datetime | None = None
 _GMC_CACHE_TTL_SECONDS = 300  # 5 minutes
 
 
-_SHOPIFY_REGION_PREFIX_RE = re.compile(r"^shopify_([a-z]{2})_", re.IGNORECASE)
-
-
 def _normalize_offer_id(value: str | None) -> str:
-    """Normalize offer IDs to match variant_index format (shopify_us_*)."""
+    """Normalize offer ID to canonical lowercase form. Delegates to canonical utility."""
+    from feedops.utils.offer_id import normalize_offer_id
     raw = str(value or "").strip()
     if not raw:
         return ""
-    match = _SHOPIFY_REGION_PREFIX_RE.match(raw)
-    if not match:
-        return raw
-    return raw.replace(match.group(0), f"shopify_{match.group(1).lower()}_", 1)
+    return normalize_offer_id(raw) or raw
 
 
 def _extract_label0(custom_labels: dict[str, Any] | None) -> str:
