@@ -10,7 +10,6 @@ from feedops.pipeline.evidence import build_evidence_table, format_evidence_mark
 from feedops.pipeline.generator import (
     build_prompt,
     build_split_prompt,
-    build_variant_prompt,
     generate_candidate,
     generate_candidates,
     parse_candidate_response,
@@ -843,15 +842,6 @@ def test_build_split_prompt_uses_canonical_prompt_loader(sample_parent_sku, monk
     assert system_prompt == sentinel_prompt
 
 
-def test_build_variant_prompt_uses_canonical_prompt_loader(sample_parent_sku, monkeypatch):
-    """build_variant_prompt returns system prompt from prompt_loader.get_system_prompt()."""
-    sentinel_prompt = "VARIANT_PROMPT_SENTINEL"
-    monkeypatch.setattr(generator_module, "get_system_prompt", lambda: sentinel_prompt)
-
-    system_prompt, _ = build_variant_prompt(sample_parent_sku, "Antique Brass", "google")
-    assert system_prompt == sentinel_prompt
-
-
 def test_build_split_prompt_includes_gold_examples_when_available(sample_parent_sku, monkeypatch):
     monkeypatch.setattr(
         generator_module,
@@ -873,18 +863,6 @@ def test_build_split_prompt_omits_gold_examples_when_unavailable(sample_parent_s
 
     _, user_prompt = build_split_prompt(sample_parent_sku)
     assert "Gold Standard Examples" not in user_prompt
-
-
-def test_build_variant_prompt_includes_gold_examples_when_available(sample_parent_sku, monkeypatch):
-    monkeypatch.setattr(
-        generator_module,
-        "format_gold_standard_examples_bundle",
-        lambda max_examples=2: "GOLD_EXAMPLES_SENTINEL",
-    )
-
-    _, user_prompt = build_variant_prompt(sample_parent_sku, "Antique Brass", "google")
-    assert "## Gold Standard Examples" in user_prompt
-    assert "GOLD_EXAMPLES_SENTINEL" in user_prompt
 
 
 def test_candidate_schema_has_required_fields():
