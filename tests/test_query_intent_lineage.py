@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from types import SimpleNamespace
 
-from feedops.api import main as api_main
+import feedops.api.persistence as api_persistence
+from feedops.api.intent_scoring import _extract_query_intent_generation_diagnostics
+from feedops.api.persistence import _persist_regeneration_result
 
 
 class _CaptureTable:
@@ -82,9 +84,9 @@ class _CaptureSupabase:
 
 
 def test_extract_query_intent_generation_diagnostics_only_returns_dict() -> None:
-    assert api_main._extract_query_intent_generation_diagnostics(None) == {}
-    assert api_main._extract_query_intent_generation_diagnostics({"query_intent_diagnostics": "nope"}) == {}
-    assert api_main._extract_query_intent_generation_diagnostics(
+    assert _extract_query_intent_generation_diagnostics(None) == {}
+    assert _extract_query_intent_generation_diagnostics({"query_intent_diagnostics": "nope"}) == {}
+    assert _extract_query_intent_generation_diagnostics(
         {"query_intent_diagnostics": {"query_intent_brief_enabled": True}}
     ) == {"query_intent_brief_enabled": True}
 
@@ -93,9 +95,9 @@ def test_persist_regeneration_result_embeds_query_intent_flag_and_diagnostics(
     monkeypatch,
 ) -> None:
     monkeypatch.setenv("QUERY_INTENT_BRIEF_V1", "1")
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-query-intent-lineage")
+    monkeypatch.setattr(api_persistence, "get_request_id", lambda: "req-query-intent-lineage")
     monkeypatch.setattr(
-        api_main,
+        api_persistence,
         "get_platform_system_prompt_hash",
         lambda platform: f"platform-hash-{platform}",
     )
@@ -110,7 +112,7 @@ def test_persist_regeneration_result_embeds_query_intent_flag_and_diagnostics(
         "query_intent_disabled_reason": None,
     }
 
-    api_main._persist_regeneration_result(
+    _persist_regeneration_result(
         supabase=db,
         master_sku="1031/18",
         platform="google",
@@ -144,16 +146,16 @@ def test_persist_regeneration_result_embeds_query_intent_flag_and_diagnostics(
 
 
 def test_lineage_hash_changes_when_query_intent_prompt_changes(monkeypatch) -> None:
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-query-intent-hashes")
+    monkeypatch.setattr(api_persistence, "get_request_id", lambda: "req-query-intent-hashes")
     monkeypatch.setattr(
-        api_main,
+        api_persistence,
         "get_platform_system_prompt_hash",
         lambda platform: f"platform-hash-{platform}",
     )
 
     db = _CaptureSupabase()
 
-    api_main._persist_regeneration_result(
+    _persist_regeneration_result(
         supabase=db,
         master_sku="1031/18",
         platform="google",
@@ -168,7 +170,7 @@ def test_lineage_hash_changes_when_query_intent_prompt_changes(monkeypatch) -> N
         request_id="req-query-intent-hashes",
         idempotency_key="idem-a",
     )
-    api_main._persist_regeneration_result(
+    _persist_regeneration_result(
         supabase=db,
         master_sku="1031/18",
         platform="google",
