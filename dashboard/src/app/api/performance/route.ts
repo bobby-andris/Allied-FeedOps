@@ -60,12 +60,6 @@ interface PerformanceResponse {
   warnings: string[]
 }
 
-function parseWindowDays(window: string): number {
-  if (window === '7d') return 7
-  if (window === '60d') return 60
-  return 30 // default '30d'
-}
-
 function daysBetween(publishedAt: string): number {
   const published = new Date(publishedAt)
   const today = new Date()
@@ -79,8 +73,6 @@ export async function GET(request: NextRequest) {
   const platform = searchParams.get('platform') || 'google'
   const baselineWindow = searchParams.get('baselineWindow') || '30d'
   const snapshotWindow = searchParams.get('snapshotWindow') || '30d'
-
-  const snapshotWindowDays = parseWindowDays(snapshotWindow)
 
   const warnings: string[] = []
 
@@ -124,10 +116,10 @@ export async function GET(request: NextRequest) {
 
     const uniqueSkus = [...new Set((publishEvents || []).map(e => e.master_sku))]
 
-    // 2. Query variant_index to get product titles
+    // 2. Query variant_index to get product titles and offer IDs for variant-level joins
     const { data: variantIndexData, error: variantIndexError } = await supabase
       .from('variant_index')
-      .select('master_sku, product_title')
+      .select('master_sku, product_title, gmc_offer_id')
       .in('master_sku', uniqueSkus.length > 0 ? uniqueSkus : ['__none__'])
 
     if (variantIndexError) {
@@ -137,33 +129,24 @@ export async function GET(request: NextRequest) {
 
     // Build SKU to product title mapping (first variant per master_sku)
     const skuToNameMap = new Map<string, string>()
+    // Build offer ID to master_sku mapping for variant table aggregation
+    const offerToSku = new Map<string, string>()
+    const skuToOfferIds = new Map<string, string[]>()
     for (const variant of variantIndexData || []) {
       if (!skuToNameMap.has(variant.master_sku)) {
         skuToNameMap.set(variant.master_sku, variant.product_title || `SKU ${variant.master_sku}`)
       }
+      if (variant.gmc_offer_id) {
+        offerToSku.set(variant.gmc_offer_id, variant.master_sku)
+        if (!skuToOfferIds.has(variant.master_sku)) {
+          skuToOfferIds.set(variant.master_sku, [])
+        }
+        skuToOfferIds.get(variant.master_sku)!.push(variant.gmc_offer_id)
+      }
     }
+    const allOfferIds = [...offerToSku.keys()]
 
-    // 3. Query performance_baselines for these SKUs
-    let baselineQuery = supabase
-      .from('performance_baselines')
-      .select('master_sku, platform, avg_ctr, avg_cvr, avg_impressions, avg_clicks')
-
-    if (uniqueSkus.length > 0) {
-      baselineQuery = baselineQuery.in('master_sku', uniqueSkus)
-    }
-
-    if (platform && platform !== 'all') {
-      baselineQuery = baselineQuery.eq('platform', platform)
-    }
-
-    const { data: baselines, error: baselineError } = await baselineQuery
-
-    if (baselineError) {
-      console.error('Failed to fetch baselines:', baselineError)
-      warnings.push('Failed to fetch baseline data')
-    }
-
-    // Create a map of baselines by SKU-platform
+    // 3. Query baselines — prefer variant-level tables, fall back to master-level
     const baselineMap = new Map<string, {
       avgCtr: number
       avgCvr: number
@@ -171,35 +154,83 @@ export async function GET(request: NextRequest) {
       avgClicks: number
     }>()
 
-    for (const baseline of baselines || []) {
-      const key = `${baseline.master_sku}|||${baseline.platform}`
-      baselineMap.set(key, {
-        avgCtr: baseline.avg_ctr || 0,
-        avgCvr: baseline.avg_cvr || 0,
-        avgImpressions: baseline.avg_impressions || 0,
-        avgClicks: baseline.avg_clicks || 0,
-      })
+    // 3a. Try variant baselines first (joined through variant_index via offer IDs)
+    let usedVariantBaselines = false
+    if (allOfferIds.length > 0) {
+      let varBaselineQuery = supabase
+        .from('performance_baselines_variant')
+        .select('gmc_offer_id, platform, avg_ctr, avg_cvr, avg_impressions, avg_clicks')
+        .in('gmc_offer_id', allOfferIds)
+
+      if (platform && platform !== 'all') {
+        varBaselineQuery = varBaselineQuery.eq('platform', platform)
+      }
+
+      const { data: varBaselines } = await varBaselineQuery
+
+      if (varBaselines && varBaselines.length > 0) {
+        usedVariantBaselines = true
+        // Aggregate variant baselines to master_sku level
+        const aggMap = new Map<string, { totalImpr: number; totalClicks: number; totalCvr: number; count: number }>()
+        for (const vb of varBaselines) {
+          const masterSku = offerToSku.get(vb.gmc_offer_id)
+          if (!masterSku) continue
+          const key = `${masterSku}|||${vb.platform}`
+          if (!aggMap.has(key)) {
+            aggMap.set(key, { totalImpr: 0, totalClicks: 0, totalCvr: 0, count: 0 })
+          }
+          const agg = aggMap.get(key)!
+          agg.totalImpr += vb.avg_impressions || 0
+          agg.totalClicks += vb.avg_clicks || 0
+          agg.totalCvr += (vb.avg_cvr || 0) * (vb.avg_impressions || 0) // weighted CVR
+          agg.count++
+        }
+        for (const [key, agg] of aggMap) {
+          const avgCtr = agg.totalImpr > 0 ? agg.totalClicks / agg.totalImpr : 0
+          const avgCvr = agg.totalImpr > 0 ? agg.totalCvr / agg.totalImpr : 0
+          baselineMap.set(key, {
+            avgCtr,
+            avgCvr,
+            avgImpressions: agg.totalImpr,
+            avgClicks: agg.totalClicks,
+          })
+        }
+      }
     }
 
-    // 4. For each published SKU, find the latest snapshot within the snapshotWindow
-    //    snapshot_date >= publish_date AND snapshot_date <= publish_date + snapshotWindowDays
-    //    We do a single query for all SKUs and then filter in JS
-    let snapshotQuery = supabase
-      .from('performance_snapshots')
-      .select('master_sku, platform, snapshot_date, impressions, clicks, ctr, cvr, days_since_publish')
-      .order('snapshot_date', { ascending: false })
+    // 3b. Fall back to master-level baselines if variant tables empty
+    if (!usedVariantBaselines) {
+      let baselineQuery = supabase
+        .from('performance_baselines')
+        .select('master_sku, platform, avg_ctr, avg_cvr, avg_impressions, avg_clicks')
 
-    if (uniqueSkus.length > 0) {
-      snapshotQuery = snapshotQuery.in('master_sku', uniqueSkus)
+      if (uniqueSkus.length > 0) {
+        baselineQuery = baselineQuery.in('master_sku', uniqueSkus)
+      }
+
+      if (platform && platform !== 'all') {
+        baselineQuery = baselineQuery.eq('platform', platform)
+      }
+
+      const { data: baselines, error: baselineError } = await baselineQuery
+
+      if (baselineError) {
+        console.error('Failed to fetch baselines:', baselineError)
+        warnings.push('Failed to fetch baseline data')
+      }
+
+      for (const baseline of baselines || []) {
+        const key = `${baseline.master_sku}|||${baseline.platform}`
+        baselineMap.set(key, {
+          avgCtr: baseline.avg_ctr || 0,
+          avgCvr: baseline.avg_cvr || 0,
+          avgImpressions: baseline.avg_impressions || 0,
+          avgClicks: baseline.avg_clicks || 0,
+        })
+      }
     }
 
-    if (platform && platform !== 'all') {
-      snapshotQuery = snapshotQuery.eq('platform', platform)
-    }
-
-    const { data: allSnapshots } = await snapshotQuery
-
-    // Group snapshots by SKU-platform key
+    // 4. Query snapshots — prefer variant-level tables, fall back to master-level
     const snapshotsByKey = new Map<string, Array<{
       snapshot_date: string
       impressions: number
@@ -209,16 +240,91 @@ export async function GET(request: NextRequest) {
       days_since_publish: number | null
     }>>()
 
-    for (const snap of allSnapshots || []) {
-      const key = `${snap.master_sku}|||${snap.platform}`
-      if (!snapshotsByKey.has(key)) {
-        snapshotsByKey.set(key, [])
+    // 4a. Try variant snapshots first
+    let usedVariantSnapshots = false
+    if (allOfferIds.length > 0) {
+      let varSnapQuery = supabase
+        .from('performance_snapshots_variant')
+        .select('gmc_offer_id, master_sku, platform, snapshot_date, impressions, clicks, ctr, roas')
+        .order('snapshot_date', { ascending: false })
+        .in('gmc_offer_id', allOfferIds)
+
+      if (platform && platform !== 'all') {
+        varSnapQuery = varSnapQuery.eq('platform', platform)
       }
-      snapshotsByKey.get(key)!.push(snap)
+
+      const { data: varSnapshots } = await varSnapQuery
+
+      if (varSnapshots && varSnapshots.length > 0) {
+        usedVariantSnapshots = true
+        // Aggregate variant snapshots to master_sku level by date
+        // Group by master_sku + platform + snapshot_date, then collapse to SKU-platform
+        const dateAgg = new Map<string, { impressions: number; clicks: number }>()
+        for (const vs of varSnapshots) {
+          const masterSku = vs.master_sku || offerToSku.get(vs.gmc_offer_id)
+          if (!masterSku) continue
+          const dateKey = `${masterSku}|||${vs.platform}|||${vs.snapshot_date}`
+          if (!dateAgg.has(dateKey)) {
+            dateAgg.set(dateKey, { impressions: 0, clicks: 0 })
+          }
+          const entry = dateAgg.get(dateKey)!
+          entry.impressions += vs.impressions || 0
+          entry.clicks += vs.clicks || 0
+        }
+
+        // Convert date-aggregated data to snapshotsByKey format
+        for (const [dateKey, data] of dateAgg) {
+          const [masterSku, plat, snapDate] = dateKey.split('|||')
+          const key = `${masterSku}|||${plat}`
+          if (!snapshotsByKey.has(key)) {
+            snapshotsByKey.set(key, [])
+          }
+          const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
+          snapshotsByKey.get(key)!.push({
+            snapshot_date: snapDate,
+            impressions: data.impressions,
+            clicks: data.clicks,
+            ctr,
+            cvr: 0,
+            days_since_publish: null,
+          })
+        }
+
+        // Sort each group by date descending
+        for (const snaps of snapshotsByKey.values()) {
+          snaps.sort((a, b) => b.snapshot_date.localeCompare(a.snapshot_date))
+        }
+      }
+    }
+
+    // 4b. Fall back to master-level snapshots if variant tables empty
+    if (!usedVariantSnapshots) {
+      let snapshotQuery = supabase
+        .from('performance_snapshots')
+        .select('master_sku, platform, snapshot_date, impressions, clicks, ctr, cvr, days_since_publish')
+        .order('snapshot_date', { ascending: false })
+
+      if (uniqueSkus.length > 0) {
+        snapshotQuery = snapshotQuery.in('master_sku', uniqueSkus)
+      }
+
+      if (platform && platform !== 'all') {
+        snapshotQuery = snapshotQuery.eq('platform', platform)
+      }
+
+      const { data: allSnapshots } = await snapshotQuery
+
+      for (const snap of allSnapshots || []) {
+        const key = `${snap.master_sku}|||${snap.platform}`
+        if (!snapshotsByKey.has(key)) {
+          snapshotsByKey.set(key, [])
+        }
+        snapshotsByKey.get(key)!.push(snap)
+      }
     }
 
     // Check if any snapshots exist at all
-    if ((allSnapshots || []).length === 0 && uniqueSkus.length > 0) {
+    if (snapshotsByKey.size === 0 && uniqueSkus.length > 0) {
       warnings.push('No performance snapshots found. Run capture-snapshot to populate data.')
     }
 
@@ -231,17 +337,15 @@ export async function GET(request: NextRequest) {
 
       const publishDate = publishInfo.publishedAt.split('T')[0]
 
-      // Use the most recent snapshot regardless of how long after publish it was captured.
-      // The array is sorted snapshot_date DESC so index 0 is always the most recent.
-      // This is resilient to backfilled snapshots captured months after the publish date.
+      // Aggregate all snapshots for this SKU-platform to compute daily averages.
+      // Each snapshot row contains ONE day of data (not cumulative).
+      // Baselines store daily averages, so we must average snapshots the same way.
       const snapshots = snapshotsByKey.get(key) || []
-      const windowSnapshot = snapshots.length > 0 ? snapshots[0] : undefined
+      const hasSnapshot = snapshots.length > 0
 
-      const hasSnapshot = !!windowSnapshot
-
-      // daysSincePublish: from snapshot record if available, otherwise compute from today
-      const daysSincePublish = hasSnapshot && windowSnapshot!.days_since_publish != null
-        ? windowSnapshot!.days_since_publish
+      // daysSincePublish: from most recent snapshot if available, otherwise compute from today
+      const daysSincePublish = hasSnapshot && snapshots[0].days_since_publish != null
+        ? snapshots[0].days_since_publish
         : daysBetween(publishInfo.publishedAt)
 
       // Get baseline data
@@ -253,24 +357,24 @@ export async function GET(request: NextRequest) {
         avgClicks: 0,
       }
 
-      // Current metrics: from the matched snapshot, or zero if no snapshot.
-      // impressions/clicks in snapshots are cumulative totals over the window period,
-      // while baseline stores daily averages (avg_impressions = total / 30).
-      // Divide by snapshotWindowDays to normalize to daily averages for valid delta comparison.
-      // CTR and CVR are already rates — no normalization needed.
-      const current = hasSnapshot
-        ? {
-            ctr: windowSnapshot!.ctr || 0,
-            cvr: windowSnapshot!.cvr || 0,
-            impressions: Math.round((windowSnapshot!.impressions || 0) / snapshotWindowDays),
-            clicks: Math.round((windowSnapshot!.clicks || 0) / snapshotWindowDays),
-          }
-        : {
-            ctr: 0,
-            cvr: 0,
-            impressions: 0,
-            clicks: 0,
-          }
+      // Current metrics: average daily values across all snapshots in the window.
+      // Each snapshot is 1 day of data. Sum and divide by actual snapshot count
+      // to get daily averages comparable to baseline daily averages.
+      // CTR and CVR are already rates — use the most recent snapshot's values.
+      let current: { ctr: number; cvr: number; impressions: number; clicks: number }
+      if (hasSnapshot) {
+        const totalImpr = snapshots.reduce((sum, s) => sum + (s.impressions || 0), 0)
+        const totalClk = snapshots.reduce((sum, s) => sum + (s.clicks || 0), 0)
+        const snapshotCount = snapshots.length
+        current = {
+          ctr: snapshots[0].ctr || 0,
+          cvr: snapshots[0].cvr || 0,
+          impressions: Math.round(totalImpr / snapshotCount),
+          clicks: Math.round(totalClk / snapshotCount),
+        }
+      } else {
+        current = { ctr: 0, cvr: 0, impressions: 0, clicks: 0 }
+      }
 
       skuPerformanceList.push({
         sku: skuId,
