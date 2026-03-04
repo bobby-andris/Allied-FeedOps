@@ -366,6 +366,60 @@ def collect_daily_performance_snapshots(
             end_date=snapshot_date_str,
         )
 
+        # --- Variant-level dual-write (BEFORE aggregation to master_sku) ---
+        # Write one row per offer_id to performance_snapshots_variant so we
+        # preserve granular data that is otherwise lost during aggregation.
+        # Locked decisions: normalize on ingestion, skip zero-impression rows,
+        # use upsert (overwrite on conflict) so re-runs for the same date update.
+        variant_snapshot_payload: list[dict[str, Any]] = []
+        for offer_id, v_metrics in by_offer.items():
+            v_impressions = int(round(float(v_metrics.get("impressions") or 0.0)))
+            if v_impressions == 0:
+                continue  # Skip zero-impression rows (locked decision)
+
+            normalized_id = normalize_offer_id(offer_id)
+            v_master_sku = offer_to_sku.get(normalized_id)
+            if not v_master_sku:
+                continue  # Unmatched offer ID — skip
+
+            v_clicks = float(v_metrics.get("clicks") or 0.0)
+            v_conversions = float(v_metrics.get("conversions") or 0.0)
+            v_conversion_value = float(v_metrics.get("conversion_value") or 0.0)
+            v_cost = float(v_metrics.get("cost") or 0.0)
+
+            v_ctr = (v_clicks / v_impressions) if v_impressions > 0 else 0.0
+            v_roas = (v_conversion_value / v_cost) if v_cost > 0 else 0.0
+
+            variant_snapshot_payload.append(
+                {
+                    "gmc_offer_id": normalized_id,
+                    "master_sku": v_master_sku,
+                    "platform": platform,
+                    "environment": environment,
+                    "snapshot_date": snapshot_date.isoformat(),
+                    "impressions": v_impressions,
+                    "clicks": int(round(v_clicks)),
+                    "ctr": round(v_ctr, 6),
+                    "conversions": int(round(v_conversions)),
+                    "conversion_value": round(v_conversion_value, 6),
+                    "cost": round(v_cost, 6),
+                    "roas": round(v_roas, 6),
+                    "fetched_at": fetched_at,
+                }
+            )
+
+        if variant_snapshot_payload:
+            supabase.table("performance_snapshots_variant").upsert(
+                variant_snapshot_payload,
+                on_conflict="gmc_offer_id,platform,environment,snapshot_date",
+            ).execute()
+            logger.info(
+                "Wrote %d variant snapshot rows for snapshot_date=%s",
+                len(variant_snapshot_payload),
+                snapshot_date_str,
+            )
+        # --- End variant-level dual-write ---
+
         aggregated_by_sku: dict[str, dict[str, float]] = {
             sku: {
                 "impressions": 0.0,
