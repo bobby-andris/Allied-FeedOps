@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 Phase: 12 (Shared Utils Extraction) — COMPLETE
 Plan: 01 complete — Phase 12 done, all dead code cleanup complete (DEAD-06 satisfied)
 Status: In progress
-Last activity: 2026-03-04 - Completed quick task 1: Execute comprehensive dashboard UAT test plan with agent-browser
+Last activity: 2026-03-04 - Completed quick task 2: Fix 3 UAT bugs: SKU exclusion, phantom finishes, publish validation
 
 Progress: [█████████░] 88%
 
@@ -100,10 +100,10 @@ Progress: [█████████░] 88%
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 1 | Execute comprehensive dashboard UAT test plan with agent-browser | 2026-03-04 | 96b1d246 | [1-execute-comprehensive-dashboard-uat-test](./quick/1-execute-comprehensive-dashboard-uat-test/) |
-| 2 | Fix 3 UAT bugs: SKU exclusion scope, phantom finish generation, publish validation | 2026-03-04 | cf17d6ec | [2-fix-3-uat-bugs-sku-exclusion-phantom-fin](./quick/2-fix-3-uat-bugs-sku-exclusion-phantom-fin/) |
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 1 | Execute comprehensive dashboard UAT test plan with agent-browser | 2026-03-04 | 96b1d246 | | [1-execute-comprehensive-dashboard-uat-test](./quick/1-execute-comprehensive-dashboard-uat-test/) |
+| 2 | Fix 3 UAT bugs: SKU exclusion, phantom finishes, publish validation | 2026-03-04 | cf17d6ec | Verified | [2-fix-3-uat-bugs-sku-exclusion-phantom-fin](./quick/2-fix-3-uat-bugs-sku-exclusion-phantom-fin/) |
 
 ## Session Continuity
 
