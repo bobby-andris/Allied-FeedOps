@@ -37,7 +37,7 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 
 ### Image Support
 
-- [ ] **IMG-01**: Wire image input through executor.py modern generation path so all per-platform generation endpoints receive product images
+- [x] **IMG-01**: Wire image input through executor.py modern generation path so all per-platform generation endpoints receive product images
 
 ## v2 Requirements
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-01 | Phase 8.1 | Pending (moved from Phase 12) |
 | DATA-02 | Phase 8.1 | Pending (moved from Phase 12) |
 | DATA-03 | Phase 8.1 | Pending (moved from Phase 12) |
-| IMG-01 | Phase 10 | Pending |
+| IMG-01 | Phase 10 | Complete |
 
 **Coverage:**
 - v1 requirements: 17 total

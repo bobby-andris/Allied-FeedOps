@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-04T05:00:03.062Z"
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-03-04T05:30:01.354Z"
 last_activity: "2026-03-04 — Phase 8.1 Plan 02 complete: offer ID normalization applied to 4 codepaths (ENTM-02), variant snapshot dual-write wired to performance_snapshots_variant"
 progress:
   total_phases: 14
-  completed_phases: 8
-  total_plans: 21
-  completed_plans: 18
+  completed_phases: 9
+  total_plans: 22
+  completed_plans: 19
   percent: 79
 ---
 
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 8.1 (Data Model Gap Audit — inserted after Phase 8)
-Plan: 02 complete — 03 next
+Phase: 10 (Image Wiring)
+Plan: 01 complete — next plan TBD
 Status: In progress
-Last activity: 2026-03-04 — Phase 8.1 Plan 02 complete: offer ID normalization applied to 4 codepaths (ENTM-02), variant snapshot dual-write wired to performance_snapshots_variant
+Last activity: 2026-03-04 — Phase 10 Plan 01 complete: product image wired through executor.py to ClaudeProvider via fetch-once bundle pattern with finish-task guard (IMG-01)
 
-Progress: [████████░░] 79%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 79%
 | Phase 08.1-data-model-gap-audit P04 | 45 | 2 tasks | 1 files |
 | Phase 09-trivial-dead-code-removal P01 | 4 | 2 tasks | 4 files |
 | Phase 09-trivial-dead-code-removal P02 | 15 | 2 tasks | 4 files |
+| Phase 10-image-wiring P01 | 12 | 2 tasks | 2 files |
 
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
@@ -80,6 +81,9 @@ Progress: [████████░░] 79%
 - Phase 8.1-02: normalize_offer_id() applied at ingestion boundary in _fetch_chunk_data() and offer_to_sku construction — all downstream dict keys are normalized before any DB lookup
 - Phase 8.1-02: variant snapshot upsert uses ignore_duplicates=False (standard upsert) — re-runs for same day update the row; zero-impression rows skipped per locked decision
 - Phase 8.1-02 (ENTM-02 COMPLETE): All 4 Python codepaths now use normalize_offer_id() from shared utility
+- Phase 10-01: fetch_image called once at bundle level before task loop — single network call efficiency
+- Phase 10-01: Finish tasks always receive image=None — finish sentences are text-only by design
+- Phase 10-01: Image forwarded via existing inspect.signature pattern in _generate_with_provider_compat — consistent with reasoning_effort/max_completion_tokens forwarding
 
 ### Blockers/Concerns
 - Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
@@ -89,6 +93,6 @@ Progress: [████████░░] 79%
 
 ## Session Continuity
 
-Last session: 2026-03-04T04:55:14.573Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-03-04T05:30:01.352Z
+Stopped at: Completed 10-01-PLAN.md
 Resume file: None
