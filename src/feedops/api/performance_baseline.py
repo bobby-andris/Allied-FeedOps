@@ -21,6 +21,7 @@ from feedops.integrations.google_ads_performance import (
     _load_client,
     _run_gaql_query,
 )
+from feedops.utils.offer_id import normalize_offer_id
 from feedops.monitoring.performance_impact import (
     collect_daily_performance_snapshots,
     compute_and_store_impact_scores,
@@ -627,6 +628,7 @@ def _capture_google_baseline(
         variants_with_data = 0
 
         for offer_id, metrics in performance_data.items():
+            offer_id = normalize_offer_id(offer_id)
             if metrics.get("impressions", 0) > 0:
                 variants_with_data += 1
                 total_impressions += metrics.get("impressions", 0)

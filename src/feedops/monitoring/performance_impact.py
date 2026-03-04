@@ -14,6 +14,7 @@ from typing import Any
 
 from feedops.db.supabase_client import get_client
 from feedops.integrations.google_ads_performance import fetch_batch_product_performance
+from feedops.utils.offer_id import normalize_offer_id
 
 logger = logging.getLogger(__name__)
 
@@ -317,7 +318,7 @@ def collect_daily_performance_snapshots(
         if sku not in sku_to_category:
             sku_to_category[sku] = row.get("product_category")
         if offer_id:
-            offer_to_sku[offer_id] = sku
+            offer_to_sku[normalize_offer_id(offer_id)] = sku
 
     offer_ids = sorted(offer_to_sku.keys())
 
@@ -377,7 +378,7 @@ def collect_daily_performance_snapshots(
         }
 
         for offer_id, metrics in by_offer.items():
-            sku = offer_to_sku.get(offer_id)
+            sku = offer_to_sku.get(normalize_offer_id(offer_id))
             if not sku:
                 continue
             entry = aggregated_by_sku.setdefault(

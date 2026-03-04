@@ -17,6 +17,8 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any
 
+from feedops.utils.offer_id import normalize_offer_id
+
 logger = logging.getLogger(__name__)
 
 
@@ -395,8 +397,8 @@ class SearchTermsClient:
             for row in result.data:
                 gmc_offer_id = row.get("gmc_offer_id", "")
                 if gmc_offer_id:
-                    # Store with lowercase key (consistent with get_variant_info normalization)
-                    self._variant_cache[gmc_offer_id.lower()] = {
+                    # Store with normalized key (consistent with get_variant_info normalization)
+                    self._variant_cache[normalize_offer_id(gmc_offer_id)] = {
                         "master_sku": row.get("master_sku"),
                         "finish": row.get("finish"),
                         "finish_code": row.get("finish_code"),
@@ -423,7 +425,7 @@ class SearchTermsClient:
         # Normalize to lowercase before lookup and caching.
         # Google Ads returns uppercase shopify_US_ but variant_index stores lowercase shopify_us_.
         # Without this normalization every lookup is a cache miss and DB query returns no results.
-        gmc_offer_id = gmc_offer_id.lower()
+        gmc_offer_id = normalize_offer_id(gmc_offer_id)
 
         # Check cache
         if gmc_offer_id in self._variant_cache:

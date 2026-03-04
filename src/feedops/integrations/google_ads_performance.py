@@ -16,6 +16,8 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
+from feedops.utils.offer_id import normalize_offer_id
+
 logger = logging.getLogger(__name__)
 
 
@@ -331,6 +333,7 @@ def _fetch_chunk_data(
         for row in rows:
             product_id = row.get("segments", {}).get("product_item_id", "")
             if product_id:
+                product_id = normalize_offer_id(product_id)
                 results.append((product_id, row))
         return results
     except Exception as e:
