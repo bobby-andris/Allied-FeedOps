@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: planning
-stopped_at: Completed 08-01-PLAN.md — Phase 8 Schema Hardening complete
-last_updated: "2026-03-04T01:10:50.114Z"
+stopped_at: Phase 8.1 context gathered
+last_updated: "2026-03-04T02:43:08.508Z"
 last_activity: "2026-03-04 — Phase 8 complete: migration 042 applied, daily snapshot job verified (1,866 rows, 622 SKUs)"
 progress:
-  total_phases: 13
+  total_phases: 14
   completed_phases: 6
   total_plans: 15
   completed_plans: 12
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** The pipeline produces high-quality product content reliably at scale, backed by accurate performance data that maps seamlessly across Google Ads, Shopify, and Merchant Center.
-**Current focus:** Phase 9 — Trivial Dead Code Removal (ready to plan)
+**Current focus:** Phase 8.1 — Data Model Gap Audit (INSERTED — urgent requirements audit before continuing v1.1)
 
 ## Current Position
 
-Phase: 9 of 13 (Trivial Dead Code Removal)
-Plan: 01 (not yet planned)
+Phase: 8.1 (Data Model Gap Audit — inserted after Phase 8)
+Plan: Not yet planned
 Status: Ready to plan
 Last activity: 2026-03-04 — Phase 8 complete: migration 042 applied, daily snapshot job verified (1,866 rows, 622 SKUs)
 
@@ -48,6 +48,9 @@ Progress: [████████░░] 80%
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
 | Phase 08-schema-hardening P01 | 30 | 2 tasks | 1 files |
+
+### Roadmap Evolution
+- Phase 8.1 inserted after Phase 8: Data Model Gap Audit (URGENT) — variant-level performance data discarded during aggregation, potential other granularity mismatches across Google Ads/Merchant Center/Shopify data flows. Phase 12 requirements (ENTM-01 through DATA-03) absorbed into audit scope.
 
 ### From v1.0 (Pipeline Reliability Rewrite + Model Evaluation)
 - main.py decomposed: 3,737 → ~500 lines, 9 extracted modules
@@ -73,6 +76,6 @@ Progress: [████████░░] 80%
 
 ## Session Continuity
 
-Last session: 2026-03-04T01:08:01.669Z
-Stopped at: Completed 08-01-PLAN.md — Phase 8 Schema Hardening complete
-Resume file: None
+Last session: 2026-03-04T02:43:08.504Z
+Stopped at: Phase 8.1 context gathered
+Resume file: .planning/phases/08.1-data-model-gap-audit/08.1-CONTEXT.md
