@@ -10,6 +10,7 @@ import time
 from fastapi import HTTPException
 
 from feedops.api.generation_telemetry import safe_int as _safe_int
+from feedops.api.utils import _require_request_id
 from feedops.api.prompt_loader import get_platform_system_prompt_hash
 from feedops.generation.persistence import get_finish_task_result
 from feedops.observability import get_request_id
@@ -467,17 +468,3 @@ def _upsert_batch_job_sku_status(
         payload,
         on_conflict="job_id,master_sku",
     ).execute()
-
-
-# ---------------------------------------------------------------------------
-# Internal helper — used by persistence functions above.
-# Duplicated here to avoid a circular import with job_management.py.
-# job_management.py is the public home; persistence.py uses its own copy.
-# ---------------------------------------------------------------------------
-
-def _require_request_id(request_id: str | None) -> str:
-    """Enforce non-placeholder request IDs for lineage writes."""
-    rid = (request_id or "").strip()
-    if not rid or rid == "-":
-        raise RuntimeError("Missing request_id for regeneration lineage write")
-    return rid

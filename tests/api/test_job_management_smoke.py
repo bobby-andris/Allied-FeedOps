@@ -5,10 +5,10 @@ def test_job_management_importable_standalone():
     from feedops.api.job_management import (
         _create_regeneration_job,
         _format_job_error,
-        _require_request_id,
         _regeneration_idempotency_key,
         _find_active_regeneration_job,
     )
+    from feedops.api.utils import _require_request_id
     assert callable(_create_regeneration_job)
 
 

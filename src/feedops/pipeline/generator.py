@@ -46,29 +46,10 @@ from feedops.pipeline.segment_strategy import (
 from feedops.pipeline.feature_flags import is_segment_strategy_v1_enabled
 from feedops.pipeline.title_normalization import trim_title_to_length
 from feedops.providers.base import LLMProvider
+from feedops.api.utils import GenerationBudgetExceededError  # re-exported for callers; no circular import (utils has no feedops.* imports)
 
 logger = logging.getLogger(__name__)
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
-
-
-class GenerationBudgetExceededError(RuntimeError):
-    """Raised when estimated request cost exceeds configured per-request budget."""
-
-    def __init__(
-        self,
-        *,
-        cap_usd: float,
-        estimated_cost_usd: float,
-        platform: str,
-    ) -> None:
-        self.cap_usd = float(cap_usd)
-        self.estimated_cost_usd = float(estimated_cost_usd)
-        self.platform = platform
-        super().__init__(
-            "generation_request_budget_exceeded:"
-            f" platform={platform} estimated_cost_usd={estimated_cost_usd:.6f}"
-            f" cap_usd={cap_usd:.6f}"
-        )
 
 
 def _resolve_requested_platforms(

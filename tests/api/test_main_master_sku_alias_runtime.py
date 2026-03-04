@@ -14,9 +14,10 @@ import feedops.api.job_management as api_job_management
 import feedops.api.telemetry as api_telemetry
 from feedops.api.prompt_loader import get_platform_system_prompt_hash
 from feedops.api.persistence import _assembled_prompt_hash, _enforce_write_time_finish_placeholder_contract
-from feedops.api.job_management import _require_request_id, _regeneration_idempotency_key, _hybrid_generation_idempotency_key
+from feedops.api.job_management import _regeneration_idempotency_key, _hybrid_generation_idempotency_key
+from feedops.api.utils import _require_request_id
 from feedops.api.multi_sku_detection import MultiSkuFamily
-from feedops.pipeline.generator import GenerationBudgetExceededError
+from feedops.api.utils import GenerationBudgetExceededError
 from feedops.models import ParentSKU, Variant
 
 
