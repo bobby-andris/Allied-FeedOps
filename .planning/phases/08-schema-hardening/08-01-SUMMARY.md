@@ -52,10 +52,10 @@ completed: 2026-03-03
 
 ## Performance
 
-- **Duration:** 11 min
+- **Duration:** ~30 min (including human verification)
 - **Started:** 2026-03-03T23:38:02Z
-- **Completed:** 2026-03-03T23:49:09Z
-- **Tasks:** 1 of 2 (Task 2 is human verification checkpoint)
+- **Completed:** 2026-03-04T01:06:20Z
+- **Tasks:** 2 of 2 (Task 2 human-verify approved)
 - **Files modified:** 1
 
 ## Accomplishments
@@ -64,12 +64,14 @@ completed: 2026-03-03
 - Added platform CHECK constraints to 4 tables: `performance_snapshots`, `performance_baselines`, `performance_impact_scores`, `generated_content`
 - Verified FK `performance_snapshots_publish_event_id_fkey` already exists — no orphaned rows (0 found)
 - Migration applied directly to production Supabase via management API
+- **Human verification approved:** Daily snapshot job triggered and succeeded — 1,866 rows upserted across 3 dates (Mar 1-3), 622 SKUs processed, 13,236 offer IDs, no 42P10 error, 122 treated + 500 control SKUs captured
 
 ## Task Commits
 
 Each task was committed atomically:
 
 1. **Task 1: Write migration 042_schema_hardening.sql and apply via Supabase MCP** - `de2f77c7` (feat)
+2. **Task 2: Verify daily snapshot job succeeds** - checkpoint:human-verify approved (no code change required — 1,866 rows upserted, 0 errors)
 
 ## Files Created/Modified
 - `supabase/migrations/042_schema_hardening.sql` - Single transactional migration with dedup, unique constraint, 4 platform CHECK constraints, orphan cleanup, and idempotent FK guard
@@ -102,10 +104,12 @@ Each task was committed atomically:
 
 ## Next Phase Readiness
 
-- Daily Cloud Scheduler snapshot job at 6:00 AM UTC should now succeed (42P10 error eliminated)
-- `performance_impact_scores` should start populating once next snapshot collection runs
-- **User verification pending:** Task 2 (checkpoint) requires confirming daily job success or manually triggering snapshot endpoint
-- Phase 9 (dead code cleanup) can begin independently — no dependency on snapshot job verification
+- Daily Cloud Scheduler snapshot job confirmed working — 42P10 error eliminated, 1,866 rows upserted in first post-migration run
+- `performance_impact_scores` will start populating as daily snapshots accumulate
+- Phase 9 (Trivial Dead Code Removal) can begin immediately — no dependencies on Phase 8
+- Phase 10 (Image Wiring) can begin immediately — independent of Phase 9
+- Phase 12 (Entity Mapping and Bulk Coverage) prerequisite met: schema hardened, snapshots flowing
+- Note: Verify `SLACK_WEBHOOK_URL` is bound to current Cloud Run revision for Slack success alerts
 
 ---
 *Phase: 08-schema-hardening*
@@ -116,3 +120,4 @@ Each task was committed atomically:
 - FOUND: `supabase/migrations/042_schema_hardening.sql`
 - FOUND: `.planning/phases/08-schema-hardening/08-01-SUMMARY.md`
 - FOUND: commit `de2f77c7`
+- VERIFIED: Task 2 checkpoint approved — daily snapshot job confirmed working by user (1,866 rows, 622 SKUs, no 42P10 error)
