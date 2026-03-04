@@ -12,7 +12,7 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 - [x] **DEAD-01**: Remove 8 orphaned functions with zero callers (`_payload_value_lengths`, `_schema_hash`, `_prompt_hash`, `_generate_with_provider_compat` in generator.py; `_provider_label` re-export in finish_processing.py; 3 finish processing re-exports in generation.py)
 - [x] **DEAD-02**: Update 5 test files to import from actual extracted module locations instead of main.py re-exports
 - [x] **DEAD-03**: Remove ~130-line backward-compat re-export block from main.py after test imports updated
-- [ ] **DEAD-04**: Remove generator.py duplicate functions already copied to executor.py/hybrid_generation.py (6 functions)
+- [x] **DEAD-04**: Remove generator.py duplicate functions already copied to executor.py/hybrid_generation.py (6 functions)
 - [x] **DEAD-05**: Remove ~500 lines of variant generation code behind never-enabled `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag
 - [ ] **DEAD-06**: Consolidate duplicate `_require_request_id()` and `GenerationBudgetExceededError` to single shared location
 
@@ -80,7 +80,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEAD-01 | Phase 9 | Complete |
 | DEAD-02 | Phase 11 | Complete |
 | DEAD-03 | Phase 11 | Complete |
-| DEAD-04 | Phase 11 | Pending |
+| DEAD-04 | Phase 11 | Complete |
 | DEAD-05 | Phase 9 | Complete |
 | DEAD-06 | Phase 13 | Pending |
 | SCHM-01 | Phase 8 | Complete |
