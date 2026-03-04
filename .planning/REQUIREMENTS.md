@@ -31,9 +31,9 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 
 ### Data Coverage
 
-- [ ] **DATA-01**: Implement throttled bulk baseline capture for all ~2,500 master SKUs with Google Ads quota management (50-SKU test gate before full sweep)
+- [x] **DATA-01**: Implement throttled bulk baseline capture for all ~2,500 master SKUs with Google Ads quota management (50-SKU test gate before full sweep)
 - [x] **DATA-02**: Verify daily snapshot capture works end-to-end after constraint fix — Slack reports success instead of 42P10 error
-- [ ] **DATA-03**: Verify impact score population works after snapshots are collecting correctly
+- [x] **DATA-03**: Verify impact score population works after snapshots are collecting correctly
 
 ### Image Support
 

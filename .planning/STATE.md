@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
-stopped_at: Completed 08.1-02-PLAN.md
-last_updated: "2026-03-04T03:23:13.875Z"
-last_activity: "2026-03-04 — Phase 8.1 Plan 01 complete: offer ID utility created (13 tests), migration 043 applied (variant performance tables)"
+stopped_at: Checkpoint at 08.1-04 Task 2 — bulk baseline backfill script created, awaiting human verification of data pipeline
+last_updated: "2026-03-04T03:31:09.254Z"
+last_activity: "2026-03-04 — Phase 8.1 Plan 02 complete: offer ID normalization applied to 4 codepaths (ENTM-02), variant snapshot dual-write wired to performance_snapshots_variant"
 progress:
   total_phases: 14
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 19
-  completed_plans: 15
-  percent: 80
+  completed_plans: 16
+  percent: 79
 ---
 
 # Project State
@@ -47,6 +47,7 @@ Progress: [████████░░] 79%
 | Phase 08.1-data-model-gap-audit P03 | 2 | 1 tasks | 1 files |
 | Phase 08.1-data-model-gap-audit P01 | 3 | 2 tasks | 4 files |
 | Phase 08.1-data-model-gap-audit P02 | 8 | 2 tasks | 4 files |
+| Phase 08.1-data-model-gap-audit P04 | 10 | 1 tasks | 1 files |
 
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
@@ -85,6 +86,6 @@ Progress: [████████░░] 79%
 
 ## Session Continuity
 
-Last session: 2026-03-04T03:23:13.872Z
-Stopped at: Completed 08.1-02-PLAN.md
+Last session: 2026-03-04T03:31:09.250Z
+Stopped at: Checkpoint at 08.1-04 Task 2 — bulk baseline backfill script created, awaiting human verification of data pipeline
 Resume file: None
