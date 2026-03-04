@@ -9,12 +9,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-import feedops.api.main as api_main
 import feedops.api.routes as api_routes
+import feedops.api.schemas as api_schemas
 import feedops.api.generation as api_generation
 import feedops.api.job_runner as api_job_runner
+import feedops.api.job_management as api_job_management
 from feedops.api.hybrid_generation import build_variant_adaptation_prompt
 from feedops.api.multi_sku_detection import MultiSkuFamily
+from feedops.api.prompt_loader import get_finish_list
 from feedops.pipeline.finish_sentence_placeholder import inject_finish_sentence_placeholder
 from feedops.models import ParentSKU, Variant
 from feedops.providers.base import LLMError
@@ -138,7 +140,7 @@ class _FakeProvider:
             if key == "finish_sentences":
                 payload[key] = {
                     finish: f"{finish} complements this wall-mounted towel bar profile."
-                    for finish in api_main.get_finish_list()
+                    for finish in get_finish_list()
                 }
             elif key in {"google_description", "bing_description"}:
                 payload[key] = (
@@ -174,7 +176,7 @@ class _RecordingProvider:
             if key == "finish_sentences":
                 payload[key] = {
                     finish: f"{finish} complements this wall-mounted towel bar profile."
-                    for finish in api_main.get_finish_list()
+                    for finish in get_finish_list()
                 }
             elif key in {"google_description", "bing_description"}:
                 payload[key] = (
@@ -332,15 +334,7 @@ class _BatchJobSupabase:
 
 
 def _patch_generation_deps(monkeypatch, provider, supabase):
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
-    monkeypatch.setattr(api_main, "get_provider", lambda: provider)
-    monkeypatch.setattr(api_main, "get_client", lambda: supabase)
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
-    # Also patch at routes module (where optimize_single_sku / batch_optimize live after Plan 03-02)
+    # Patch at routes module (where optimize_single_sku / batch_optimize / regenerate_content live)
     monkeypatch.setattr(api_routes, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_routes, "build_evidence_table", lambda _sku: [])
     monkeypatch.setattr(api_routes, "format_evidence_markdown", lambda _evidence: "table")
@@ -446,11 +440,11 @@ async def test_optimize_single_sku_respects_generation_kill_switch(monkeypatch):
     def _unexpected_load(*_args, **_kwargs):
         raise AssertionError("load_parent_sku_from_supabase should not be called")
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", _unexpected_load)
+    monkeypatch.setattr(api_routes, "load_parent_sku_from_supabase", _unexpected_load)
 
-    request = api_main.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=True)
+    request = api_schemas.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=True)
     with pytest.raises(HTTPException) as exc_info:
-        await api_main.optimize_single_sku(request)
+        await api_routes.optimize_single_sku(request)
 
     assert exc_info.value.status_code == 503
 
@@ -472,32 +466,32 @@ async def test_regenerate_description_uses_fallback_finish_sentences_when_killed
         ]
     )
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
-    monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
-    monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    monkeypatch.setattr(api_routes, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_routes, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_routes, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_routes, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_routes, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_routes, "get_system_prompt", lambda: "system")
+    monkeypatch.setattr(api_routes, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(api_routes, "get_category_guidance", lambda _category: "")
     # Also patch at generation module (where _execute_regeneration_request lives after extraction)
     monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_generation, "get_provider", lambda: fake_provider)
     monkeypatch.setattr(api_generation, "get_client", lambda: _FakeSupabase())
     monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
-    request = api_main.RegenerateRequest(
+    request = api_schemas.RegenerateRequest(
         master_sku="1031/18",
         content_type="description",
         platform="google",
         feedback=None,
         finish_code="ABR",
     )
-    response = await api_main.regenerate_content(request)
+    response = await api_routes.regenerate_content(request)
 
     assert response.success is True
     assert response.finish_sentences is not None
-    assert len(response.finish_sentences) == len(api_main.get_finish_list())
+    assert len(response.finish_sentences) == len(get_finish_list())
     assert "{FINISH_SENTENCE}" in response.content
     assert response.content.count("{FINISH_SENTENCE}") == 1
     assert "Antique Brass" not in response.content
@@ -510,32 +504,32 @@ async def test_regenerate_description_injects_finish_sentence_placeholder_when_f
     fake_provider = _FakeProvider(
         [
             {"content": "Keep towels organized with this wall-mounted towel bar."},
-            {"finish_sentences": {finish: f"{finish} complements this towel bar design." for finish in api_main.get_finish_list()}},
+            {"finish_sentences": {finish: f"{finish} complements this towel bar design." for finish in get_finish_list()}},
         ]
     )
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
-    monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
-    monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    monkeypatch.setattr(api_routes, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_routes, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_routes, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_routes, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_routes, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_routes, "get_system_prompt", lambda: "system")
+    monkeypatch.setattr(api_routes, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(api_routes, "get_category_guidance", lambda _category: "")
     # Also patch at generation module (where _execute_regeneration_request lives after extraction)
     monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_generation, "get_provider", lambda: fake_provider)
     monkeypatch.setattr(api_generation, "get_client", lambda: _FakeSupabase())
     monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
-    request = api_main.RegenerateRequest(
+    request = api_schemas.RegenerateRequest(
         master_sku="1031/18",
         content_type="description",
         platform="google",
         feedback=None,
         finish_code="ABR",
     )
-    response = await api_main.regenerate_content(request)
+    response = await api_routes.regenerate_content(request)
 
     assert response.success is True
     assert response.finish_sentences is not None
@@ -559,28 +553,28 @@ async def test_regenerate_description_falls_back_when_finish_sentences_incomplet
         ]
     )
 
-    monkeypatch.setattr(api_main, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
-    monkeypatch.setattr(api_main, "build_evidence_table", lambda _sku: [])
-    monkeypatch.setattr(api_main, "format_evidence_markdown", lambda _evidence: "table")
-    monkeypatch.setattr(api_main, "get_provider", lambda: fake_provider)
-    monkeypatch.setattr(api_main, "get_client", lambda: _FakeSupabase())
-    monkeypatch.setattr(api_main, "get_system_prompt", lambda: "system")
-    monkeypatch.setattr(api_main, "get_system_prompt_hash", lambda: "hash123")
-    monkeypatch.setattr(api_main, "get_category_guidance", lambda _category: "")
+    monkeypatch.setattr(api_routes, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
+    monkeypatch.setattr(api_routes, "build_evidence_table", lambda _sku: [])
+    monkeypatch.setattr(api_routes, "format_evidence_markdown", lambda _evidence: "table")
+    monkeypatch.setattr(api_routes, "get_provider", lambda: fake_provider)
+    monkeypatch.setattr(api_routes, "get_client", lambda: _FakeSupabase())
+    monkeypatch.setattr(api_routes, "get_system_prompt", lambda: "system")
+    monkeypatch.setattr(api_routes, "get_system_prompt_hash", lambda: "hash123")
+    monkeypatch.setattr(api_routes, "get_category_guidance", lambda _category: "")
     # Also patch at generation module (where _execute_regeneration_request lives after extraction)
     monkeypatch.setattr(api_generation, "load_parent_sku_from_supabase", lambda _sku: _sample_parent_sku())
     monkeypatch.setattr(api_generation, "get_provider", lambda: fake_provider)
     monkeypatch.setattr(api_generation, "get_client", lambda: _FakeSupabase())
     monkeypatch.setattr(api_generation, "resolve_canonical_master_sku", lambda _supabase, sku: sku)
 
-    request = api_main.RegenerateRequest(
+    request = api_schemas.RegenerateRequest(
         master_sku="1031/18",
         content_type="description",
         platform="google",
         feedback=None,
         finish_code="ABR",
     )
-    response = await api_main.regenerate_content(request)
+    response = await api_routes.regenerate_content(request)
 
     assert response.success is True
     assert response.finish_sentences is not None
@@ -613,8 +607,8 @@ async def test_optimize_single_sku_google_bing_description_parity_with_regenerat
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
 
-    response = await api_main.optimize_single_sku(
-        api_main.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=False)
+    response = await api_routes.optimize_single_sku(
+        api_schemas.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=False)
     )
 
     assert response.success is True
@@ -645,7 +639,7 @@ async def test_optimize_single_sku_google_bing_description_parity_with_regenerat
     assert len(finish_rows) == 2
     for row in finish_rows:
         assert row["platform"] in {"google", "bing"}
-        assert len(row["finish_sentences"]) == len(api_main.get_finish_list())
+        assert len(row["finish_sentences"]) == len(get_finish_list())
 
 
 @pytest.mark.asyncio
@@ -689,7 +683,7 @@ async def test_process_hybrid_batch_job_full_generation_matches_regenerate_finis
     assert len(finish_rows) == 2
     for row in finish_rows:
         assert row["platform"] in {"google", "bing"}
-        assert len(row["finish_sentences"]) == len(api_main.get_finish_list())
+        assert len(row["finish_sentences"]) == len(get_finish_list())
 
 
 def test_build_variant_adaptation_prompt_shopify_description_does_not_fallback_to_title_prompt():
@@ -717,8 +711,8 @@ async def test_optimize_single_sku_persists_linked_history_for_all_platforms(mon
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
 
-    response = await api_main.optimize_single_sku(
-        api_main.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=False)
+    response = await api_routes.optimize_single_sku(
+        api_schemas.OptimizeRequest(master_sku="1031/18", num_candidates=1, dry_run=False)
     )
 
     assert response.success is True
@@ -777,7 +771,7 @@ async def test_process_batch_job_persists_platform_telemetry_once_per_platform(m
     provider = _RecordingProvider()
     supabase = _CaptureSupabase()
     _patch_generation_deps(monkeypatch, provider, supabase)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-batch-telemetry-once")
+    monkeypatch.setattr(api_job_management, "get_request_id", lambda: "req-batch-telemetry-once")
 
     async def _fake_generate_per_platform(**_kwargs):
         return {
@@ -834,7 +828,7 @@ async def test_process_batch_job_persists_platform_telemetry_once_per_platform(m
 
 
 def test_batch_optimize_request_exposes_generation_options_field():
-    assert "options" in api_main.BatchOptimizeRequest.model_fields
+    assert "options" in api_schemas.BatchOptimizeRequest.model_fields
 
 
 @pytest.mark.asyncio
@@ -847,15 +841,12 @@ async def test_batch_optimize_passes_generation_options_to_background_job(monkey
         captured["kwargs"] = kwargs
         return SimpleNamespace()
 
-    monkeypatch.setattr(api_main, "get_client", lambda: supabase)
     monkeypatch.setattr(api_routes, "get_client", lambda: supabase)
     monkeypatch.setattr(api_routes, "resolve_canonical_master_skus", lambda _supabase, skus: skus)
-    monkeypatch.setattr(api_main, "run_async_in_thread", _capture_run_async)
     monkeypatch.setattr(api_routes, "run_async_in_thread", _capture_run_async)
-    monkeypatch.setattr(api_main, "get_request_id", lambda: "req-123")
     monkeypatch.setattr(api_routes, "get_request_id", lambda: "req-123")
 
-    request = api_main.BatchOptimizeRequest.model_validate(
+    request = api_schemas.BatchOptimizeRequest.model_validate(
         {
             "skus": ["1031/18", "920D-6"],
             "num_candidates": 1,
@@ -868,7 +859,7 @@ async def test_batch_optimize_passes_generation_options_to_background_job(monkey
         }
     )
 
-    response = await api_main.batch_optimize(request)
+    response = await api_routes.batch_optimize(request)
 
     assert response.success is True
     assert captured["func_name"] == "run"  # JobRunner(mode="batch").run after Plan 03-01 extraction
