@@ -6,6 +6,7 @@ wave: 1
 depends_on: []
 files_modified:
   - dashboard/src/app/api/sku-selection/route.ts
+  - dashboard/src/app/(dashboard)/review/[sku]/page.tsx
   - src/feedops/api/prompt_loader.py
   - src/feedops/api/finish_processing.py
   - src/feedops/pipeline/generator.py
@@ -18,6 +19,7 @@ must_haves:
     - "SKUs with any generated_content rows (regardless of approval status) are excluded from Generate tab recommendations"
     - "Pipeline generates finish sentences only for finishes that exist in variant_index for that master_sku"
     - "Publish pipeline succeeds for SKUs with fewer than 28 variants (no count mismatch error)"
+    - "Review page displays only finish sentences for finishes that exist in variant_index for that SKU"
   artifacts:
     - path: "dashboard/src/app/api/sku-selection/route.ts"
       provides: "SKU exclusion filtering"
@@ -30,6 +32,9 @@ must_haves:
       contains: "get_finish_list_for_sku"
     - path: "dashboard/src/lib/publishing/expand-variants.ts"
       provides: "Publish validation using per-finish check instead of count comparison"
+    - path: "dashboard/src/app/(dashboard)/review/[sku]/page.tsx"
+      provides: "Filtered finish sentences prop — only SKU-relevant finishes"
+      contains: "relevantFinishes"
   key_links:
     - from: "src/feedops/api/finish_processing.py"
       to: "src/feedops/api/prompt_loader.py"
@@ -39,13 +44,17 @@ must_haves:
       to: "variant_index table"
       via: "per-finish coverage check"
       pattern: "variants.*finish.*finishSentences"
+    - from: "dashboard/src/app/(dashboard)/review/[sku]/page.tsx"
+      to: "variant_index query results"
+      via: "filter finish sentences by variant finishes"
+      pattern: "relevantFinishes.*finishSentences"
 ---
 
 <objective>
-Fix 3 UAT bugs: SKU exclusion scope too narrow on Generate tab, pipeline generating all 28 finish sentences regardless of actual variant count, and publish pipeline failing on SKUs with fewer than 28 variants.
+Fix 3 UAT bugs: SKU exclusion scope too narrow on Generate tab, pipeline generating all 28 finish sentences regardless of actual variant count, review page showing all 28 finish sentences instead of only relevant ones, and publish pipeline failing on SKUs with fewer than 28 variants.
 
-Purpose: Unblock publishing workflow and eliminate phantom finish generation waste.
-Output: Corrected SKU filtering, SKU-aware finish generation, and resilient publish validation.
+Purpose: Unblock publishing workflow, eliminate phantom finish display/generation waste, and show only relevant finishes on review page.
+Output: Corrected SKU filtering, SKU-aware finish generation, filtered review page display, and resilient publish validation.
 </objective>
 
 <execution_context>
@@ -56,6 +65,7 @@ Output: Corrected SKU filtering, SKU-aware finish generation, and resilient publ
 <context>
 @.planning/STATE.md
 @dashboard/src/app/api/sku-selection/route.ts
+@dashboard/src/app/(dashboard)/review/[sku]/page.tsx
 @src/feedops/api/prompt_loader.py
 @src/feedops/api/finish_processing.py
 @src/feedops/pipeline/generator.py
@@ -94,14 +104,41 @@ if (Object.keys(finishSentences).length !== uniqueFinishes) {
     throw new Error('variant_finish_contradiction: publish_google_finish_sentences_incomplete')
 }
 ```
+
+<!-- From dashboard/src/app/(dashboard)/review/[sku]/page.tsx lines 188-193 -->
+```typescript
+// Variants already fetched from variant_index (line 189-193)
+const { data: variants } = await supabase
+  .from('variant_index')
+  .select('*')
+  .eq('master_sku', sku)
+  .order('finish', { ascending: true })
+```
+
+<!-- From dashboard/src/app/(dashboard)/review/[sku]/page.tsx lines 303-315, 456-458 -->
+```typescript
+// Finish sentences fetched unfiltered (all 28 from DB)
+const { data: googleFinishSentences } = await supabase
+  .from('variant_finish_sentences')
+  .select('finish_sentences')
+  .eq('master_sku', sku)
+  .eq('platform', 'google')
+  .single()
+
+// Passed directly to client without filtering
+finishSentences: {
+  google: googleFinishSentences?.finish_sentences as Record<string, string> | null || null,
+  bing: bingFinishSentences?.finish_sentences as Record<string, string> | null || null,
+},
+```
 </interfaces>
 </context>
 
 <tasks>
 
 <task type="auto">
-  <name>Task 1: Fix SKU exclusion + publish validation (TypeScript side)</name>
-  <files>dashboard/src/app/api/sku-selection/route.ts, dashboard/src/lib/publishing/expand-variants.ts</files>
+  <name>Task 1: Fix SKU exclusion + review page finish filtering + publish validation (TypeScript side)</name>
+  <files>dashboard/src/app/api/sku-selection/route.ts, dashboard/src/app/(dashboard)/review/[sku]/page.tsx, dashboard/src/lib/publishing/expand-variants.ts</files>
   <action>
 **Bug A — SKU exclusion (sku-selection/route.ts lines 28-36):**
 
@@ -121,6 +158,41 @@ const { data: generatedSkus } = await supabase
 ```
 
 The `alreadyGeneratedSkus` set construction (line 34-36) stays the same but no longer needs the `approved_content` field — just map `master_sku`.
+
+**Bug B4 — Review page finish filtering (review/[sku]/page.tsx lines 456-458):**
+
+The `variants` array from `variant_index` is already fetched at line 189-193 and contains `.finish` for each variant. After loading `googleFinishSentences` and `bingFinishSentences` (lines 303-315), filter each to only include keys that match finishes present in `variant_index` for this SKU.
+
+Before the return statement (around line 448), add filtering logic:
+```typescript
+// Filter finish sentences to only finishes that exist in variant_index for this SKU
+const relevantFinishes = new Set(
+  (variants || []).map((v: VariantIndex) => v.finish).filter(Boolean)
+)
+
+const filterFinishSentences = (
+  sentences: Record<string, string> | null
+): Record<string, string> | null => {
+  if (!sentences) return null
+  const filtered: Record<string, string> = {}
+  for (const [finish, sentence] of Object.entries(sentences)) {
+    if (relevantFinishes.has(finish)) {
+      filtered[finish] = sentence
+    }
+  }
+  return Object.keys(filtered).length > 0 ? filtered : null
+}
+```
+
+Then update the finishSentences prop at lines 456-458:
+```typescript
+finishSentences: {
+  google: filterFinishSentences(googleFinishSentences?.finish_sentences as Record<string, string> | null || null),
+  bing: filterFinishSentences(bingFinishSentences?.finish_sentences as Record<string, string> | null || null),
+},
+```
+
+This ensures the review page only displays finish sentences for finishes that actually exist in variant_index for the SKU (per CONTEXT.md locked decision).
 
 **Bug B4 — Publish validation (expand-variants.ts lines 228-232):**
 
@@ -148,6 +220,7 @@ This allows the DB to have 28 finish sentences while the SKU only has 25 variant
   </verify>
   <done>
   - SKU selection API excludes any SKU with any row in generated_content (not just approved rows)
+  - Review page filters finish sentences to only show finishes present in variant_index for the SKU
   - Publish expand-variants checks per-finish coverage instead of exact count match
   - TypeScript compiles clean
   </done>
@@ -245,7 +318,8 @@ Update the import at line 11 of generator.py: Add `get_finish_list_for_sku` from
 <success_criteria>
 - Bug A: SKU selection API query no longer filters by `approved_content IS NOT NULL` — any SKU with generated content is excluded
 - Bug B2: Pipeline finish sentence generation uses SKU-specific finish list from variant_index, not hardcoded 28
-- Bug B4: Publish expand-variants validates per-finish coverage (every variant finish has a sentence) instead of exact count match
+- Bug B4 (review): Review page filters finish sentences to only display finishes that exist in variant_index for that SKU
+- Bug B4 (publish): Publish expand-variants validates per-finish coverage (every variant finish has a sentence) instead of exact count match
 - All TypeScript compiles, Python imports clean, no regressions
 </success_criteria>
 
