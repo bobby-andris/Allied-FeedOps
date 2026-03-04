@@ -222,6 +222,6 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 8.1 
 | 8.1. Data Model Gap Audit | 4/4 | Complete   | 2026-03-04 | - |
 | 9. Trivial Dead Code Removal | 1/2 | In Progress|  | - |
 | 10. Image Wiring | 1/1 | Complete    | 2026-03-04 | - |
-| 11. Test-Import Cleanup and Re-export Removal | 1/2 | In Progress|  | - |
+| 11. Test-Import Cleanup and Re-export Removal | 2/2 | Complete   | 2026-03-04 | - |
 | 12. Entity Mapping and Bulk Coverage | v1.1 | 0/TBD | Not started | - |
 | 13. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |
