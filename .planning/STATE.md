@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
-stopped_at: Phase 12 context gathered
-last_updated: "2026-03-04T07:43:16.691Z"
+stopped_at: Completed 12-shared-utils-extraction/12-01-PLAN.md
+last_updated: "2026-03-04T08:03:57.529Z"
 last_activity: "2026-03-04 — Phase 11 Plan 02 complete: 2 duplicate functions removed from generator.py, test import updated to executor.py (DEAD-04)"
 progress:
   total_phases: 13
-  completed_phases: 10
-  total_plans: 24
-  completed_plans: 21
+  completed_phases: 11
+  total_plans: 25
+  completed_plans: 22
   percent: 88
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 ## Current Position
 
-Phase: 11 (Test-Import Cleanup and Re-export Removal) — COMPLETE
-Plan: 02 complete — Phase 11 done, next is Phase 12 (Shared Utils Extraction)
+Phase: 12 (Shared Utils Extraction) — COMPLETE
+Plan: 01 complete — Phase 12 done, all dead code cleanup complete (DEAD-06 satisfied)
 Status: In progress
-Last activity: 2026-03-04 — Phase 11 Plan 02 complete: 2 duplicate functions removed from generator.py, test import updated to executor.py (DEAD-04)
+Last activity: 2026-03-04 — Phase 12 Plan 01 complete: _require_request_id and GenerationBudgetExceededError extracted to feedops/api/utils.py; duplicates removed from persistence.py, job_management.py, generator.py
 
 Progress: [█████████░] 88%
 
@@ -54,6 +54,7 @@ Progress: [█████████░] 88%
 | Phase 10-image-wiring P01 | 12 | 2 tasks | 2 files |
 | Phase 11-test-import-cleanup-re-export-removal P01 | 13 | 2 tasks | 6 files |
 | Phase 11 P02 | 5 | 1 tasks | 2 files |
+| Phase 12-shared-utils-extraction P01 | 7 | 2 tasks | 7 files |
 
 ## Accumulated Context
 | Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
@@ -89,6 +90,8 @@ Progress: [█████████░] 88%
 - Phase 11-01: get_request_id monkeypatches for job_runner tests patch at feedops.api.job_management (where _resolve_execution_request_id resolves the name), not api_job_runner directly
 - Phase 11-01: test_query_intent_lineage.py migrated as Rule 1 auto-fix — not in DEAD-02 list but relied on re-export block (broke when block was removed)
 - Phase 11-02: executor.py is the canonical location for _platform_reasoning_effort and _platform_completion_cap — generator.py no longer re-defines them (DEAD-04 complete)
+- Phase 12-01: feedops/api/utils.py is the canonical location for _require_request_id and GenerationBudgetExceededError — generator.py imports from utils (linear chain, not circular); DEAD-06 complete
+- Phase 12-01: No re-export in job_management.py for _require_request_id — all callers import directly from feedops.api.utils; test_job_management_smoke.py updated accordingly
 
 ### Blockers/Concerns
 - Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
@@ -97,6 +100,6 @@ Progress: [█████████░] 88%
 
 ## Session Continuity
 
-Last session: 2026-03-04T07:43:16.685Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-shared-utils-extraction/12-CONTEXT.md
+Last session: 2026-03-04T08:03:57.527Z
+Stopped at: Completed 12-shared-utils-extraction/12-01-PLAN.md
+Resume file: None
