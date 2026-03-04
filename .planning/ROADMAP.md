@@ -166,7 +166,10 @@ Plans:
   2. A `curl /optimize-sku` call for a SKU without a `main_image_url` completes normally — `image=None` is handled gracefully with no error
   3. Finish sentence tasks do not receive image inputs (image wiring is skipped for finish tasks)
   4. `pytest tests/` passes with zero failures after the change
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 10-01-PLAN.md — Wire image fetch + forwarding through executor.py to provider (IMG-01)
 
 #### Phase 11: Test-Import Cleanup and Re-export Removal
 **Goal**: Test files import from canonical module locations; main.py backward-compat re-export block is deleted; executor.py is the single source of truth for per-platform generation utilities
@@ -214,7 +217,7 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 8.1 
 | 8. Schema Hardening | v1.1 | 1/1 | Complete | 2026-03-04 |
 | 8.1. Data Model Gap Audit | 4/4 | Complete   | 2026-03-04 | - |
 | 9. Trivial Dead Code Removal | 1/2 | In Progress|  | - |
-| 10. Image Wiring | v1.1 | 0/TBD | Not started | - |
+| 10. Image Wiring | v1.1 | 0/1 | Not started | - |
 | 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/TBD | Not started | - |
 | 12. Entity Mapping and Bulk Coverage | v1.1 | 0/TBD | Not started | - |
 | 13. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |
