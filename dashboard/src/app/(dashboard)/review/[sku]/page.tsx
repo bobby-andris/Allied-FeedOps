@@ -60,44 +60,39 @@ interface CurrentContentByPlatform {
 /**
  * Generate all possible SKU formats to try when looking up in the database.
  *
- * Problem: SKUs in the database may use slashes (WP-2/16-GAL) or hyphens (920D-6),
- * while URLs must use hyphens (slashes are path separators).
+ * Problem: SKUs in the database may use slashes (WP-2/16-GAL, DT-HTL/24-5)
+ * or hyphens (920D-6), while URLs must use hyphens (slashes are path separators).
  *
- * Solution: Generate multiple candidate formats and try each one.
+ * Solution: Try replacing each hyphen position with a slash. This covers ALL
+ * boundary types (digit-to-digit, letter-to-digit, etc.) without fragile regex.
  *
  * @param urlSku The SKU as it appears in the URL (hyphens only)
- * @returns Array of possible database formats to try
+ * @returns Array of possible database formats to try, as-is first then slash variants
  */
 function getSkuCandidates(urlSku: string): string[] {
-  const candidates: string[] = []
-
-  // 1. URL-decode in case of %2F encoding
   const decoded = decodeURIComponent(urlSku)
+  const candidates = new Set<string>()
 
-  // 2. Add the decoded URL SKU as-is (might match directly)
-  candidates.push(decoded)
-
-  // 3. Try replacing last hyphen-before-dimension with slash
-  // Pattern: -16, -2X, -16-GAL → /16, /2X, /16-GAL
-  const normalizedLast = decoded.replace(/-(\d+[A-Z]*(?:-[A-Z]+)?)$/i, '/$1')
-  if (normalizedLast !== decoded) {
-    candidates.push(normalizedLast)
-  }
-
-  // 4. Try replacing the second-to-last hyphen-digit segment (for patterns like WP-2-16-GAL where the 2 is a model number)
-  // This handles cases like WP-2-16-GAL where we need WP-2/16-GAL
-  const twoPartMatch = decoded.match(/^(.+?)-(\d+)-(\d+[A-Z]*(?:-[A-Z]+)?)$/i)
-  if (twoPartMatch) {
-    candidates.push(`${twoPartMatch[1]}-${twoPartMatch[2]}/${twoPartMatch[3]}`)
-  }
-
-  // 5. If the SKU has a slash already (from decoding), also try the hyphen version
+  // If already has a slash (from URL decoding), try it and its hyphen version
   if (decoded.includes('/')) {
-    candidates.push(decoded.replace(/\//g, '-'))
+    candidates.add(decoded)
+    candidates.add(decoded.replace(/\//g, '-'))
+    return [...candidates]
   }
 
-  // Remove duplicates while preserving order
-  return [...new Set(candidates)]
+  // Always try the URL SKU as-is (works for hyphens-only SKUs like 920D-6)
+  candidates.add(decoded)
+
+  // Try replacing each hyphen with a slash, one at a time.
+  // For "DT-HTL-24-5" this produces: DT/HTL-24-5, DT-HTL/24-5, DT-HTL-24/5
+  // The DB lookup loop will find the correct one.
+  for (let i = 0; i < decoded.length; i++) {
+    if (decoded[i] === '-') {
+      candidates.add(decoded.substring(0, i) + '/' + decoded.substring(i + 1))
+    }
+  }
+
+  return [...candidates]
 }
 
 async function getSkuData(urlSku: string) {
@@ -319,26 +314,120 @@ async function getSkuData(urlSku: string) {
     .eq('platform', 'bing')
     .single()
 
-  // Get performance baselines (30-day pre-publish metrics)
-  const { data: performanceBaselines, error: baselinesError } = await supabase
-    .from('performance_baselines')
-    .select('*')
+  // Get performance baselines — prefer variant-level, fall back to master-level
+  // First get offer IDs for this SKU from variant_index
+  const { data: skuOfferIds } = await supabase
+    .from('variant_index')
+    .select('gmc_offer_id')
     .eq('master_sku', sku)
 
-  if (baselinesError) {
-    console.error('Error fetching performance baselines:', baselinesError)
+  const offerIdsForPerf = (skuOfferIds || []).map(v => v.gmc_offer_id).filter(Boolean) as string[]
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let performanceBaselines: any[] | null = null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let performanceSnapshots: any[] | null = null
+
+  // Try variant baselines first
+  if (offerIdsForPerf.length > 0) {
+    const { data: varBaselines } = await supabase
+      .from('performance_baselines_variant')
+      .select('*')
+      .in('gmc_offer_id', offerIdsForPerf)
+
+    if (varBaselines && varBaselines.length > 0) {
+      // Aggregate variant baselines to master_sku level per platform
+      const aggMap = new Map<string, {
+        platform: string; totalImpr: number; totalClicks: number;
+        totalCtr: number; totalCvr: number; count: number
+      }>()
+      for (const vb of varBaselines) {
+        const key = vb.platform as string
+        if (!aggMap.has(key)) {
+          aggMap.set(key, { platform: key, totalImpr: 0, totalClicks: 0, totalCtr: 0, totalCvr: 0, count: 0 })
+        }
+        const agg = aggMap.get(key)!
+        agg.totalImpr += (vb.avg_impressions as number) || 0
+        agg.totalClicks += (vb.avg_clicks as number) || 0
+        agg.count++
+      }
+      performanceBaselines = [...aggMap.values()].map(agg => ({
+        master_sku: sku,
+        platform: agg.platform,
+        avg_impressions: agg.totalImpr,
+        avg_clicks: agg.totalClicks,
+        avg_ctr: agg.totalImpr > 0 ? agg.totalClicks / agg.totalImpr : 0,
+        avg_cvr: 0,
+      }))
+    }
   }
 
-  // Get latest performance snapshot (post-publish metrics)
-  const { data: performanceSnapshots, error: snapshotsError } = await supabase
-    .from('performance_snapshots')
-    .select('*')
-    .eq('master_sku', sku)
-    .order('snapshot_date', { ascending: false })
-    .limit(10)  // Get last 10 snapshots for trend
+  // Fall back to master-level baselines
+  if (!performanceBaselines || performanceBaselines.length === 0) {
+    const { data: masterBaselines, error: baselinesError } = await supabase
+      .from('performance_baselines')
+      .select('*')
+      .eq('master_sku', sku)
+    if (baselinesError) {
+      console.error('Error fetching performance baselines:', baselinesError)
+    }
+    performanceBaselines = masterBaselines
+  }
 
-  if (snapshotsError) {
-    console.error('Error fetching performance snapshots:', snapshotsError)
+  // Try variant snapshots first
+  if (offerIdsForPerf.length > 0) {
+    const { data: varSnapshots } = await supabase
+      .from('performance_snapshots_variant')
+      .select('*')
+      .in('gmc_offer_id', offerIdsForPerf)
+      .order('snapshot_date', { ascending: false })
+      .limit(280)  // 10 days * ~28 variants
+
+    if (varSnapshots && varSnapshots.length > 0) {
+      // Aggregate variant snapshots to master_sku level by date
+      const dateAgg = new Map<string, {
+        snapshot_date: string; platform: string; impressions: number; clicks: number
+      }>()
+      for (const vs of varSnapshots) {
+        const key = `${vs.platform}|||${vs.snapshot_date}`
+        if (!dateAgg.has(key)) {
+          dateAgg.set(key, {
+            snapshot_date: vs.snapshot_date as string,
+            platform: vs.platform as string,
+            impressions: 0, clicks: 0,
+          })
+        }
+        const entry = dateAgg.get(key)!
+        entry.impressions += (vs.impressions as number) || 0
+        entry.clicks += (vs.clicks as number) || 0
+      }
+      performanceSnapshots = [...dateAgg.values()]
+        .map(agg => ({
+          master_sku: sku,
+          platform: agg.platform,
+          snapshot_date: agg.snapshot_date,
+          impressions: agg.impressions,
+          clicks: agg.clicks,
+          ctr: agg.impressions > 0 ? agg.clicks / agg.impressions : 0,
+          cvr: 0,
+        }))
+        .sort((a, b) => (b.snapshot_date as string).localeCompare(a.snapshot_date as string))
+        .slice(0, 10)
+    }
+  }
+
+  // Fall back to master-level snapshots
+  if (!performanceSnapshots || performanceSnapshots.length === 0) {
+    const { data: masterSnapshots, error: snapshotsError } = await supabase
+      .from('performance_snapshots')
+      .select('*')
+      .eq('master_sku', sku)
+      .order('snapshot_date', { ascending: false })
+      .limit(10)
+    if (snapshotsError) {
+      console.error('Error fetching performance snapshots:', snapshotsError)
+    }
+    performanceSnapshots = masterSnapshots
   }
 
   const { data: publishEvents, error: publishEventsError } = await supabase
