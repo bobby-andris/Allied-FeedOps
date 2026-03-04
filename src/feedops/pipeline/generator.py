@@ -1,25 +1,15 @@
 """Candidate generator using LLM providers."""
 
 import asyncio
-import hashlib
-import inspect
 import json
 import logging
-import os
 import re
-import time
 
 from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_category_guidance,
     get_finish_list,
     get_system_prompt,
-)
-from feedops.api.generation_telemetry import estimate_openai_cost_usd_from_usage
-from feedops.api.runtime_controls import (
-    diagnostic_mode_enabled,
-    diagnostic_skip_finish_subcall_enabled,
-    request_cost_usd_cap,
 )
 from feedops.api.prompt_builder import (
     build_bing_prompt,
@@ -34,7 +24,6 @@ from feedops.generation.executor import (
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.evidence import (
     build_evidence_table,
-    filter_evidence_for_copy_context,
     format_evidence_markdown,
 )
 from feedops.pipeline.finish_sentence_placeholder import build_fallback_finish_sentences
@@ -47,13 +36,7 @@ from feedops.pipeline.keyword_placement import (
     validate_candidate_keyword_placement,
 )
 from feedops.pipeline.prompts import (
-    BING_SCHEMA,
     CANDIDATE_SCHEMA,
-    FINISH_SENTENCES_SCHEMA,
-    FINISH_CONTEXT_TEMPLATE,
-    GOOGLE_SCHEMA,
-    SHOPIFY_SCHEMA,
-    VARIANT_USER_PROMPT_TEMPLATE,
 )
 from feedops.pipeline.segment_strategy import (
     SegmentStrategy,
@@ -63,134 +46,10 @@ from feedops.pipeline.segment_strategy import (
 from feedops.pipeline.feature_flags import is_segment_strategy_v1_enabled
 from feedops.pipeline.title_normalization import trim_title_to_length
 from feedops.providers.base import LLMProvider
+from feedops.api.utils import GenerationBudgetExceededError  # re-exported for callers; no circular import (utils has no feedops.* imports)
 
 logger = logging.getLogger(__name__)
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
-
-
-class GenerationBudgetExceededError(RuntimeError):
-    """Raised when estimated request cost exceeds configured per-request budget."""
-
-    def __init__(
-        self,
-        *,
-        cap_usd: float,
-        estimated_cost_usd: float,
-        platform: str,
-    ) -> None:
-        self.cap_usd = float(cap_usd)
-        self.estimated_cost_usd = float(estimated_cost_usd)
-        self.platform = platform
-        super().__init__(
-            "generation_request_budget_exceeded:"
-            f" platform={platform} estimated_cost_usd={estimated_cost_usd:.6f}"
-            f" cap_usd={cap_usd:.6f}"
-        )
-
-
-def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> str:
-    """Resolve per-platform reasoning effort."""
-    if platform == "finish":
-        return "low"
-    return default_reasoning_effort
-
-
-def _platform_completion_cap(platform: str, base_cap: int) -> int:
-    """Apply per-platform completion caps for v2 generation.
-
-    We intentionally *bound* completion budgets to reduce long-tail latency and
-    runaway spend during strict JSON generation. Callers can pass a lower cap,
-    but platform-specific hard limits prevent overly large completions.
-
-    Defaults are tuned to avoid GPT-5.x strict-JSON truncation for description
-    generation while remaining bounded by request-level cost and retry limits.
-    Limits are configurable by env when tighter controls are needed.
-    """
-    normalized_cap = max(1, int(base_cap))
-    default_cap = max(1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_DEFAULT", "8000")))
-    finish_cap = max(
-        1,
-        int(
-            os.getenv(
-                "FEEDOPS_PLATFORM_COMPLETION_CAP_FINISH",
-                os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_DEFAULT", "2000"),
-            )
-        ),
-    )
-    platform_limits = {
-        "google": max(
-            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_GOOGLE", str(default_cap)))
-        ),
-        "bing": max(
-            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_BING", str(default_cap)))
-        ),
-        "shopify": max(
-            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_SHOPIFY", str(default_cap)))
-        ),
-        "finish": finish_cap,
-    }
-    limit = platform_limits.get(platform)
-    if limit is None:
-        return normalized_cap
-    return min(normalized_cap, limit)
-
-
-def _payload_value_lengths(payload: dict[str, object]) -> dict[str, int]:
-    """Return best-effort character lengths for payload values."""
-    lengths: dict[str, int] = {}
-    for key, value in payload.items():
-        if isinstance(value, str):
-            lengths[key] = len(value.strip())
-        elif value is None:
-            lengths[key] = 0
-        else:
-            lengths[key] = len(str(value))
-    return lengths
-
-
-async def _generate_with_provider_compat(
-    *,
-    provider: LLMProvider,
-    prompt: str,
-    schema: dict[str, object],
-    system_prompt: str,
-    reasoning_effort: str,
-    max_completion_tokens: int,
-) -> dict[str, object]:
-    """Call provider.generate while tolerating legacy test doubles.
-
-    Some older tests still use lightweight provider stubs that only accept
-    `(prompt, schema, system_prompt)`. Runtime providers accept the newer
-    keyword arguments. We introspect the callable and pass only supported args.
-    """
-    generate_fn = provider.generate
-    signature = inspect.signature(generate_fn)
-    accepts_varkw = any(
-        param.kind == inspect.Parameter.VAR_KEYWORD
-        for param in signature.parameters.values()
-    )
-    kwargs: dict[str, object] = {
-        "prompt": prompt,
-        "schema": schema,
-        "system_prompt": system_prompt,
-    }
-    if accepts_varkw or "reasoning_effort" in signature.parameters:
-        kwargs["reasoning_effort"] = reasoning_effort
-    if accepts_varkw or "max_completion_tokens" in signature.parameters:
-        kwargs["max_completion_tokens"] = max_completion_tokens
-    return await generate_fn(**kwargs)
-
-
-def _schema_hash(schema: dict[str, object]) -> str:
-    """Return stable hash for schema diagnostics."""
-    canonical = json.dumps(schema, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-
-
-def _prompt_hash(system_prompt: str, user_prompt: str) -> str:
-    """Return stable hash for per-platform prompt provenance."""
-    combined = f"{system_prompt}\n\n{user_prompt}"
-    return hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
 
 def _resolve_requested_platforms(
@@ -505,20 +364,6 @@ async def generate_per_platform(
             "Ignoring non-v2 prompt_version=%s; per-platform generation is mandatory.",
             prompt_version,
         )
-    normalized_platforms = {
-        str(platform).strip().lower()
-        for platform in (selected_platforms or ("google", "bing", "shopify", "finish"))
-        if str(platform).strip()
-    }
-    normalized_content_types = {
-        str(content_type).strip().lower()
-        for content_type in (selected_content_types or ("title", "description"))
-        if str(content_type).strip()
-    }
-    include_finish = (
-        "description" in normalized_content_types
-        and any(platform in {"google", "bing"} for platform in normalized_platforms)
-    )
     try:
         response = await execute_generation_legacy_payload(
             parent_sku=parent_sku,
@@ -737,200 +582,3 @@ async def generate_candidates(
 
     return candidates, errors
 
-
-# ---------------------------------------------------------------------------
-# VARIANT-SPECIFIC GENERATION (finish-integrated content)
-# ---------------------------------------------------------------------------
-# These functions generate content for specific finish variants directly from
-# the LLM, rather than post-processing master SKU content. This produces more
-# natural finish integration in descriptions.
-# ---------------------------------------------------------------------------
-
-
-def _variant_generation_enabled() -> bool:
-    """Check if variant-at-LLM-time generation is enabled."""
-    value = os.getenv("FEEDOPS_VARIANT_AT_LLM_TIME")
-    if value is None:
-        return False
-    return value.strip().lower() in {"1", "true", "yes"}
-
-
-def build_variant_prompt(
-    parent_sku: ParentSKU,
-    finish_name: str,
-    platform: str = "google",
-) -> tuple[str, str]:
-    """Build prompt with finish context for variant generation.
-
-    Args:
-        parent_sku: The parent SKU to optimize.
-        finish_name: The specific finish for this variant (e.g., "Antique Brass").
-        platform: Target platform (google, bing, shopify).
-
-    Returns:
-        Tuple of (system_prompt, user_prompt) with finish context injected.
-    """
-    evidence = build_evidence_table(parent_sku)
-    evidence_markdown = format_evidence_markdown(evidence)
-    keyword_plan = build_keyword_placement_plan(parent_sku, evidence)
-    keyword_placement = format_keyword_placement_section(keyword_plan)
-    segment_strategy = _resolve_segment_strategy(parent_sku)
-    gold_examples = format_gold_standard_examples_bundle(max_examples=2)
-    gold_examples_section = (
-        f"\n## Gold Standard Examples\n{gold_examples}\n" if gold_examples else ""
-    )
-
-    # Get finish metadata for context
-    finish_meta = get_finish_metadata(finish_name) or {}
-    finish_category = finish_meta.get("category", "metallic")
-    finish_character = finish_meta.get("functional_description", "")
-    style_affinities = finish_meta.get("style_affinities", [])
-    style_context = ", ".join(style_affinities) if style_affinities else "versatile"
-
-    # Platform-specific emphasis
-    platform_emphasis = {
-        "google": "material coordination and searchable attributes",
-        "bing": "explicit finish synonyms and literal keyword matching",
-        "shopify": "design aesthetic and buyer appeal",
-    }.get(platform, "natural integration")
-
-    # Build finish context
-    finish_context = FINISH_CONTEXT_TEMPLATE.format(
-        finish_name=finish_name,
-        finish_category=finish_category,
-        finish_character=finish_character,
-        style_context=style_context,
-        platform_emphasis=platform_emphasis,
-    )
-
-    # Build variant SKU identifier
-    variant_sku = f"{parent_sku.master_sku}-{finish_name.upper().replace(' ', '-')[:3]}"
-
-    # Build user prompt with finish context
-    user_prompt = VARIANT_USER_PROMPT_TEMPLATE.format(
-        evidence_table=evidence_markdown,
-        keyword_placement=keyword_placement,
-        category_guidance=get_category_guidance(parent_sku.category),
-        segment_strategy_guidance=format_segment_strategy_guidance(segment_strategy),
-        customer_context=parent_sku.category or "",
-        competitive_context="",
-        finish_context=finish_context,
-        gold_examples=gold_examples_section,
-        schema=json.dumps(CANDIDATE_SCHEMA, indent=2),
-        variant_sku=variant_sku,
-        finish_name=finish_name,
-    )
-
-    return get_system_prompt(), user_prompt
-
-
-async def generate_variant_candidate(
-    parent_sku: ParentSKU,
-    finish_name: str,
-    llm: LLMProvider,
-    platform: str = "google",
-) -> Candidate:
-    """Generate a finish-specific candidate directly from LLM.
-
-    This produces content where the finish is naturally integrated into the
-    description, rather than being awkwardly injected via post-processing.
-
-    Args:
-        parent_sku: The parent SKU to optimize.
-        finish_name: The specific finish for this variant (e.g., "Antique Brass").
-        llm: The LLM provider to use.
-        platform: Target platform (google, bing, shopify).
-
-    Returns:
-        Candidate with finish-integrated content.
-    """
-    system_prompt, user_prompt = build_variant_prompt(parent_sku, finish_name, platform)
-
-    # Fetch image if available
-    image = None
-    if parent_sku.variants:
-        main_image_url = parent_sku.variants[0].main_image_url
-        if main_image_url:
-            image = await fetch_image(main_image_url)
-
-    response = await llm.generate(
-        user_prompt,
-        CANDIDATE_SCHEMA,
-        image=image,
-        system_prompt=system_prompt,
-    )
-
-    candidate = parse_candidate_response(response)
-    strategy = _resolve_segment_strategy(parent_sku)
-    candidate = candidate.model_copy(
-        update={
-            "generation_metadata": {
-                "segment_strategy_id": strategy.id,
-                "segment_strategy_name": strategy.name,
-            }
-        }
-    )
-    logger.info(
-        "Applied segment strategy for variant generation",
-        extra={
-            "master_sku": parent_sku.master_sku,
-            "finish_name": finish_name,
-            "segment_strategy_id": strategy.id,
-            "segment_strategy_name": strategy.name,
-        },
-    )
-
-    # Validate that finish appears in the description
-    desc_lower = candidate.google_description.lower()
-    if finish_name.lower() not in desc_lower:
-        # Log warning but don't fail - the content may still be good
-        logging.warning(
-            f"Finish '{finish_name}' not found in generated description for {parent_sku.master_sku}"
-        )
-
-    return candidate
-
-
-async def generate_variant_candidates_batch(
-    parent_sku: ParentSKU,
-    finish_names: list[str],
-    llm: LLMProvider,
-    platform: str = "google",
-    max_concurrent: int = 5,
-) -> tuple[dict[str, Candidate], list[str]]:
-    """Generate candidates for multiple finish variants in parallel.
-
-    Args:
-        parent_sku: The parent SKU to optimize.
-        finish_names: List of finish names to generate variants for.
-        llm: The LLM provider to use.
-        platform: Target platform.
-        max_concurrent: Maximum concurrent LLM calls.
-
-    Returns:
-        Tuple of (finish_name -> Candidate dict, list of errors).
-    """
-    semaphore = asyncio.Semaphore(max_concurrent)
-
-    async def _generate_one(finish: str) -> tuple[str, Candidate | Exception]:
-        async with semaphore:
-            try:
-                candidate = await generate_variant_candidate(
-                    parent_sku, finish, llm, platform
-                )
-                return (finish, candidate)
-            except Exception as e:
-                return (finish, e)
-
-    results = await asyncio.gather(*[_generate_one(f) for f in finish_names])
-
-    candidates: dict[str, Candidate] = {}
-    errors: list[str] = []
-
-    for finish, result in results:
-        if isinstance(result, Exception):
-            errors.append(f"{finish}: {result}")
-        else:
-            candidates[finish] = result
-
-    return candidates, errors

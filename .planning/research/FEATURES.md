@@ -1,187 +1,150 @@
 # Feature Research
 
-**Domain:** Python pipeline decomposition, LLM provider abstraction, and model evaluation
+**Domain:** E-commerce data infrastructure — lifecycle management for performance data, dead code cleanup, and cross-platform entity mapping
 **Researched:** 2026-03-03
-**Confidence:** HIGH (direct codebase analysis, existing tests, project briefs)
+**Confidence:** HIGH (all findings from live codebase inspection and pre-existing `/tmp/` research reports)
 
 ---
 
 ## Context: What Already Exists
 
-Before categorizing features as table stakes vs differentiators, it's important to note what the codebase already has — so the roadmap targets gaps, not rebuilds:
+This is a subsequent milestone. The features below address gaps in an existing, production system — not a greenfield build.
 
-**Already implemented (do not re-build):**
-- `providers/base.py` — Abstract `LLMProvider` with `generate()`, `health_check()`, `aclose()`, `name`
-- `providers/openai_provider.py` — OpenAI/GPT-5.2 provider (has the 5 known bugs)
-- `providers/gemini_provider.py` — Gemini provider
-- `providers/factory.py` — `get_provider()` with fallback chain, `FallbackProvider` class
-- `providers/reliability.py` — Circuit breaker, retry backoff
-- `quality/eval_framework.py` — Automated check suite (banned words, brand position, char limits, description structure)
-- `tests/test_eval_framework.py` — Tests for eval checks and regression runner
-- `tests/test_providers.py` — Tests for base, OpenAI, Gemini providers
-- `api/generation_telemetry.py` — Cost estimation, telemetry extraction (already split from main.py)
-- `api/hybrid_generation.py` — Variant adaptation logic (already split)
-- `api/multi_sku_detection.py` — Family detection (already split)
-- Several routers already split: search_insights, monitoring, gmc_sync, performance_baseline
+**Already implemented and working:**
+- Performance baseline capture (on-demand, 274/~2,500 SKUs covered)
+- Search term sync (on-demand, 189K rows)
+- Keyword planner enrichment (cached 30-day TTL)
+- Funnel tier daily snapshots (working — correct unique constraint)
+- Daily performance snapshot capture (scheduled, but broken — see bug below)
+- Slack webhook notifications for job status
+- `run_async_in_thread()` background task pattern
+- Google Ads integration: `shopping_performance_view` batch queries (chunked 25 IDs, 5 parallel threads)
+- `variant_index` as the central entity mapping hub (72K rows)
 
 **The actual gaps targeted by this milestone:**
-- Claude (`anthropic`) provider — not yet implemented
-- `main.py` still has ~30 Pydantic schemas, ~10 persistence functions, ~8 job management functions, ~4 remaining telemetry functions, ~5 finish processing functions, ~5 generation core functions, and 2 large batch processors (500+ lines each)
-- GPT-5.2 bugs are confirmed unfixed in `openai_provider.py:168-185`
-- Unified `JobRunner` replacing the duplicated batch processors
-- Head-to-head evaluation of Claude vs GPT-5.2 on real content
+- `performance_snapshots` missing unique constraint (daily job fails silently since launch)
+- ~200+ lines of dead code across generator.py and extracted API modules
+- ~130 lines of backward-compat re-exports in main.py (only exist for test compatibility)
+- Offer ID case mismatch inconsistently handled in performance query paths
+- Image support wired in legacy path but not in the modern per-platform generation path
+- Only 274/~2,500 master SKUs have performance baselines (on-demand only, no bulk coverage)
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Must Have — Decomposition Fails Without These)
+### Table Stakes (Users Expect These)
+
+Features the system must have for the data layer to be considered production-ready. Missing any of these means daily scheduled jobs failing silently, or metrics that cannot be trusted.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| All existing API endpoints work identically post-decomposition | Backward compat is the #1 constraint — the dashboard calls these endpoints in production | HIGH | Test with curl against live endpoint after each extraction; routes must remain at same paths |
-| `run_async_in_thread()` preserved in new structure | Background jobs die without this pattern on Cloud Run scale-to-zero | MEDIUM | Must survive extraction to job_management module; cannot be replaced with BackgroundTasks |
-| Unit tests for each extracted module | The entire point of decomposition is testability — without tests, extraction has no verification | MEDIUM | Each module (`schemas`, `persistence`, `job_management`, `telemetry`, `finish_processing`, `generation`) needs pytest coverage |
-| Finish placeholder contract unchanged | `{FINISH_NAME}` and `{FINISH_SENTENCE}` are enforced at write time; breaking this corrupts all variant expansion | LOW | `_enforce_write_time_finish_placeholder_contract()` must move intact to `finish_processing` module |
-| Prompt authority chain preserved | `prompt_builder.py` → `prompts.py` → `prompt_loader.py` → `shopping_intelligence.py` is the runtime source of truth | LOW | Decomposition must not alter import paths that break this chain |
-| Generation quality unchanged after decomposition | 98% human approval rate must not regress | MEDIUM | Run eval framework on sample SKUs before/after extraction; Phase 27 proved even refactors can break GPT-5.2 |
-| Claude provider implements `LLMProvider` interface | Provider abstraction is useless without a Claude implementation to compare | MEDIUM | `generate()`, `health_check()`, `aclose()`, `name` — same contract as OpenAI and Gemini providers |
-| GPT-5.2 temperature/reasoning_effort conflict fixed | Passing both is mutually exclusive on GPT-5.2 — currently always passes `temperature=0.7` alongside reasoning_effort | LOW | `openai_provider.py:168-185` — remove temperature when reasoning_effort is set |
-| GPT-5.2 reasoning_effort default fixed | When `FEEDOPS_REASONING_EFFORT` env var is unset, no reasoning is sent; GPT-5.2 defaults to zero reasoning | LOW | Default to `"medium"` when unset |
-| Bing `{FINISH_NAME}` bug fixed | 85/98 Bing titles have hardcoded finish names — variant expansion is broken for all of them | MEDIUM | Fix prompt instruction in Bing section of `prompts.py`; requires incremental deploy-and-test protocol |
-| Regenerate 85 broken Bing titles | Bug fix is useless if existing broken content remains in database | MEDIUM | Batch regeneration of affected Bing titles with corrected placeholder behavior |
+| **performance_snapshots upsert constraint** | Daily snapshot job (2:45 AM ET) fails with PostgreSQL 42P10 every run — the table has no unique constraint on `(master_sku, platform, environment, snapshot_date)` yet the upsert code specifies exactly those columns | LOW | Single `ALTER TABLE` migration. Root cause confirmed: `performance_impact.py:461`. All other 6 data tables already have correct constraints. |
+| **Impact scores population** | `performance_impact_scores` has 0 rows because it depends on snapshots — the upsert bug cascades. Without impact scores, post-publish ROI measurement is invisible | LOW | Unblocked entirely by the constraint fix above; no code change needed in `compute_and_store_impact_scores()`. |
+| **Consistent offer ID normalization** | Google Ads returns `shopify_US_` (uppercase); `variant_index` stores `shopify_us_` (lowercase). Search term code normalizes correctly. Performance baseline code does not — it passes `variant_index.gmc_offer_id` values directly | MEDIUM | Audit all Google Ads query paths; apply normalization at the integration boundary in `google_ads_performance.py`, not at every call site. |
+| **Dead function removal (trivially safe)** | 8 functions confirmed as completely orphaned — no callers at runtime or in tests: `_payload_value_lengths`, `_schema_hash`, `_prompt_hash`, `_generate_with_provider_compat` in generator.py; `_provider_label` re-export in finish_processing.py; finish processing re-exports in generation.py (lines 26-30); `build_variant_adaptation_prompt` in tasks.py; `serialize_task_result` in generation/persistence.py | LOW | Mechanical deletion. No callers anywhere. Reduces ~200 lines of noise with zero risk. |
+| **main.py backward-compat re-export cleanup** | ~130 lines of re-exports in main.py (lines 174-304) exist only because 5+ test files import from `feedops.api.main` rather than the actual extracted modules. This is maintenance debt from DECOMP-09 | MEDIUM | Update 5 test files to import from real module locations, then delete the re-export block. Listed test files: `test_phase7_observability_reliability.py`, `test_generation_runtime_scope_contract.py`, `test_query_intent_lineage.py`, `test_finish_prompt_source_contract.py`, `test_main_master_sku_alias_runtime.py`. |
+| **Image support wiring in executor.py** | The modern per-platform generation path (`/regenerate`, `/optimize-sku`, `/batch-optimize`, `/hybrid-generate`) does NOT send product images to the LLM. Only the legacy `optimize.py` CLI path sends images. Provider infrastructure already supports it (Claude + OpenAI both accept `ImageInput`). Gap is ~15 lines of wiring | LOW | Additive — no refactor required. Fetch image once before task loop in `execute_generation_bundle()`, pass through `_generate_with_provider_compat()`. Skip image for finish sentence tasks (they don't need it). |
 
-### Differentiators (Competitive Advantage for this Internal Milestone)
+### Differentiators (Competitive Advantage)
+
+Features that go beyond fixing bugs and improve data quality and coverage scale.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Unified `JobRunner` replacing duplicated batch processors | Eliminates 500+ lines of near-identical logic in `process_batch_job()` and `process_hybrid_batch_job()`; reduces maintenance surface and future bug duplication | HIGH | ~60% shared logic between the two; must produce identical results to current implementation; depends on clean Phase 1 extraction |
-| `json_schema` strict mode replacing `json_object` | Eliminates the retry loops caused by GPT-5.2 returning non-conformant JSON in legacy mode; tokens wasted on retry are significant at batch scale | MEDIUM | `openai_provider.py` — switch response_format type; verify schema builder `_build_strict_schema()` already handles this correctly |
-| Prompt cache retention for batch runs | `prompt_cache_retention: "24h"` means the static system prompt (18K tokens) is cached across the entire batch run, not just 5-10 minutes | LOW | Adds one header to OpenAI API calls; meaningful cost reduction for 120+ SKU batches |
-| Head-to-head model evaluation with human scoring | Produces evidence-based data on Claude vs GPT-5.2 quality, cost, and latency — replaces speculation with measurement | HIGH | 10 diverse SKUs, both providers, human scoring by Bobby/Robert on title quality, description quality, brand voice, accuracy; needs result storage format |
-| Cost/quality/latency tradeoff documentation | Makes future provider decisions (and budget conversations) data-driven | LOW | Tabular output from evaluation: cost per SKU, p50/p95 latency, composite eval score, human score |
-| `factory.py` support for Claude provider | `get_provider(preferred="claude")` works without code changes — env var `ANTHROPIC_API_KEY` controls availability | LOW | Follows same pattern as existing OpenAI/Gemini factory logic |
-| XML tag prompt structure for GPT-5.2 | GPT-5.2 parses XML tags better than `=== ===` headers — documented in `gpt52-best-practices.md` | MEDIUM | Requires incremental deploy-and-test per Phase 27 protocol; treat as one change at a time |
-| `main.py` reduced to <500 lines | Route definitions only — makes the file reviewable, approachable for future contributors | MEDIUM | Measured success criterion from project brief; achieved by extracting all 7 identified concern groups |
-| Stale job recovery preserved in extraction | Startup sweep that marks stuck `processing` jobs as `failed` must survive lifespan context move | LOW | Currently in `_app_lifespan` in main.py; move to `job_management` module but keep lifespan hook |
+| **Full catalog baseline backfill** | Only 274/~2,500 master SKUs have performance baselines (captured on-demand only). Backfilling all active SKUs provides a data-driven benchmark for every content optimization decision | MEDIUM | Use existing `fetch_batch_product_performance()` (chunked 25 IDs, 5 parallel threads). Validate whether the existing `feedops-daily-incremental-refresh` scheduler already handles this incrementally — if not, extend the `/backfill/start` endpoint to support a full-catalog sweep. |
+| **Scheduled search term sync** | 189K search term rows exist but sync only triggers on SKU selection/regeneration. If no regeneration happens for 7+ days, search intelligence goes stale. A weekly scheduled sync keeps data fresh independently | LOW | The endpoint `/search-insights/sync` already exists and works. Add a `feedops-weekly-search-sync` Cloud Scheduler job pointing to it. Near-zero implementation cost. |
+| **Generator.py duplicate consolidation** | 3 functions are duplicated between generator.py and executor.py: `_platform_reasoning_effort`, `_platform_completion_cap`, `_resolve_requested_platforms`. After test imports are updated, consolidating to executor.py as the single source eliminates divergence risk | MEDIUM | Blocked on test import updates first. After that, mechanical — redirect calls to executor.py version and delete generator.py copies. |
+| **Circular import resolution** | `_require_request_id()` is duplicated in `persistence.py` and `job_management.py` because a direct import would create a circular dependency. Extracting to a shared `feedops.api.utils` module eliminates the duplication cleanly | LOW | Low risk. Requires import graph analysis to confirm the extracted location does not introduce new cycles. |
 
-### Anti-Features (Deliberately Avoid)
+### Anti-Features (Commonly Requested, Often Problematic)
+
+Features that seem like natural next steps but should be explicitly deferred.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Batching prompt changes during GPT-5.2 bug fixes | Faster to fix all 5 bugs at once | Phase 27 proved even single text changes can break GPT-5.2 strict JSON mode — batching makes it impossible to isolate which change caused regression | Fix one bug per deploy, curl-verify, then proceed |
-| Replacing `run_async_in_thread()` with `asyncio.create_task()` or `BackgroundTasks` | Cleaner FastAPI idioms | Cloud Run containers scale to zero mid-request; BackgroundTasks die with the response; jobs would silently terminate | Keep non-daemon thread pattern; document the reason clearly in extracted module |
-| Full eval UI in dashboard | Nice for visibility | Out of scope for this milestone; dashboard changes are explicitly excluded; adding UI scope creep risks blocking pipeline work | Store eval results as JSON files or Supabase rows; read with existing dashboard tooling later |
-| Prompt content rewriting as part of decomposition | Tempting to improve content during refactor | Phase 27 proved GPT-5.2 is hyper-sensitive; refactoring modules changes import paths and may subtly alter prompt construction; mixing concerns multiplies risk | Decompose first with zero prompt changes; fix GPT-5.2 bugs as a separate discrete phase |
-| Claude as primary provider immediately | If eval shows Claude is better, switch now | Evaluation needs controlled data first; switching before evaluation gives no baseline; also requires verifying Claude handles the 18K token system prompt and finish placeholder contract | Run eval, document results, then make a deliberate provider switch decision in a future milestone |
-| Generic LLM framework (LangChain, LiteLLM) | Abstracts all provider differences | Adds dependency complexity, hides provider-specific behavior that matters for quality (reasoning_effort, prompt caching, json_schema mode), and creates debugging opacity | Maintain thin hand-written provider implementations; the interface is already clean (3 abstract methods) |
-| Parallel decomposition of multiple modules simultaneously | Faster delivery | Circular imports are a real risk when splitting a 3,737-line file; if two modules both need a third thing still in main.py, you get import cycles; also makes CI failures ambiguous | Extract one concern group at a time, run full test suite after each extraction |
-| New database tables or schema changes | Nice to track eval results properly | Deferred migrations (034b, 035b) are explicitly blocked; adding new tables risks applying blocked migrations by accident | Use JSON output files for eval results; existing `generated_content` table for content storage |
+| **Real-time performance data** | Daily data feels stale — "why can't I see today's metrics?" | Google Ads data has inherent 24-48 hour processing lag (conversion data up to 3 days). Real-time polling hits API rate limits and returns incomplete data that changes retroactively. | Keep daily snapshots with rolling D-1/D-2/D-3 lag correction (already implemented in `collect_daily_performance_snapshots()`). Educate via UI on Google Ads data freshness. |
+| **Product-level search term attribution** | "Which specific variant triggered this search?" seems like valuable precision | Google Ads API explicitly prevents joint queries of `search_term` and `product_item_id`. The campaign-level join (up to 10 products per campaign) is an API constraint, not a code limitation. No workaround exists within the standard API. | Accept and document campaign-level attribution. The 189K existing rows are still valuable for keyword optimization even with approximate attribution. |
+| **PMax campaign search term inclusion** | Performance Max campaigns exist and are excluded from search term sync | PMax search term data requires asset group reporting, a different API surface than `search_term_view`. Requires feasibility research against the actual account campaign structure before any implementation attempt. | Flag as P3 pending account audit. Performance metrics (baselines/snapshots) already include PMax data since `shopping_performance_view` has no campaign type filter. |
+| **Bing/Microsoft Ads data integration** | Schema has `platform` column; feels like natural extension | `bing_ads_performance.py` exists in integrations but is likely incomplete. Bing Shopping has a different API structure, campaign types, and attribution model. Adding Bing before Google data is fully operational creates two broken pipelines. | Defer until Google pipeline is validated end-to-end. The `platform` column in `performance_baselines` and `performance_snapshots` already supports it when ready. |
+| **GA4 attribution tables** | Connecting content changes to revenue via GA4 sessions would close the loop | Migration `034b` (4 tables: GA4 attribution) is explicitly deferred per project constraints. 32 TypeScript files already reference tables from migration `035b` that don't exist — adding more deferred tables expands the scope of the problem. | Evaluate as its own milestone after v1.1 is stable. |
+| **Removing optimize.py and the legacy generation path** | Dead code cleanup seems like it should include the full legacy path (~450 lines in generator.py) | `optimize.py` might still be used in the production Dockerfile CMD or as a debugging tool. Removing it without confirming zero production callers could break the CLI pipeline silently. | Audit the Dockerfile CMD and any scripts invoking `optimize.py` FIRST. Only remove after confirming no production callers. Mark as P3 pending that audit. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[main.py Schemas extraction]
-    └──enables──> [Unit tests for schemas module]
-    └──enables──> [Persistence extraction] (needs clean schema imports)
-    └──enables──> [Job management extraction] (needs clean schema imports)
+[Snapshot upsert constraint fix (migration)]
+    └──unblocks──> [Impact scores population]
+                       └──enables──> [Post-publish ROI visibility in dashboard]
 
-[Persistence extraction]
-    └──enables──> [Job management extraction] (job state reads/writes need persistence)
-    └──enables──> [Generation extraction] (content persistence needs clean module)
+[Dead function removal — 8 trivially-safe items]
+    └──no dependencies──> [Ship independently, zero risk]
 
-[Job management extraction]
-    └──enables──> [Unified JobRunner] (can't unify what hasn't been isolated)
-    └──preserves──> [run_async_in_thread pattern]
+[Test import updates (5 test files)]
+    └──unblocks──> [main.py re-export removal (~130 lines)]
+    └──unblocks──> [generator.py duplicate consolidation]
+                       └──completes──> [executor.py as single source of truth]
 
-[Generation extraction]
-    └──enables──> [GPT-5.2 bug fixes] (modular isolation makes bugs safer to fix)
-    └──enables──> [Head-to-head evaluation] (both providers use same generation path)
+[Offer ID normalization audit + fix]
+    └──required before──> [Full catalog baseline backfill]
+                              └──enables──> [Data-driven optimization for all 2,500 SKUs]
 
-[GPT-5.2 bug #3: json_schema strict mode]
-    └──validates-against──> [_build_strict_schema() in openai_provider.py] (already implemented)
+[Image wiring in executor.py]
+    └──enhances──> [All modern generation endpoints (/regenerate, /optimize-sku, /batch-optimize)]
+    └──independent of──> [Data infrastructure work — can ship in any phase]
 
-[GPT-5.2 bug #5: XML prompt structure]
-    └──requires──> [Deploy-and-test protocol] (one change, deploy, curl verify)
-    └──conflicts-with──> [Prompt content rewriting] (never mix structural and content changes)
-
-[Claude provider implementation]
-    └──requires──> [LLMProvider base interface] (already exists)
-    └──requires──> [factory.py update] (add "claude" to get_provider())
-    └──enables──> [Head-to-head evaluation]
-
-[Head-to-head evaluation]
-    └──requires──> [Claude provider functional]
-    └──requires──> [GPT-5.2 bugs fixed] (need clean baseline to compare against)
-    └──enhances──> [Cost/quality/latency documentation]
-
-[Bing {FINISH_NAME} bug fix]
-    └──requires──> [Incremental prompt change protocol]
-    └──enables──> [Regenerate 85 broken Bing titles]
-    └──independent-of──> [main.py decomposition] (can run in parallel or after)
+[Generator.py legacy path audit]
+    └──must precede──> [Legacy path removal]
+    └──outcome determines──> [~450 lines removable or preserved]
 ```
 
 ### Dependency Notes
 
-- **Decompose before fixing GPT-5.2 bugs:** Modular isolation means bug fixes happen in a focused, testable file rather than a 3,737-line monolith. This is a risk reduction dependency, not a hard technical one — but strongly recommended.
-- **Fix GPT-5.2 bugs before running evaluation:** The evaluation needs a clean GPT-5.2 baseline. Comparing Claude against a buggy GPT-5.2 produces misleading results.
-- **Claude provider before evaluation:** Obvious — can't run head-to-head without both providers.
-- **Bing bug is independent:** The `{FINISH_NAME}` fix touches `prompts.py` and Supabase batch regeneration — neither depends on main.py decomposition. Can be scheduled before or after decomposition phases.
-- **Unified JobRunner after module extraction:** The two batch processors can only be cleanly unified after their shared logic has been extracted into discrete dependency modules. Attempting unification on the monolith would create a 1,000+ line single function.
+- **Snapshot constraint is the unlocker**: `compute_and_store_impact_scores()` already works correctly. The function exists, the logic is correct, it just has nothing to compute because snapshots cannot be inserted. Zero code changes needed after the schema fix.
+- **Offer ID normalization before backfill**: A full catalog baseline backfill silently fails to match SKUs if the case mismatch is present in the performance query path. Fix normalization first to ensure backfill data is correctly attributed.
+- **Test updates must precede import cleanup**: The main.py re-export block exists specifically for test monkeypatching compatibility. Remove the tests' dependency first, then the re-exports. Never delete re-exports before updating the tests.
+- **Image wiring is fully independent**: Additive (~15 lines), touches no data infrastructure code, has no schema dependencies. Can slot into any phase without ordering constraints.
+- **Legacy path removal requires an audit gate**: Do not remove `generate_candidates` / `build_split_prompt` / `build_prompt` from generator.py until the Dockerfile CMD and any scheduled scripts are inspected. This is not a dependency — it is a required pre-check.
 
 ---
 
 ## MVP Definition
 
-### Phase 1 Deliverable: Decomposed, Tested, Backward-Compatible
+This is a subsequent milestone for an existing production system. "MVP" means: fix the broken daily jobs and reduce codebase noise without introducing regression risk.
 
-- [ ] `schemas.py` extracted with all ~20 Pydantic models — tests pass
-- [ ] `persistence.py` extracted with all ~10 Supabase read/write functions — tests pass
-- [ ] `job_management.py` extracted with job lifecycle functions — tests pass, `run_async_in_thread()` preserved
-- [ ] `finish_processing.py` extracted with placeholder contract enforcement — tests pass
-- [ ] `generation.py` extracted with core generation orchestration — tests pass
-- [ ] `telemetry.py` extracted with remaining metrics functions — tests pass
-- [ ] `main.py` at <500 lines — route definitions only
-- [ ] All API endpoints smoke-tested (curl against deployed Cloud Run)
+### Phase 1 — Bug Fixes and Trivial Cleanup (Zero Risk)
 
-### Phase 2 Deliverable: Unified Job Orchestration
+- [ ] `performance_snapshots` unique constraint migration — the single thing blocking all daily snapshot data
+- [ ] Remove 8 trivially-dead orphaned functions — mechanical deletion, no callers anywhere in runtime or tests
+- [ ] Remove `_provider_label` re-export from finish_processing.py (1 line)
+- [ ] Remove finish processing re-exports from generation.py (4 lines)
 
-- [ ] `JobRunner` class replaces `process_batch_job()` and `process_hybrid_batch_job()`
-- [ ] Batch and hybrid modes produce identical results to current implementation
-- [ ] Job failure recovery tested
+### Phase 2 — Test Cleanup and Import Hygiene (Low Risk)
 
-### Phase 3 Deliverable: Fixed GPT-5.2 + Claude Provider
+- [ ] Update `test_prompt_sanitization_contract.py` to import `_platform_reasoning_effort` and `_platform_completion_cap` from executor.py instead of generator.py
+- [ ] Update `tests/api/test_generation.py` to call `build_core_prompt()` directly instead of deprecated `_build_generation_user_prompt()` wrapper
+- [ ] Update 5 test files to import from extracted modules (not main.py), then delete main.py re-export block
+- [ ] After test updates: remove duplicated `_platform_reasoning_effort`, `_platform_completion_cap`, `_generate_with_provider_compat` from generator.py
 
-- [ ] All 5 GPT-5.2 bugs fixed (incremental, one per deploy)
-- [ ] Claude provider functional with `LLMProvider` interface
-- [ ] `get_provider(preferred="claude")` works
-- [ ] Unit tests for Claude provider
+### Phase 3 — Entity Mapping and Coverage (Medium Risk)
 
-### Phase 4 Deliverable: Model Evaluation
+- [ ] Offer ID normalization — audit `google_ads_performance.py` and any callers; normalize at integration boundary (not call sites)
+- [ ] Wire image support in executor.py (~15 lines, additive, no refactor)
+- [ ] Full catalog baseline backfill — audit `feedops-daily-incremental-refresh` scheduler job; extend or create a one-time sweep if needed
 
-- [ ] 10 diverse SKUs selected and documented
-- [ ] Content generated with both Claude and GPT-5.2
-- [ ] Human scoring completed by Bobby/Robert
-- [ ] Cost/quality/latency comparison documented
+### Decisions Required Before Proceeding
 
-### Phase 5 Deliverable: Bing Fix
+- [ ] Audit Dockerfile CMD and scripts for `optimize.py` invocations — determines whether ~450 lines of legacy generation path in generator.py can be removed
+- [ ] Confirm or deny PMax campaign presence in the Allied Brass Google Ads account — determines whether the search term coverage gap is real
 
-- [ ] Root cause of `{FINISH_NAME}` absence diagnosed in `prompts.py`
-- [ ] Prompt fixed and deployed (incremental protocol)
-- [ ] 85 broken Bing titles regenerated
-- [ ] Variant expansion verified correct
+### Future Consideration (v1.2+)
 
-### Add After Validation
-
-- [ ] Automated regression eval integrated into CI — once eval framework is proven, run on every batch generation to catch regressions automatically
-- [ ] Provider performance dashboard — surface eval results in the existing dashboard UI (future milestone)
-
-### Future Consideration
-
-- [ ] Primary provider switch to Claude — if evaluation demonstrates quality advantage; decision requires human-scored data from Phase 4
-- [ ] LLM-as-judge scoring — supplement human scoring with automated LLM-based quality scoring; requires careful calibration against human ground truth
+- [ ] Scheduled search term sync (weekly Cloud Scheduler job) — simple, but not blocking anything right now
+- [ ] Generator.py legacy path removal — gated on the optimize.py audit
+- [ ] Circular import resolution via shared utils module — technical elegance, not a bug
+- [ ] PMax search term inclusion — requires feasibility research
 
 ---
 
@@ -189,42 +152,69 @@ Before categorizing features as table stakes vs differentiators, it's important 
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Backward-compatible decomposition (Phase 1) | HIGH — unlocks all testability | HIGH | P1 |
-| GPT-5.2 temperature/reasoning_effort fix | HIGH — eliminates a silent quality bug | LOW | P1 |
-| GPT-5.2 reasoning_effort default fix | HIGH — zero reasoning means degraded content | LOW | P1 |
-| Finish placeholder contract preserved | HIGH — broken contract corrupts all variants | LOW | P1 |
-| Claude provider implementation | HIGH — needed for evaluation | MEDIUM | P1 |
-| Bing `{FINISH_NAME}` bug fix | HIGH — 85/98 Bing titles are broken | MEDIUM | P1 |
-| Regenerate 85 broken Bing titles | HIGH — fix without regeneration is useless | MEDIUM | P1 |
-| Unit tests for each extracted module | HIGH — the reason for decomposition | MEDIUM | P1 |
-| Head-to-head evaluation (Phase 4) | HIGH — produces provider decision data | HIGH | P1 |
-| Unified JobRunner (Phase 2) | MEDIUM — reduces maintenance burden | HIGH | P2 |
-| GPT-5.2 json_schema strict mode fix | MEDIUM — reduces retry waste | MEDIUM | P2 |
-| GPT-5.2 prompt cache retention fix | MEDIUM — cost reduction at batch scale | LOW | P2 |
-| GPT-5.2 XML prompt structure fix | MEDIUM — quality improvement, high risk | HIGH | P2 |
-| Cost/quality/latency documentation | MEDIUM — informs future decisions | LOW | P2 |
-| `main.py` <500 lines target | LOW — internal metric, not user-facing | MEDIUM | P2 |
-| LLM-as-judge automated scoring | LOW — nice, but human scoring is ground truth | HIGH | P3 |
-| Provider performance dashboard UI | LOW — deferred; out of milestone scope | HIGH | P3 |
+| Snapshot upsert constraint fix | HIGH — daily job failing since launch; impact scores empty | LOW — single SQL migration | P1 |
+| Remove 8 trivially-dead functions | MEDIUM — codebase clarity | LOW — mechanical deletion | P1 |
+| main.py re-export removal | MEDIUM — 130 lines of maintenance burden | MEDIUM — 5 test files to update | P1 |
+| Generator.py duplicate consolidation | MEDIUM — removes divergence risk | LOW — after test updates | P1 |
+| Offer ID normalization | HIGH — data correctness at scale | MEDIUM — audit + fix 1-2 files | P1 |
+| Image wiring in executor.py | HIGH — all modern generation endpoints gain multimodal input | LOW — 15 lines, additive | P1 |
+| Full catalog baseline backfill | HIGH — 2,226 SKUs currently have no benchmark | MEDIUM — validate/extend scheduler | P2 |
+| Scheduled search term sync | MEDIUM — data freshness without user action | LOW — new scheduler job only | P2 |
+| optimize.py audit + legacy path removal | LOW — risk of silent CLI breakage if rushed | MEDIUM — audit gate required | P3 |
+| PMax search term inclusion | MEDIUM — coverage gap if PMax campaigns active | HIGH — API feasibility unknown | P3 |
+| Circular import shared utils | LOW — technical elegance | LOW — low-risk refactor | P3 |
+| Bing/Microsoft Ads integration | LOW — premature without stable Google pipeline | HIGH — different API surface | DEFER |
+| GA4 attribution tables | MEDIUM — future value for closed-loop optimization | HIGH — scope explosion risk | DEFER |
 
 **Priority key:**
-- P1: Must have for milestone success
-- P2: Should have, complete within milestone if capacity allows
-- P3: Defer to future milestone
+- P1: Must have for milestone — fixes broken production behavior or is near-zero-risk cleanup
+- P2: High value; add once P1 items are stable and verified
+- P3: Nice to have; depends on audit gate or external research
+- DEFER: Explicitly out of scope for this milestone
+
+---
+
+## Data Lifecycle Domain Patterns (Research)
+
+How e-commerce performance data systems typically work — and how Allied-FeedOps aligns or deviates:
+
+### Daily metric collection at scale
+
+Standard pattern: batch API calls with chunking/pagination, parallel threads capped to avoid rate limits, idempotent upserts keyed on natural composite key (not surrogate PK), rolling lookback windows (D-1/D-2/D-3) to account for Google's 24-48 hour data processing lag.
+
+Allied-FeedOps alignment: `fetch_batch_product_performance()` chunks 25 IDs per GAQL query with 5 parallel threads — correct. Rolling D-1/D-2/D-3 lag correction is already implemented and correct in `collect_daily_performance_snapshots()`. The only missing piece is the database constraint that makes idempotent upserts work.
+
+### Schema constraint patterns for upsert-heavy workloads
+
+Standard pattern: composite UNIQUE constraints on the natural key (not just the surrogate PK). For time-series data: `UNIQUE(entity_id, date, partition_key)`. PostgreSQL `ON CONFLICT (cols) DO UPDATE` requires a matching unique constraint or index — not just column names in the upsert call.
+
+Allied-FeedOps alignment: 6 of 7 upsert-heavy tables have correct constraints. `performance_snapshots` is the sole exception — a bug, not a design choice. The fix is one DDL statement.
+
+### Cross-platform entity mapping
+
+Standard pattern: a central hub table with normalized IDs for each platform's native entity references. Case normalization at the integration boundary (not scattered across query sites). The hub table is the single lookup path — APIs never queried with a non-normalized ID.
+
+Allied-FeedOps alignment: `variant_index` (72K rows) is this hub — correct design. The case normalization gap (`shopify_US_` vs `shopify_us_`) is the one violation. Normalization should happen when writing to variant_index, or consistently applied at the integration layer in `google_ads_performance.py`.
+
+### Data quality validation
+
+Standard pattern: row counts and freshness checks surfaced in health endpoints; alerts when scheduled jobs produce zero rows (not just when they error); explicit distinction between "no data" and "zero value"; staleness TTLs enforced at the application layer.
+
+Allied-FeedOps alignment: Slack alerts on job failure (implemented). Zero-row funnel snapshot alerts (implemented). Performance baseline staleness check with 60-day TTL (implemented in ensure-data.ts). Gap: no alert when daily snapshot capture succeeds (no Python error) but produces zero new rows — which is exactly what happens silently due to the constraint bug. The error is PostgreSQL-level, swallowed by the exception handler.
 
 ---
 
 ## Sources
 
-- Direct codebase analysis: `src/feedops/api/main.py` (3,737 lines, function groupings)
-- Direct codebase analysis: `src/feedops/providers/` (base, openai, gemini, factory, reliability)
-- Direct codebase analysis: `src/feedops/quality/eval_framework.py` + `tests/test_eval_framework.py`
-- Project brief: `docs/setup/pipeline-rewrite-brief.md` (Section 3: main.py analysis)
-- Project context: `.planning/PROJECT.md` (Active requirements, out-of-scope items, constraints)
-- Domain knowledge: `CLAUDE.md` (GPT-5.2 Known Issues, Phase 27 learnings, prompt sensitivity)
-- Memory: `memory/MEMORY.md` (Phase 27 critical learnings, Bing bug details)
+- `/tmp/dead-code-research.md` — Full dead code audit conducted 2026-03-03 (HIGH confidence — live codebase inspection with function-level call graph analysis)
+- `/tmp/google-ads-import-research.md` — Google Ads data import pipeline research conducted 2026-03-03 (HIGH confidence — live DB constraint query + source code inspection)
+- `.planning/PROJECT.md` — Milestone definition and confirmed out-of-scope items
+- `src/feedops/monitoring/performance_impact.py` line 461 — Snapshot upsert bug confirmed at exact location
+- `src/feedops/integrations/google_ads_performance.py` — Batch performance fetch implementation (chunked 25 IDs, 5 parallel threads confirmed)
+- `src/feedops/generation/executor.py` — Image wiring gap confirmed in `execute_generation_bundle()` — no `image` parameter passed
+- Live Supabase constraint query (from research report) — confirmed 7 tables, only `performance_snapshots` missing natural key unique constraint
 
 ---
 
-*Feature research for: Pipeline decomposition, LLM provider abstraction, model evaluation*
+*Feature research for: Allied-FeedOps v1.1 — Data Infrastructure Hardening + Dead Code Cleanup*
 *Researched: 2026-03-03*

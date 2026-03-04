@@ -69,14 +69,6 @@ def _format_job_error(exc: Exception) -> str:
     return str(exc)[:2000]
 
 
-def _require_request_id(request_id: str | None) -> str:
-    """Enforce non-placeholder request IDs for lineage writes."""
-    rid = (request_id or "").strip()
-    if not rid or rid == "-":
-        raise RuntimeError("Missing request_id for regeneration lineage write")
-    return rid
-
-
 def _resolve_execution_request_id(request_id: str | None = None) -> str:
     """Resolve a stable request id for non-HTTP execution paths.
 

@@ -44,8 +44,9 @@ from feedops.pipeline.finish_sentence_placeholder import (
     strip_generic_finish_count_claims,
     strip_hardcoded_finish_names,
 )
+from feedops.pipeline.images import fetch_image
 from feedops.pipeline.query_intent_brief import build_query_intent_context
-from feedops.providers.base import LLMProvider
+from feedops.providers.base import ImageInput, LLMProvider
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +117,7 @@ async def _generate_with_provider_compat(
     system_prompt: str,
     reasoning_effort: str,
     max_completion_tokens: int,
+    image: ImageInput | None = None,
 ) -> dict[str, object]:
     generate_fn = provider.generate
     signature = inspect.signature(generate_fn)
@@ -132,6 +134,8 @@ async def _generate_with_provider_compat(
         kwargs["reasoning_effort"] = reasoning_effort
     if accepts_varkw or "max_completion_tokens" in signature.parameters:
         kwargs["max_completion_tokens"] = max_completion_tokens
+    if image is not None and (accepts_varkw or "image" in signature.parameters):
+        kwargs["image"] = image
     return await generate_fn(**kwargs)
 
 
@@ -469,6 +473,25 @@ async def execute_generation_bundle(
         cost_cap_usd=cost_cap_usd,
     )
 
+    image: ImageInput | None = None
+    if parent_sku.variants:
+        main_image_url = parent_sku.variants[0].main_image_url
+        if main_image_url:
+            image = await fetch_image(main_image_url)
+            if image:
+                logger.info(
+                    "image_wired: master_sku=%s source_url=%s bytes=%d",
+                    parent_sku.master_sku,
+                    image.source_url,
+                    len(image.data),
+                )
+            else:
+                logger.debug(
+                    "image_fetch_skipped: master_sku=%s url=%s (fetch returned None)",
+                    parent_sku.master_sku,
+                    main_image_url,
+                )
+
     results: list[TaskResult] = []
     estimated_cost_total_usd = 0.0
 
@@ -501,6 +524,7 @@ async def execute_generation_bundle(
         schema = build_task_schema(spec)
         platform_reasoning = _platform_reasoning_effort(spec.platform, reasoning_effort)
         platform_cap = _platform_completion_cap(spec.platform, max_completion_tokens)
+        task_image = None if spec.platform == "finish" else image
 
         started = time.perf_counter()
         payload = await asyncio.wait_for(
@@ -511,6 +535,7 @@ async def execute_generation_bundle(
                 system_prompt=system_prompt,
                 reasoning_effort=platform_reasoning,
                 max_completion_tokens=platform_cap,
+                image=task_image,
             ),
             timeout=120.0,
         )

@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import pytest
 
-import feedops.api.main as api_main
 import feedops.api.finish_processing as finish_processing_mod
+from feedops.api.prompt_loader import get_finish_list
+from feedops.api.persistence import _assembled_prompt_hash
+from feedops.api.finish_processing import _enforce_finish_sentence_parity
 
 
 @pytest.mark.asyncio
@@ -22,7 +24,7 @@ async def test_finish_sentence_generation_uses_finish_platform_prompt(monkeypatc
         return {
             "finish_sentences": {
                 finish: f"{finish} complements this profile."
-                for finish in api_main.get_finish_list()
+                for finish in get_finish_list()
             }
         }
 
@@ -43,7 +45,7 @@ async def test_finish_sentence_generation_uses_finish_platform_prompt(monkeypatc
         lambda platform: f"platform-system-{platform}",
     )
 
-    content, finish_sentences = await api_main._enforce_finish_sentence_parity(
+    content, finish_sentences = await _enforce_finish_sentence_parity(
         provider=object(),
         content="Wall-mounted towel bar with solid brass construction.",
         master_sku="1031/18",
@@ -54,9 +56,9 @@ async def test_finish_sentence_generation_uses_finish_platform_prompt(monkeypatc
     assert captured_call["system_prompt"] == "platform-system-finish"
     assert "{FINISH_SENTENCE}" in content
     assert finish_sentences is not None
-    assert len(finish_sentences) == len(api_main.get_finish_list())
+    assert len(finish_sentences) == len(get_finish_list())
 
-    expected_hash = api_main._assembled_prompt_hash(
+    expected_hash = _assembled_prompt_hash(
         "platform-system-finish",
         "finish-user-prompt",
     )

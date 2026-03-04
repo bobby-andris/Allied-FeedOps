@@ -1,195 +1,185 @@
 # Project Research Summary
 
-**Project:** Pipeline Reliability Rewrite + Model Evaluation
-**Domain:** FastAPI monolith decomposition + LLM provider abstraction + model evaluation
+**Project:** Allied-FeedOps v1.1 — Data Infrastructure Hardening + Dead Code Cleanup
+**Domain:** E-commerce data lifecycle management — schema constraint design, entity relationship hardening, dead code elimination for a Python/FastAPI content generation pipeline
 **Researched:** 2026-03-03
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This is a subsequent-milestone engineering project, not a greenfield build. The core stack (FastAPI, Pydantic v2, OpenAI SDK, Supabase, Cloud Run) is already in production. The central challenge is safely decomposing a 3,737-line `main.py` monolith into testable modules while preserving a fragile, proven production system — then adding a Claude provider and running a data-driven head-to-head model evaluation. The recommended approach is strictly incremental: extract one concern group at a time, run the full test suite after each step, and never modify prompt content during structural refactoring.
+This is a stabilization milestone for an existing, production-validated system — not a greenfield build. The core architecture (FastAPI on Cloud Run, Supabase PostgreSQL, Google Ads API integration, Claude Sonnet 4.6) is working correctly. The problems being addressed are precision defects: one missing database unique constraint that causes the daily performance snapshot job to silently fail every night, approximately 330+ lines of dead code left behind by the DECOMP-09 decomposition, and an offer ID case mismatch that will corrupt data at bulk operation scale. These are well-understood problems with well-understood fixes. No new technologies are required; all dependencies are already installed.
 
-The highest-leverage work in this milestone is GPT-5.2 bug remediation. Five known bugs exist in `openai_provider.py` (temperature/reasoning_effort conflict, zero reasoning default, legacy `json_object` mode, no prompt cache retention, `=== ===` headers). Each must be fixed as a separate PR with curl verification against `920D-6` before proceeding to the next. Phase 27 proved that even cosmetic prompt changes silently break GPT-5.2 structured output — this risk pervades every phase that touches `prompts.py`. The Bing `{FINISH_NAME}` bug (85/98 titles broken) is a parallel-track fix that does not depend on decomposition and should be addressed alongside or after the GPT-5.2 fixes.
+The recommended approach is to tackle work in strict dependency order: schema migration first (highest value, zero code risk), then trivially-dead function removal (no test entanglement), then image wiring in executor.py (additive feature), then test-import updates followed by re-export block removal (the most coordination-intensive piece), and finally shared utils extraction (optional cleanup). The snapshot constraint fix is the single highest-leverage change in this milestone — it unblocks the impact scores pipeline entirely without touching a line of Python code.
 
-The evaluation is the capstone. Claude (`anthropic>=0.84.0`) must be implemented as a drop-in `LLMProvider` implementation, the GPT-5.2 bugs must be fixed to establish a clean baseline, and then 10 diverse SKUs should be run through both providers with blind human scoring by Bobby/Robert. The risk of LLM-as-judge bias is real and documented — human judgment is the required ground truth. The evaluation must produce concrete cost/latency/quality data, not speculation, before any provider switch decision is made.
-
----
+The key risks are all execution-related, not design-related: removing dead code before updating test imports causes CI failures; adding a unique constraint without deduplicating existing rows fails the migration; scaling bulk baseline fetch to 2,500 SKUs without throttling exhausts the Google Ads API daily quota. Every pitfall has a documented prevention step. The research provides a function-level inventory of all dead code, confirmed constraint audit results, and exact SQL for safe migration sequencing.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The only new dependency is `anthropic>=0.84.0`. Everything else already exists in `pyproject.toml`. The `AsyncAnthropic` client mirrors the `OpenAIProvider` pattern closely, with three key differences: `output_config` (not `response_format`), `max_tokens` (not `max_completion_tokens`), and `system=` as a separate kwarg. Native structured output via `output_config.format.json_schema` eliminates retry loops.
+No new packages are required for this milestone. The full stack — FastAPI 0.109+, Pydantic v2, `supabase>=2.0`, `google-ads>=28.4.1`, `anthropic>=0.84.0` — is already production-validated and installed. The work is pure schema DDL, Python function deletion, and a 15-line additive wiring change.
 
-For module decomposition and evaluation, the existing `pytest + pytest-asyncio + unittest.mock.AsyncMock` toolchain handles everything. No new testing frameworks needed. The evaluation harness should be a custom `pytest.mark.parametrize` test that writes to CSV — `deepeval` and similar frameworks add heavyweight dependencies with no benefit for a 10-SKU human-scored comparison.
+The only new artifact is migration 036 (`ALTER TABLE performance_snapshots ADD CONSTRAINT uq_snapshots_sku_platform_env_date UNIQUE (master_sku, platform, environment, snapshot_date)`) plus a dedup DELETE that must precede it in the same migration file. Migration 032 was previously written and contains the correct constraint definition — 036 is the version that actually gets applied to production.
 
 **Core technologies:**
-- `anthropic>=0.84.0`: Claude SDK — mirrors `OpenAIProvider` pattern, native JSON schema structured output, `AsyncAnthropic` client
-- `claude-sonnet-4-5`: Evaluation model — same tier as GPT-5.2 (capable reasoning at moderate cost), most production-relevant comparison
-- `pytest` + `csv` stdlib: Evaluation harness — zero new dependencies, human scoring in spreadsheet is the ground truth
-- Existing `ruff` + `mypy`: Extraction safety — run after every module extraction to catch circular imports and type contract violations
+- PostgreSQL UNIQUE constraints (native DDL): enforce upsert deduplication — the fix that unblocks the entire daily snapshot pipeline
+- PostgreSQL CHECK constraints (native DDL): extend to `platform` column for domain enforcement, following the pattern already applied to `cohort_type` and `label`
+- `supabase>=2.0` (already installed): execute upserts with `on_conflict=` once constraints are in place
+- `ruff + pytest + mypy` (already configured): safety net for every dead code removal — run after each individual deletion, not in batches
+- `google-ads>=28.4.1` (already installed): no SDK changes needed; PMax is already included in `shopping_performance_view` without filter changes
 
 ### Expected Features
 
-Research identified a clear two-tier feature set. The P1 items are blockers — the milestone fails without them. The P2 items should complete within the milestone if capacity allows.
+The milestone targets two distinct categories: production bug fixes and codebase cleanup. All P1 items fix broken or misleading behavior; P2 items improve coverage and quality; P3 items require an explicit audit gate before proceeding.
 
-**Must have (table stakes / P1):**
-- Backward-compatible decomposition — all existing API endpoints work identically post-extraction
-- `run_async_in_thread()` preserved — background jobs die on Cloud Run without `daemon=False` threads
-- Unit tests for each extracted module — the reason for decomposition is testability
-- Finish placeholder contract unchanged — `{FINISH_NAME}` and `{FINISH_SENTENCE}` must survive extraction intact
-- GPT-5.2 temperature/reasoning_effort conflict fixed — mutually exclusive parameters, currently always broken
-- GPT-5.2 reasoning_effort default fixed — unset env var means zero reasoning; default to `"medium"`
-- Claude provider implementing `LLMProvider` ABC — needed for evaluation
-- Bing `{FINISH_NAME}` bug fixed — 85/98 Bing titles have hardcoded finish names
-- Regenerate 85 broken Bing titles — fix without regeneration leaves broken content in production
-- Head-to-head model evaluation — produces evidence for the provider switch decision
+**Must have (table stakes):**
+- `performance_snapshots` unique constraint migration — daily job has been failing silently since launch; impact scores empty as a result; single SQL statement fix
+- Dead function removal (8 trivially orphaned items) — `_payload_value_lengths`, `_schema_hash`, `_prompt_hash`, legacy `_generate_with_provider_compat` copy in generator.py, `_provider_label` re-export in finish_processing.py, finish processing re-exports in generation.py (lines 26-30), `build_variant_adaptation_prompt` in tasks.py, `serialize_task_result` in generation/persistence.py — mechanical deletion, zero callers anywhere in runtime or tests
+- main.py backward-compat re-export removal — ~130 lines of maintenance debt from DECOMP-09; gated on updating 5 specific test files first
+- Generator.py duplicate consolidation — `_platform_reasoning_effort`, `_platform_completion_cap`, `_resolve_requested_platforms` duplicated between generator.py and executor.py; executor.py becomes single source of truth
+- Offer ID normalization audit — `shopify_US_` (Google Ads) vs `shopify_us_` (database); mismatch causes silent data loss in performance queries; fix at integration boundary in `google_ads_performance.py`
+- Image wiring in executor.py — ~15 lines additive; modern API path (`/regenerate`, `/optimize-sku`, `/batch-optimize`) does not currently send product images to Claude; provider layer already accepts `ImageInput`
 
-**Should have (competitive / P2):**
-- Unified `JobRunner` replacing duplicated batch processors — eliminates 500+ lines of near-identical code
-- GPT-5.2 `json_schema` strict mode (replaces `json_object`) — eliminates retry loops at batch scale
-- GPT-5.2 prompt cache retention (`24h`) — meaningful cost reduction for 120+ SKU batches
-- GPT-5.2 XML tag prompt structure (replaces `=== ===`) — documented quality improvement, highest risk
-- `main.py` reduced to <500 lines — route definitions only
-- Cost/quality/latency comparison documented — makes future provider decisions data-driven
+**Should have (differentiators):**
+- Full catalog baseline backfill — only 274 of ~2,500 master SKUs have performance baselines; backfill infrastructure (`/backfill/start` with `job_type: "performance_metrics"`) already exists; needs throttling at scale
+- Shared utils extraction — `_require_request_id()` duplicated in persistence.py and job_management.py due to circular import; extract to new `feedops/api/utils.py`
 
-**Defer (future milestone / P3):**
-- Provider performance dashboard UI — out of scope; store eval results as JSON/Supabase rows
-- LLM-as-judge automated scoring — supplement human scoring only after calibration against human ground truth
-- Primary provider switch to Claude — requires evaluation data first; switch decision belongs in a future milestone
+**Defer (v2+):**
+- Scheduled weekly search term sync — endpoint exists and works; adding Cloud Scheduler job is trivial but not blocking anything currently
+- optimize.py legacy path removal — ~450 lines; requires explicit audit of Dockerfile CMD and scripts before removal is safe
+- PMax search term inclusion — requires feasibility research against actual account campaign structure
+- Bing/Microsoft Ads integration — schema supports it; defer until Google pipeline is validated end-to-end
+- GA4 attribution tables — migrations 034b/035b explicitly deferred; 32 TypeScript files already reference missing tables
 
 ### Architecture Approach
 
-The target architecture separates a 3,737-line monolith into four layers: API entry (`main.py` at <500 lines), route modules (`api/routers/`), service/logic layer (extracted `JobRunner`, `FinishService`, `GenerationService`), and the existing provider abstraction layer (add `ClaudeProvider`). The extraction order is determined by the import dependency graph: `schemas` first (no dependencies), then `FinishService`, then `GenerationService`, then `JobRunner`, then route routers, then `main.py` slim-down. Provider work (Claude) runs in parallel with extraction phases 1-4 because it touches only `providers/claude_provider.py` and `providers/factory.py`.
+The system is a dual-layer architecture: Python/FastAPI on Cloud Run handles content generation and data collection; Next.js on Vercel handles review and publishing. This milestone operates exclusively on the Python layer and database schema. The central entity hub is `variant_index` (72K rows), which maps `gmc_offer_id` (lowercase) to `master_sku`, `shopify_product_id`, `shopify_variant_id`, and `finish_code`. Three Cloud Scheduler jobs drive daily automated data collection at 2:15 AM, 2:45 AM, and 6:00 AM UTC. The only new file created in v1.1 is `feedops/api/utils.py` to resolve a circular import.
 
 **Major components:**
-1. `api/schemas/` — extracted Pydantic models; enables isolated unit testing without importing the full app
-2. `api/job_runner.py` — unified `JobRunner` replacing `process_batch_job` and `process_hybrid_batch_job`; owns lifecycle (status transitions, error handling, thread safety); ~60% shared logic between current functions
-3. `providers/claude_provider.py` — `LLMProvider` ABC implementation using `anthropic.AsyncAnthropic.messages.create()` with `tool_choice` for structured JSON; maps `reasoning_effort` to Claude's `thinking.budget_tokens`
-4. `api/routers/` — `generation.py`, `batch.py`, `hybrid.py`, `images.py`, `admin.py`; existing pattern already used by `search_insights`, `monitoring`, `gmc_sync`, `performance_baseline` routers
+1. `performance_impact.py` — daily snapshot collection and diff-in-diff scoring; broken by missing constraint at line 461; zero code changes needed after migration 036 is applied
+2. `generation/executor.py` — modern per-platform LLM generation path; needs 15-line image wiring addition
+3. `pipeline/generator.py` — legacy path (still active via optimize.py CLI); partial dead code removal only — the `generate_candidates` / `build_split_prompt` / `build_prompt` generation chain must be preserved until an explicit audit confirms optimize.py is retired
+4. `supabase/migrations/` — schema evolution via SQL files; migration 036 must run dedup DELETE before ALTER TABLE in the same migration file
+5. `feedops/api/main.py` — backward-compat re-export block (lines 174-304); removal requires updating 5 test files first, in sequence
 
 ### Critical Pitfalls
 
-1. **GPT-5.2 prompt sensitivity** — Even cosmetic changes to `prompts.py` cause empty/placeholder-only output in strict JSON mode. Prevention: one change per PR, deploy, curl `920D-6`, verify description >500 chars before proceeding. `self_score` and `scoring_rubric` are load-bearing; never remove them without isolated testing.
+1. **Removing dead code before updating test imports** — 5 groups of functions appear dead in production but are imported by tests through the backward-compat re-export chain. Fix sequence: update test import, run pytest, remove dead code, run pytest again. Never batch across multiple functions. Confirmed affected test files: `test_prompt_sanitization_contract.py`, `test_pipeline.py`, `test_generation.py`, `test_phase7_observability_reliability.py`, `test_generation_runtime_scope_contract.py`, `test_query_intent_lineage.py`, `test_finish_prompt_source_contract.py`, `test_main_master_sku_alias_runtime.py`.
 
-2. **Breaking `run_async_in_thread` during decomposition** — If `daemon=False` is changed to `daemon=True` (or replaced with `BackgroundTasks`), batch jobs die silently on Cloud Run. Prevention: extract `run_async_in_thread` to a shared module first, write a unit test asserting `thread.daemon == False`, never change the threading pattern.
+2. **Adding unique constraint to a table with existing duplicate rows** — `performance_snapshots` has 179 rows from early inserts; any duplicates will fail the ALTER TABLE statement with `could not create unique index`. Run the dedup check first; include the dedup DELETE in the same migration file as the ALTER TABLE so they execute atomically.
 
-3. **Shared provider state across SKUs** — If `OpenAIProvider` is instantiated at module level and shared across concurrent SKUs, `_last_usage` and `_last_retry_counts` instance variables produce race conditions. Prevention: call `get_provider()` inside the SKU loop and `close_provider()` in `finally`, exactly as current code does.
+3. **Upsert semantics after constraint fix — last-write-wins corrupts historical snapshots** — after the constraint is added, the existing ON CONFLICT DO UPDATE logic overwrites all columns on re-run. For time-series snapshot data, `ignore_duplicates=True` is the safer semantic: first write wins, re-runs do not corrupt historical data. This is an explicit decision, not a default.
 
-4. **Circular imports during decomposition** — Moving 30+ models and 50+ functions creates cross-module import cycles. Prevention: define the import DAG before writing code (`types → schemas → utilities → persistence → processors → routes`); use `TYPE_CHECKING` guards for type-hint-only imports; run `python -c "import feedops.api.main"` after every extraction step.
+4. **Offer ID case mismatch corrupts bulk data operations** — `variant_index` uses lowercase `shopify_us_`; Google Ads API returns uppercase `shopify_US_`. Joins fail silently: matching SKUs appear to have zero impressions. Create a `normalize_offer_id()` utility and apply it at every integration boundary before any bulk fetch code is written.
 
-5. **Evaluation bias** — If Claude scores Claude outputs or GPT-5.2 scores GPT-5.2 outputs, results are invalid. Prevention: human blind review by Robert is the required ground truth; labels removed, output order randomized; objective rule-violation counting (not holistic scoring) as primary metric alongside cost and latency.
-
----
+5. **Google Ads quota exhaustion during bulk baseline fetch** — 2,500 master SKUs x ~29 offer IDs each = ~72K IDs. At 25 per GAQL query the bulk fetch issues ~2,880 requests, consuming 19% of the 15,000/day quota in one shot. Cap concurrent threads at 3 (not 5), add 200ms inter-batch delays for operations over 100 SKUs, catch `RESOURCE_EXHAUSTED` with exponential backoff.
 
 ## Implications for Roadmap
 
 Based on research, suggested phase structure:
 
-### Phase 1: Schemas Extraction
-**Rationale:** Schemas have zero dependencies (pure Pydantic models). Extracting them first eliminates the most common circular import source and unblocks all subsequent extractions. Tests written here verify the extraction pattern before it's repeated for more complex modules.
-**Delivers:** `api/schemas/` subpackage with all ~20 Pydantic models; unit tests importable without spinning up the full app; proven extraction pattern for subsequent phases
-**Addresses:** Backward compatibility, unit testability (table stakes features)
-**Avoids:** Circular imports (Pitfall 4) — DAG established before any business logic moves
+### Phase 1: Schema Migration — Snapshot Constraint Fix
+**Rationale:** Single highest-leverage change in the milestone. Zero Python code risk. Unblocks the entire daily snapshot collection and impact scores pipeline that has been failing silently since launch. Must come first because impact scores depend on snapshot rows existing.
+**Delivers:** Daily snapshot job succeeds; `performance_impact_scores` starts populating; Slack reports success instead of FAILED. Post-publish ROI visibility in the dashboard becomes operational.
+**Addresses:** P1 — `performance_snapshots` upsert constraint; cascading P1 — impact scores population
+**Avoids:** Pitfall 2 (run dedup query against production first, include DELETE and ALTER TABLE in same migration file); Pitfall 3 (decide `ignore_duplicates=True` semantics explicitly before writing the upsert call); Pitfall 6 (verify Slack webhook binding before declaring complete)
+**Research flag:** Standard pattern — well-documented PostgreSQL DDL + Supabase CLI migration tooling. No additional research needed.
 
-### Phase 2: FinishService and GenerationService Extraction
-**Rationale:** Both services have clean, well-defined interfaces and limited dependencies. `FinishService` owns the finish placeholder contract which must not be broken. Extracting these before `JobRunner` means the job processor can delegate to tested, isolated services.
-**Delivers:** `pipeline/finish_service.py` with placeholder contract; `api/generation_service.py` with metrics wrapper; unit tests for each; prompt authority chain verified intact
-**Addresses:** Finish placeholder contract preserved (table stakes)
-**Avoids:** Prompt content contamination (Pitfall 1) — extract by import path only, zero text changes to `SYSTEM_PROMPT`
+### Phase 2: Trivial Dead Code Removal
+**Rationale:** No test dependencies, no ordering constraints relative to other phases. These 8 items are confirmed orphans with zero callers in production or tests. Fast, zero-risk wins that reduce codebase noise before the more complex test-dependent cleanup in Phase 4.
+**Delivers:** ~200 lines of dead code removed from generator.py, tasks.py, generation/persistence.py, generation.py, finish_processing.py.
+**Addresses:** P1 — 8 trivially orphaned functions
+**Avoids:** Pitfall 7 — do NOT remove the `generate_candidates` / `build_split_prompt` / `build_prompt` chain from generator.py; those functions are called by optimize.py and are explicitly out of scope for this phase
+**Research flag:** Standard pattern — mechanical deletion with ruff + pytest verification after each removal.
 
-### Phase 3: JobRunner and Route Extraction
-**Rationale:** Depends on clean service layer from Phase 2. Route extraction uses the existing `APIRouter` pattern (4 routers already extracted). `JobRunner` unification consolidates the ~60% shared logic between `process_batch_job` and `process_hybrid_batch_job`.
-**Delivers:** Unified `api/job_runner.py`; all remaining routes in `api/routers/`; `main.py` at <500 lines; `run_async_in_thread` extracted to shared location with `daemon=False` test
-**Addresses:** Unified JobRunner (P2 differentiator), `main.py` <500 lines target
-**Avoids:** `run_async_in_thread` breakage (Pitfall 2) — extracted first within this phase with unit test
+### Phase 3: Image Wiring in executor.py
+**Rationale:** Additive feature with no dependencies on Phase 2 or Phase 4. Independent of all data infrastructure work. Placing it as a standalone phase keeps it isolated from the test-import coordination work in Phase 4.
+**Delivers:** All modern generation endpoints (`/regenerate`, `/optimize-sku`, `/batch-optimize`, `/hybrid-generate`) send product images to Claude during generation. Content quality improvement for all SKUs with a `main_image_url` in `variant_index`.
+**Addresses:** P1 — image wiring in executor.py (~15 lines additive)
+**Avoids:** Skip image fetch for finish sentence tasks; handle `image=None` gracefully so SKUs without a product image continue to work unchanged
+**Research flag:** Standard pattern — 15-line addition following the existing `fetch_image()` + `ImageInput` pattern. No additional research needed.
 
-### Phase 4: GPT-5.2 Bug Fixes (5 separate PRs)
-**Rationale:** Must happen after decomposition so fixes are made in isolated, testable files. Must happen before evaluation to establish a clean baseline for comparison. Each fix is a separate PR with curl verification. Order: (1) temperature/reasoning_effort conflict, (2) reasoning_effort default, (3) `json_schema` strict mode, (4) prompt cache retention, (5) XML tag prompt structure (highest risk, last).
-**Delivers:** All 5 GPT-5.2 bugs fixed; clean production baseline; reduced retry waste; improved content quality
-**Addresses:** Both P1 provider bugs; `json_schema` and prompt cache (P2); XML structure (P2, highest risk)
-**Avoids:** Batching prompt changes (anti-feature), silent quality regressions (Pitfall 1)
+### Phase 4: Test-Import Cleanup and Re-export Block Removal
+**Rationale:** The most coordination-intensive work. Must be executed in sub-steps: update one test import, run pytest, remove the dead code, run pytest again. Never remove code before updating the test. The main.py re-export block (130 lines) can only be fully removed after all 5 test files are updated.
+**Delivers:** generator.py reduced by 3 duplicated functions; main.py reduced by ~130 lines of re-export debt; executor.py becomes the single source of truth for per-platform generation utilities.
+**Addresses:** P1 — main.py re-export removal; P1 — generator.py duplicate consolidation
+**Avoids:** Pitfall 1 (critical — never remove a symbol from its source location before updating all test imports pointing to it; run full pytest between each removal)
+**Research flag:** Standard pattern — known test files catalogued with exact import citations in dead-code-research.md. No additional research needed, but requires careful sequential execution.
 
-### Phase 5: Claude Provider and Factory
-**Rationale:** Can run in parallel with Phases 1-3. Placed here to ensure GPT-5.2 baseline is clean before evaluation. Uses the existing `LLMProvider` ABC — additive change only, no existing code modified.
-**Delivers:** `providers/claude_provider.py` with `tool_choice` structured output; `factory.py` updated for `ANTHROPIC_API_KEY`; unit tests; `get_provider(preferred="claude")` functional; tested against all three platforms (google, bing, shopify)
-**Addresses:** Claude provider (table stakes for evaluation)
-**Avoids:** Schema incompatibility (Pitfall 5) — test with production schema on 3 diverse SKUs before declaring complete
+### Phase 5: Entity Mapping and Bulk Coverage
+**Rationale:** Offer ID normalization must precede bulk baseline backfill — a case mismatch in a 2,500-SKU fetch silently creates thousands of zero-impression baseline records. Fix normalization at the integration boundary first, then extend coverage.
+**Delivers:** Offer ID normalization utility in `google_ads_performance.py`; full catalog baseline backfill for all ~2,500 master SKUs (up from 274 currently). All content optimization decisions become data-driven.
+**Addresses:** P1 — offer ID normalization; P2 — full catalog baseline backfill
+**Avoids:** Pitfall 4 (normalization utility before any bulk fetch code is written); Pitfall 5 (3-thread cap, 200ms inter-batch delay, `RESOURCE_EXHAUSTED` catch with exponential backoff; test against 50-SKU sample before running full catalog sweep)
+**Research flag:** Bulk backfill scale needs pre-run validation. Test against 50 SKUs with throttling before running full 2,500-SKU sweep. Monitor Google Ads API Center for quota consumption before and after the test run.
 
-### Phase 6: Model Evaluation
-**Rationale:** Requires both providers functional and GPT-5.2 baseline clean. Human blind scoring is the ground truth. 10 diverse SKUs selected to cover different categories, collection types, and content complexity.
-**Delivers:** `tests/eval/test_model_comparison.py` with CSV output; 10 SKUs evaluated on both providers; blind human scoring by Bobby/Robert; cost/latency/quality comparison table; documented provider recommendation
-**Addresses:** Head-to-head evaluation (P1), cost/quality/latency documentation (P2)
-**Avoids:** Evaluation bias (Pitfall 6) — evaluation protocol designed before running comparisons; blind review mandatory
-
-### Phase 7: Bing Fix and Regeneration
-**Rationale:** Independent of decomposition and provider work. Can technically run in parallel with Phases 1-3 but scheduled after Phase 4 to ensure it uses the corrected incremental prompt change protocol.
-**Delivers:** Root cause of `{FINISH_NAME}` absence diagnosed and fixed in `prompts.py`; 85 broken Bing titles regenerated; variant expansion verified correct; SQL check confirming 0 hardcoded finish names in Bing content
-**Addresses:** Bing fix and regeneration (both P1)
-**Avoids:** Batching prompt changes (anti-feature) — fix is a single isolated change with deploy-and-test
+### Phase 6: Shared Utils Extraction (Optional)
+**Rationale:** Not a bug — a code elegance improvement. `_require_request_id()` is duplicated in persistence.py and job_management.py only because a direct import creates a circular dependency. Extracting to a shared `utils.py` eliminates the duplication cleanly with low risk. Can be deferred to a follow-up PR if schedule is tight.
+**Delivers:** New `feedops/api/utils.py`; circular import resolved; duplication eliminated with a comment explaining why.
+**Addresses:** P3 — circular import resolution
+**Avoids:** Confirm the import graph before extraction — `utils.py` must not itself import from either `persistence.py` or `job_management.py` or new cycles are created
+**Research flag:** Standard refactoring pattern. Low urgency.
 
 ### Phase Ordering Rationale
 
-- **Decompose before fixing bugs:** Modular isolation means bug fixes happen in a focused, testable file rather than a 3,737-line monolith. This is a risk reduction dependency, not a hard technical one — but Phase 27 showed that context matters when touching GPT-5.2 prompt behavior.
-- **Fix GPT-5.2 before evaluation:** The evaluation needs a clean GPT-5.2 baseline. Comparing Claude against a buggy GPT-5.2 produces misleading results and potentially defers a valid provider switch.
-- **Provider parallel with decomposition:** `ClaudeProvider` only touches `providers/claude_provider.py` and `providers/factory.py` — no overlap with extraction work. Parallelizing saves wall-clock time.
-- **Bing fix last (or parallel):** Independent of decomposition and provider. Scheduled after Phase 4 to ensure the incremental prompt-change protocol is established and practiced before applying it to the Bing fix.
+- **Schema first:** Zero code risk, highest cascade value (unblocks impact scores, validates Slack alerting, establishes a verification baseline before code changes begin)
+- **Trivial dead code second:** Establishes the "run ruff + pytest after each deletion" discipline before the more complex test-dependent removals in Phase 4
+- **Image wiring third:** Additive and independent — isolating it before Phase 4 prevents additive changes from mixing with subtractive changes in the same PR
+- **Test-import cleanup fourth:** Highest coordination cost — doing it after simple successes builds confidence in the deletion pattern and keeps failures attributable
+- **Entity mapping fifth:** Offer ID normalization must precede bulk baseline fetch; bulk fetch is the largest operational risk item in the milestone and should run last among P1/P2 work
+- **Shared utils last:** Only item with no urgency — duplication is documented, not broken
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 4 (GPT-5.2 bugs):** XML tag migration (bug #5) is the highest risk change. Research the exact diff against current `prompts.py` `=== ===` structure before planning the PR. Requires baseline capture of current output lengths before any change.
-- **Phase 6 (Evaluation):** SKU selection criteria and scoring rubric design need deliberate planning. Which 10 SKUs represent the catalog diversity? What are the objective rule-violation checks vs. subjective quality dimensions?
-- **Phase 5 (Claude provider):** The `tool_choice` structured output approach in ARCHITECTURE.md differs from the `output_config.format` approach in STACK.md. These need to be reconciled — verify which path supports Claude's extended thinking alongside structured output before implementation.
+Phases with standard patterns (no additional research needed):
+- **Phase 1:** PostgreSQL DDL + Supabase CLI migration workflow is well-documented; constraint DDL already written in migration 032
+- **Phase 2:** Mechanical deletion with ruff/pytest; dead-code-research.md provides the complete function-level inventory
+- **Phase 3:** Provider layer image support already implemented; 15-line addition following an established pattern
+- **Phase 4:** Test files and canonical import paths fully catalogued in dead-code-research.md
 
-Phases with standard patterns (skip research during planning):
-- **Phase 1 (Schemas):** Pydantic model extraction is a textbook refactoring. Existing extraction pattern already proven with 4 existing routers.
-- **Phase 3 (Route extraction):** `APIRouter` pattern is well-documented and already used in this codebase for 4 routers.
-- **Phase 7 (Bing fix):** Root cause is known (prompt instruction missing). Protocol is established. No new research needed.
-
----
+Phases needing validation during execution:
+- **Phase 5 (bulk backfill):** Test against a 50-SKU sample with throttling before running the full 2,500-SKU sweep. Verify the `RESOURCE_EXHAUSTED` error path in `google_ads_performance.py` is handled before scale-out. Check Google Ads API Center quota before and after the test run.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | `anthropic>=0.84.0` verified against official docs; codebase directly inspected for existing patterns; version compatibility confirmed |
-| Features | HIGH | Direct codebase analysis of `main.py` and `providers/`; feature gaps verified against existing code; priorities based on proven production constraints |
-| Architecture | HIGH | Codebase directly inspected; FastAPI `APIRouter` pattern verified against official docs and existing usage in this codebase |
-| Pitfalls | HIGH (project-specific) / MEDIUM (ecosystem) | Project-specific pitfalls backed by Phase 27 post-mortem and audit docs; ecosystem pitfalls (circular imports, LLM bias) from multiple community sources |
+| Stack | HIGH | All dependencies confirmed present in pyproject.toml; no new installations required; constraint fix verified against live migration SQL and production DB row counts |
+| Features | HIGH | Feature list derived from live codebase inspection with file/line citations; dead code inventory function-level with call graph confirmation; row counts from production DB |
+| Architecture | HIGH | Component responsibilities verified against actual source files; build order derived from confirmed dependency graph (no inference required); scheduler job times confirmed from live GCP config |
+| Pitfalls | HIGH | All pitfalls grounded in actual codebase state; specific test file names and line numbers confirmed; `performance_impact.py:461` confirmed as exact upsert bug location; Google Ads quota limits from official documentation |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Claude structured output API path:** STACK.md recommends `output_config.format.json_schema`; ARCHITECTURE.md recommends `tool_choice={"type": "tool", "name": "output"}`. These are different implementation approaches. Reconcile before Phase 5 planning — `tool_choice` approach is more reliable for enforcing schema but adds one more API surface area to understand.
-- **Extended thinking compatibility with structured output:** Whether Claude's `thinking` mode can be used simultaneously with `tool_choice` structured output is not confirmed. If not compatible, the `reasoning_effort` mapping in `ClaudeProvider` may need to be disabled by default.
-- **10 SKU evaluation set:** Not defined in research. Should span different categories (grab bars, shower doors, accessories), collection types (named vs unnamed), and content complexity levels (simple vs multi-attribute). Bobby/Robert should confirm the selection before Phase 6.
-- **Bing `{FINISH_NAME}` root cause:** Research identifies the symptom (85/98 titles hardcoded) and likely location (`prompts.py` Bing section) but the exact prompt instruction gap needs a targeted `prompts.py` review at planning time.
+- **optimize.py retirement decision:** The research explicitly flags this as requiring a team decision before the legacy generation chain in generator.py can be removed (~450 lines). Recommend making this call explicit in the Phase 2 plan — the trivially-dead items in Phase 2 do NOT include the optimize.py generation chain, so Phase 2 is safe regardless of this decision.
 
----
+- **Upsert semantics choice:** The research flags a decision between `DO UPDATE SET` (last-write-wins) and `ignore_duplicates=True` (first-write-wins) for the `performance_snapshots` upsert. For time-series data where historical snapshots should not be overwritten by re-runs, `ignore_duplicates=True` is recommended — but this must be a conscious decision made during Phase 1 planning, not a default.
+
+- **Google Ads quota headroom:** The 15,000 requests/day limit is from official documentation; actual quota can vary by account and API version. Verify the actual limit in Google Ads API Center for customer ID `6253381786` before Phase 5.
+
+- **Slack webhook binding verification:** The research identifies the possibility that `SLACK_WEBHOOK_URL` may not be bound to the current Cloud Run revision. Verify this as part of Phase 1 verification: `gcloud run services describe feedops-pipeline --project=bobbys-project-346400 --format='value(spec.template.spec.containers[0].env)'`.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Codebase: `src/feedops/api/main.py` (3,737 lines) — function groupings, line number references
-- Codebase: `src/feedops/providers/` — base, openai, gemini, factory, reliability
-- Codebase: `src/feedops/quality/eval_framework.py` + `tests/test_eval_framework.py`
-- [Anthropic Structured Outputs Official Docs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) — `output_config.format.json_schema` pattern
-- [FastAPI Bigger Applications Official Docs](https://fastapi.tiangolo.com/tutorial/bigger-applications/) — `APIRouter` pattern
-- [FastAPI Background Tasks Official Docs](https://fastapi.tiangolo.com/tutorial/background-tasks/) — lifecycle limitations
+- `/tmp/dead-code-research.md` (2026-03-03) — function-level dead code inventory with call graph analysis; exact test import file/line citations
+- `/tmp/google-ads-import-research.md` (2026-03-03) — live DB row counts and constraint audit; ON CONFLICT bug root cause confirmed at `performance_impact.py:461`; scheduled job architecture
+- `supabase/migrations/032_performance_impact_pipeline.sql` — confirmed correct constraint DDL and dedup pattern
+- `pyproject.toml` — confirmed all dependencies present; no new pip installs required
+- `docs/database/SCHEMA.md` — 56 tables documented; constraint patterns verified
+- `src/feedops/monitoring/performance_impact.py:461` — confirmed upsert with missing unique constraint
+- `src/feedops/integrations/google_ads_performance.py` — confirmed 25-per-chunk, 5-thread batch architecture
+- `src/feedops/generation/executor.py` — confirmed image wiring gap in `execute_generation_bundle()`
 
 ### Secondary (MEDIUM confidence)
-- [anthropics/anthropic-sdk-python GitHub](https://github.com/anthropics/anthropic-sdk-python) — version 0.84.0 current
-- [FastAPI Best Practices (zhanymkanov)](https://github.com/zhanymkanov/fastapi-best-practices) — community consensus
-- [LLM evaluation bias 2025](https://www.mdpi.com/2078-2489/16/8/652) — positional bias in pairwise comparisons
-- [LLM-as-judge self-preference bias](https://cameronrwolfe.substack.com/p/llm-as-a-judge) — self-preference documentation
+- Official Google Ads API quotas documentation — 15,000 requests/day limit (may vary by account/API version)
+- Official PostgreSQL ON CONFLICT documentation — confirms constraint requirement for `ON CONFLICT (columns)` syntax
 
-### Project Documentation
-- `CLAUDE.md` — GPT-5.2 Known Issues, Phase 27 learnings, prompt sensitivity
-- `memory/MEMORY.md` — Phase 27 critical discovery, Bing bug details
-- `docs/setup/pipeline-rewrite-brief.md` — Milestone brief and `main.py` analysis
-- `docs/audit/background-task-fix-2026-02-08.md` — `run_async_in_thread` rationale
+### Tertiary (LOW confidence — needs validation during execution)
+- Google Ads quota headroom for Allied Brass account — verify in API Center before Phase 5 bulk backfill
+- optimize.py production usage status — git log shows file exists and is maintained; exact production usage pattern not confirmed during research
 
 ---
 *Research completed: 2026-03-03*

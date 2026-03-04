@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
     // 1. Get published SKUs
     let publishQuery = supabase
       .from('publish_events')
-      .select('id, master_sku, platform, environment, content_version, executed_at')
+      .select('id, master_sku, platform, environment, content_version, published_at')
       .eq('status', 'success')
-      .order('executed_at', { ascending: false })
+      .order('published_at', { ascending: false })
 
     if (filterSku) {
       publishQuery = publishQuery.eq('master_sku', filterSku)
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       if (!publishEvent) continue
 
       // Calculate days since publish
-      const publishDate = new Date(publishEvent.executed_at)
+      const publishDate = new Date(publishEvent.published_at)
       const now = new Date()
       const daysSincePublish = Math.floor((now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24))
 

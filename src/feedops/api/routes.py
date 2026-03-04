@@ -92,7 +92,6 @@ from feedops.api.persistence import (
 from feedops.api.job_management import (
     _create_regeneration_job,
     _format_job_error,
-    _require_request_id,
     _resolve_execution_request_id,
     _regeneration_idempotency_key,
     _hybrid_generation_idempotency_key,
@@ -100,6 +99,7 @@ from feedops.api.job_management import (
     _find_active_hybrid_job,
     _normalize_regeneration_job_row,
 )
+from feedops.api.utils import _require_request_id, GenerationBudgetExceededError
 from feedops.api.hybrid_generation import adapt_variant_content  # noqa: F401 - re-exported for test patching compatibility
 from feedops.api.job_runner import JobRunner
 from feedops.api.sku_alias import (
@@ -112,7 +112,7 @@ from feedops.api.runtime_controls import (
     finish_sentence_regeneration_enabled,
 )
 from feedops.pipeline.feature_flags import capture_flag_snapshot
-from feedops.pipeline.generator import GenerationBudgetExceededError, generate_per_platform
+from feedops.pipeline.generator import generate_per_platform
 from feedops.observability import get_request_id, log_event, request_context
 from feedops.observability.metrics import metrics_registry
 from feedops.api.generation import (

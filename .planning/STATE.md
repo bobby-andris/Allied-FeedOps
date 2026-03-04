@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: verifying
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-03T15:50:31.503Z"
-last_activity: 2026-03-03 — Plan 04-03 executed
+milestone: v1.1
+milestone_name: Dead Code Cleanup + Data Infrastructure
+status: executing
+stopped_at: Completed 12-shared-utils-extraction/12-01-PLAN.md
+last_updated: "2026-03-04T08:07:43.005Z"
+last_activity: "2026-03-04 — Phase 12 Plan 01 complete: _require_request_id and GenerationBudgetExceededError extracted to feedops/api/utils.py; duplicates removed from persistence.py, job_management.py, generator.py"
 progress:
-  total_phases: 7
-  completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 13
+  completed_phases: 11
+  total_plans: 25
+  completed_plans: 22
+  percent: 88
 ---
 
 # Project State
@@ -20,88 +20,86 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-03)
 
-**Core value:** The pipeline produces high-quality product content reliably at scale — decomposition and bug fixes must not regress the 98% human approval rate or break any existing API endpoints.
-**Current focus:** Phase 4 complete — all 3 plans executed; verification script (04-03) shipped; ready for Phase 5
+**Core value:** The pipeline produces high-quality product content reliably at scale, backed by accurate performance data that maps seamlessly across Google Ads, Shopify, and Merchant Center.
+**Current focus:** Phase 8.1 — Data Model Gap Audit (INSERTED — urgent requirements audit before continuing v1.1)
 
 ## Current Position
 
-Phase: 4 of 7 (GPT-5.2 bug fixes) — Complete
-Plan: 3 of 3 in current phase (DONE)
-Status: Plan 04-03 complete — verify_content_quality.py verification script created; Phase 4 all done
-Last activity: 2026-03-03 — Plan 04-03 executed
+Phase: 12 (Shared Utils Extraction) — COMPLETE
+Plan: 01 complete — Phase 12 done, all dead code cleanup complete (DEAD-06 satisfied)
+Status: In progress
+Last activity: 2026-03-04 — Phase 12 Plan 01 complete: _require_request_id and GenerationBudgetExceededError extracted to feedops/api/utils.py; duplicates removed from persistence.py, job_management.py, generator.py
 
-Progress: [██████████] 100%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 10.7 min
-- Total execution time: 1.09 hours
+- Total plans completed: 1 (v1.1)
+- Average duration: 30 min
+- Total execution time: 0.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-schemas-extraction | 2/2 | 13 min | 6.5 min |
-| 02-services-extraction | 2/2 | 21 min | 10.5 min |
-| 03-jobrunner-and-route-extraction | 2/2 | 35 min | 17.5 min |
-
-**Recent Trend:**
-- Last 5 plans: 7, 10, 11, 13, 22 min
-- Trend: Increasing (larger refactors in phase 3)
-| Phase 04-gpt52-bug-fixes P03 | 4 | 1 tasks | 1 files |
-| Phase 04-gpt52-bug-fixes P02 | 5 | 1 tasks | 1 files |
-| Phase 04-gpt52-bug-fixes P01 | 3 | 2 tasks | 2 files |
-| Phase 05-claude-provider P01 | 3 | 2 tasks | 3 files |
-| Phase 05-claude-provider P02 | 5 | 2 tasks | 2 files |
+| 08-schema-hardening | 1 | 30 min | 30 min |
+| Phase 08.1-data-model-gap-audit P03 | 2 | 1 tasks | 1 files |
+| Phase 08.1-data-model-gap-audit P01 | 3 | 2 tasks | 4 files |
+| Phase 08.1-data-model-gap-audit P02 | 8 | 2 tasks | 4 files |
+| Phase 08.1-data-model-gap-audit P04 | 10 | 1 tasks | 1 files |
+| Phase 08.1-data-model-gap-audit P04 | 45 | 2 tasks | 1 files |
+| Phase 09-trivial-dead-code-removal P01 | 4 | 2 tasks | 4 files |
+| Phase 09-trivial-dead-code-removal P02 | 15 | 2 tasks | 4 files |
+| Phase 10-image-wiring P01 | 12 | 2 tasks | 2 files |
+| Phase 11-test-import-cleanup-re-export-removal P01 | 13 | 2 tasks | 6 files |
+| Phase 11 P02 | 5 | 1 tasks | 2 files |
+| Phase 12-shared-utils-extraction P01 | 7 | 2 tasks | 7 files |
 
 ## Accumulated Context
+| Phase 08-schema-hardening P01 | 11 | 1 tasks | 1 files |
+| Phase 08-schema-hardening P01 | 30 | 2 tasks | 1 files |
 
-### Decisions
+### Roadmap Evolution
+- Phase 8.1 inserted after Phase 8: Data Model Gap Audit (URGENT) — variant-level performance data discarded during aggregation, potential other granularity mismatches across Google Ads/Merchant Center/Shopify data flows. Phase 12 requirements (ENTM-01 through DATA-03) absorbed into audit scope.
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+### From v1.0 (Pipeline Reliability Rewrite + Model Evaluation)
+- main.py decomposed: 3,737 → ~500 lines, 9 extracted modules
+- All 5 GPT-5.2 bugs fixed; Claude Sonnet 4.6 in production (84% cheaper, 2x faster)
+- 98% human approval rate on generated Google content
+- Deploy checklist created as mandatory pre-push workflow
+- Phase 7 (Bing fix) deferred — 96 SKUs need regeneration, tracked as v2 requirement
 
-- [Roadmap]: Decompose before fixing bugs — modular isolation makes bug fixes safer and more testable
-- [Roadmap]: Phase 7 (Bing fix) depends on Phase 4 (protocol established) but is independent of Phases 5-6
-- [Roadmap]: Provider abstraction (Phase 5) placed after GPT-5.2 fixes (Phase 4) — evaluation needs a clean baseline
-- [Project]: Never batch prompt changes — one change per PR, deploy, curl `920D-6`, verify >500 chars (Phase 27 learning)
-- [Phase 01-schemas-extraction]: Pure move: zero changes to function signatures — extraction is a pure refactoring
-- [Phase 01-schemas-extraction]: No explicit re-exports from main.py — Python import side effects allow external lazy imports to still resolve until Plan 02 cleanup
-- [Phase 01-02]: _require_request_id duplicated in persistence.py (private copy) to avoid circular imports between sibling modules — job_management.py is the public home
-- [Phase 01-02]: All external callers (search_insights, gmc_sync, backfill) import run_async_in_thread from telemetry.py at module level
-- [Phase 02-01]: APIRouter pattern for intent_scoring avoids circular import with main.py (no @app.post)
-- [Phase 02-01]: _get_generate_with_metrics() indirection in finish_processing.py enables monkeypatching without circular import — contract tests updated to patch at finish_processing module
-- [Phase 02-02]: Pure function extraction for generation.py — no APIRouter needed since functions are not route handlers
-- [Phase 02-02]: Dual-namespace monkeypatching pattern: tests must patch both api_main and api_generation after extraction
-- [Phase 03-01]: extract_spec_difference is in multi_sku_detection (not hybrid_generation) — research doc had wrong module
-- [Phase 03-01]: Dual-namespace monkeypatching: tests patching job processing must target api_job_runner, not api_main
-- [Phase 03-01]: process_regenerate_job left in main.py — JOBS-01 specifies batch+hybrid only
-- [Phase 03-02]: Dual-namespace backward-compat re-exports added to main.py; tests updated to patch both api_main and api_routes modules
-- [Phase 04-gpt52-bug-fixes]: prompt_cache_key is first-class OpenAI SDK param (not extra_body) — static value feedops-pipeline-v1 shared across all batch requests to maximize cache hit rate
-- [Phase 04-gpt52-bug-fixes]: GPT-02 default reasoning_effort is 'high' — requirement spec updated to match locked decision
-- [Phase 04-gpt52-bug-fixes]: Empty-properties schema used in GPT-03 test to avoid JSON missing-key validation on fake responses while still asserting response_format kwargs
-- [Phase 04-gpt52-bug-fixes P03]: Stdlib-only verification script (urllib, argparse) — no external deps; OSError re-raised for connection failures (exit 2) vs HTTP errors → ERROR status (exit 1)
-- [Phase 05-claude-provider]: output_config.format with json_schema chosen over tool_use for ClaudeProvider — native GA constrained decoding, no tool definition overhead
-- [Phase 05-claude-provider]: reasoning_effort accepted but deferred to Phase 6 — will map to thinking budget_tokens (low=2000, medium=8000, high=20000)
-- [Phase 05-claude-provider]: _parse_json_payload imported directly from openai_provider — utils.py extraction deferred to Phase 6 cleanup
-- [Phase 05-claude-provider]: Claude not added to FallbackProvider chains — explicit selection only until Phase 6 evaluation confirms quality
-- [Phase 05-claude-provider]: effective_preferred merges programmatic preferred arg with FEEDOPS_PROVIDER env var (arg takes priority when both set)
-- [Phase 05-claude-provider]: FEEDOPS_CLAUDE_SDK_TIMEOUT_SECONDS defaults to 60s vs 45s for OpenAI — Claude requests run longer
-
-### Pending Todos
-
-None yet.
+### Key Decisions (v1.1)
+- Dead code before data infra: Low-risk cleanup reduces noise before schema changes
+- variant_index as entity hub: 72K rows, central to all cross-platform mapping
+- Upsert semantics: Use `ignore_duplicates=True` for snapshots (first-write-wins; historical data must not be overwritten)
+- Test-import update BEFORE re-export removal: Never remove a symbol before updating all test imports
+- Phase 8: FK already existed as performance_snapshots_publish_event_id_fkey — SCHM-04 guard updated to check ANY FK on column to prevent duplicate creation
+- Phase 8: Orphaned publish_event_id rows NULLed rather than deleted — metrics data preserved
+- Phase 8: Unique constraint columns (master_sku, platform, environment, snapshot_date) match performance_impact.py:461 on_conflict parameter exactly
+- Phase 8.1-01: normalize_offer_id() uses .lower() — simple, safe, idempotent; to_gmc_format() uses .replace() — targeted, idempotent at publish boundary only
+- Phase 8.1-01: Unique constraint columns (gmc_offer_id, platform, environment, snapshot_date) match on_conflict parameter Plan 02 will use exactly
+- Phase 8.1-01: Supabase keychain token format is go-keyring-base64:{b64} — split on colon before decoding
+- Phase 8.1-02: normalize_offer_id() applied at ingestion boundary in _fetch_chunk_data() and offer_to_sku construction — all downstream dict keys are normalized before any DB lookup
+- Phase 8.1-02: variant snapshot upsert uses ignore_duplicates=False (standard upsert) — re-runs for same day update the row; zero-impression rows skipped per locked decision
+- Phase 8.1-02 (ENTM-02 COMPLETE): All 4 Python codepaths now use normalize_offer_id() from shared utility
+- Phase 10-01: fetch_image called once at bundle level before task loop — single network call efficiency
+- Phase 10-01: Finish tasks always receive image=None — finish sentences are text-only by design
+- Phase 10-01: Image forwarded via existing inspect.signature pattern in _generate_with_provider_compat — consistent with reasoning_effort/max_completion_tokens forwarding
+- Phase 11-01: get_request_id monkeypatches for job_runner tests patch at feedops.api.job_management (where _resolve_execution_request_id resolves the name), not api_job_runner directly
+- Phase 11-01: test_query_intent_lineage.py migrated as Rule 1 auto-fix — not in DEAD-02 list but relied on re-export block (broke when block was removed)
+- Phase 11-02: executor.py is the canonical location for _platform_reasoning_effort and _platform_completion_cap — generator.py no longer re-defines them (DEAD-04 complete)
+- Phase 12-01: feedops/api/utils.py is the canonical location for _require_request_id and GenerationBudgetExceededError — generator.py imports from utils (linear chain, not circular); DEAD-06 complete
+- Phase 12-01: No re-export in job_management.py for _require_request_id — all callers import directly from feedops.api.utils; test_job_management_smoke.py updated accordingly
 
 ### Blockers/Concerns
-
-- [Research]: Claude structured output API path unresolved — `output_config.format.json_schema` vs `tool_choice`. Reconcile before Phase 5 planning.
-- [Research]: Extended thinking + structured output compatibility with Claude not confirmed. Affects `reasoning_effort` mapping in ClaudeProvider.
-- [Phase 6]: 10 SKU evaluation set not yet defined — Bobby/Robert must confirm selection before Phase 6 begins.
+- Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
+- (Resolved) Old Phase 12 pre-condition and quota risk no longer apply — requirements completed in Phase 8.1
+- Slack webhook binding: Verify `SLACK_WEBHOOK_URL` is bound to current Cloud Run revision before declaring Phase 8 complete
 
 ## Session Continuity
 
-Last session: 2026-03-03T15:50:31.499Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-model-evaluation/06-CONTEXT.md
+Last session: 2026-03-04T08:03:57.527Z
+Stopped at: Completed 12-shared-utils-extraction/12-01-PLAN.md
+Resume file: None

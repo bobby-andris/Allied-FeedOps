@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 
-from feedops.api.generation_telemetry import provider_label as _provider_label  # noqa: F401 — re-exported for callers
 from feedops.api.persistence import _assembled_prompt_hash
 from feedops.api.prompt_loader import get_finish_list, get_platform_system_prompt
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
