@@ -26,7 +26,7 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 ### Entity Mapping
 
 - [x] **ENTM-01**: Create shared offer ID normalization utility for case-insensitive matching between DB (lowercase) and GMC (uppercase)
-- [ ] **ENTM-02**: Apply offer ID normalization consistently across all data codepaths (performance baselines, search terms, snapshots, backfill)
+- [x] **ENTM-02**: Apply offer ID normalization consistently across all data codepaths (performance baselines, search terms, snapshots, backfill)
 - [x] **ENTM-03**: Document entity relationship map showing variant_index as hub linking Google Ads ↔ Shopify ↔ GMC with correct join keys
 
 ### Data Coverage
