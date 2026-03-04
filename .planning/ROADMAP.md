@@ -104,7 +104,9 @@
   2. A single isolated prompt fix is deployed and curl-verified against one Bing title before mass regeneration
   3. All 85 broken Bing titles are regenerated — SQL query confirms 0 Bing titles contain hardcoded finish names
   4. Variant expansion for a regenerated SKU produces 28 distinct finish-specific titles
-**Plans**: TBD — deferred
+**Plans**: 1 plan
+Plans:
+- [ ] 12-01-PLAN.md — Create utils.py, consolidate _require_request_id and GenerationBudgetExceededError (DEAD-06) — deferred
 
 </details>
 
@@ -196,7 +198,9 @@ Plans:
   2. Neither `persistence.py` nor `job_management.py` defines these symbols — both import from `utils.py`
   3. `python -c "import feedops.api.main"` exits 0 (no circular import introduced by utils.py)
   4. `pytest tests/` passes with zero failures after extraction
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 12-01-PLAN.md — Create utils.py, consolidate _require_request_id and GenerationBudgetExceededError (DEAD-06)
 
 ## Progress
 
@@ -217,4 +221,4 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 8.1 
 | 9. Trivial Dead Code Removal | 1/2 | In Progress|  | - |
 | 10. Image Wiring | 1/1 | Complete    | 2012-03-04 | - |
 | 11. Test-Import Cleanup and Re-export Removal | 2/2 | Complete    | 2012-03-04 | - |
-| 12. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |
+| 12. Shared Utils Extraction | v1.1 | 0/1 | Not started | - |
