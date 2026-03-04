@@ -64,9 +64,9 @@ export async function GET(request: NextRequest) {
     // 1. Get published SKUs with their publish dates
     let publishQuery = supabase
       .from('publish_events')
-      .select('id, master_sku, platform, executed_at')
+      .select('id, master_sku, platform, published_at')
       .eq('status', 'success')
-      .order('executed_at', { ascending: false })
+      .order('published_at', { ascending: false })
 
     if (filterSku) {
       publishQuery = publishQuery.eq('master_sku', filterSku)
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
 
     // 2. For each SKU, compare search queries before/after publish
     for (const [sku, publishEvent] of skuPublishMap) {
-      const publishDate = new Date(publishEvent.executed_at)
+      const publishDate = new Date(publishEvent.published_at)
       const now = new Date()
       const daysSincePublish = Math.floor((now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24))
 

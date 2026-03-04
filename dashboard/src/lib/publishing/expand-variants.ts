@@ -424,11 +424,12 @@ export async function validateContentForPublishing(
         .select('finish')
         .eq('master_sku', canonicalMasterSku)
 
-      const expectedCount = new Set((variantFinishes || []).map((v) => v.finish)).size
-      if (Object.keys(finishSentences).length !== expectedCount) {
+      const actualFinishes = new Set((variantFinishes || []).map((v) => v.finish))
+      const missingFinishes = [...actualFinishes].filter(f => !finishSentences[f])
+      if (missingFinishes.length > 0) {
         issues.push({
           code: 'publish_google_finish_sentences_incomplete',
-          message: `Expected ${expectedCount} finish sentences, found ${Object.keys(finishSentences).length}`,
+          message: `Missing finish sentences for ${missingFinishes.length} variant(s): ${missingFinishes.slice(0, 3).join(', ')}${missingFinishes.length > 3 ? '...' : ''}`,
           actionable_message: 'Regenerate Google/Bing descriptions to repopulate complete variant_finish_sentences coverage.',
         })
       }
