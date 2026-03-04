@@ -403,6 +403,49 @@ def get_finish_list() -> list[str]:
     return FINISH_LIST_28
 
 
+def get_finish_list_for_sku(master_sku: str) -> list[str]:
+    """Get the actual finish list for a specific SKU from variant_index.
+
+    Queries Supabase variant_index to find which finishes this SKU actually has.
+    Falls back to FINISH_LIST_28 if Supabase is unavailable or no variants found.
+
+    Returns:
+        List of finish names for this SKU's actual variants.
+    """
+    if not is_supabase_available():
+        logger.warning(
+            "Supabase unavailable for get_finish_list_for_sku(%s), falling back to FINISH_LIST_28",
+            master_sku,
+        )
+        return FINISH_LIST_28
+    try:
+        supabase = get_client()
+        result = (
+            supabase.table("variant_index")
+            .select("finish")
+            .eq("master_sku", master_sku)
+            .execute()
+        )
+        finishes = sorted(set(
+            row["finish"] for row in (result.data or [])
+            if row.get("finish")
+        ))
+        if not finishes:
+            logger.warning(
+                "No variant_index finishes found for %s, falling back to FINISH_LIST_28",
+                master_sku,
+            )
+            return FINISH_LIST_28
+        return finishes
+    except Exception as exc:
+        logger.warning(
+            "Failed to query variant_index for %s: %s — falling back to FINISH_LIST_28",
+            master_sku,
+            exc,
+        )
+        return FINISH_LIST_28
+
+
 def clear_cache() -> None:
     """Clear the cached prompt template."""
     global _cached_template, _cache_timestamp

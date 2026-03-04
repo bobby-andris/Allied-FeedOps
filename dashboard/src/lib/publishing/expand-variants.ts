@@ -225,10 +225,11 @@ export async function expandVariantsForPublish(
   if (hasGenericFinishCountClaim(approved_description)) {
     throw new Error('variant_finish_contradiction: publish_google_description_contains_generic_finish_count_claim')
   }
-  // Compare finish sentence count against actual variant count for this SKU
-  const uniqueFinishes = new Set(variants.map((v) => v.finish)).size
-  if (Object.keys(finishSentences).length !== uniqueFinishes) {
-    throw new Error('variant_finish_contradiction: publish_google_finish_sentences_incomplete')
+  // Validate per-finish coverage: every variant finish must have a sentence
+  const requiredFinishes = [...new Set(variants.map((v) => v.finish).filter(Boolean))]
+  const missingFinishes = requiredFinishes.filter(f => !finishSentences[f])
+  if (missingFinishes.length > 0) {
+    throw new Error(`variant_finish_contradiction: publish_google_finish_sentences_incomplete — missing: ${missingFinishes.slice(0, 3).join(', ')}`)
   }
 
   // Get approved variant images (with CDN URLs)

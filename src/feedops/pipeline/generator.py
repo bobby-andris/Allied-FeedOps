@@ -9,6 +9,7 @@ from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_category_guidance,
     get_finish_list,
+    get_finish_list_for_sku,
     get_system_prompt,
 )
 from feedops.api.prompt_builder import (
@@ -280,14 +281,25 @@ def parse_candidate_response(response: dict) -> Candidate:
 
 
 def _build_finish_metadata_rows(parent_sku: ParentSKU) -> list[dict[str, object]]:
-    """Build canonical finish metadata rows for finish sentence prompting."""
+    """Build finish metadata rows for finish sentence prompting.
+
+    Uses the SKU's actual variants from parent_sku.variants. If no variants
+    have finish data, falls back to the full FINISH_LIST_28.
+    """
     code_lookup = {
         (variant.finish or "").strip(): (variant.finish_code or "").strip()
         for variant in parent_sku.variants
         if getattr(variant, "finish", None)
     }
+    sku_finishes = sorted(set(
+        (variant.finish or "").strip()
+        for variant in parent_sku.variants
+        if getattr(variant, "finish", None)
+    ))
+    if not sku_finishes:
+        sku_finishes = get_finish_list()
     rows: list[dict[str, object]] = []
-    for finish_name in get_finish_list():
+    for finish_name in sku_finishes:
         finish_meta = get_finish_metadata(finish_name) or {}
         rows.append(
             {
@@ -305,8 +317,8 @@ def _normalize_finish_sentence_payload(
     payload: dict[str, object],
     parent_sku: ParentSKU,
 ) -> dict[str, str]:
-    """Normalize finish sentence payload to canonical finish-name mapping."""
-    canonical_finishes = get_finish_list()
+    """Normalize finish sentence payload to SKU-specific finish-name mapping."""
+    canonical_finishes = get_finish_list_for_sku(parent_sku.master_sku)
     fallback_map = build_fallback_finish_sentences(canonical_finishes)
     code_lookup = {
         (variant.finish_code or "").strip().upper(): (variant.finish or "").strip()

@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 Phase: 12 (Shared Utils Extraction) — COMPLETE
 Plan: 01 complete — Phase 12 done, all dead code cleanup complete (DEAD-06 satisfied)
 Status: In progress
-Last activity: 2026-03-04 — Phase 12 Plan 01 complete: _require_request_id and GenerationBudgetExceededError extracted to feedops/api/utils.py; duplicates removed from persistence.py, job_management.py, generator.py
+Last activity: 2026-03-04 - Completed quick task 2: Fix 3 UAT bugs: SKU exclusion, phantom finishes, publish validation
 
 Progress: [█████████░] 88%
 
@@ -98,8 +98,15 @@ Progress: [█████████░] 88%
 - (Resolved) Old Phase 12 pre-condition and quota risk no longer apply — requirements completed in Phase 8.1
 - Slack webhook binding: Verify `SLACK_WEBHOOK_URL` is bound to current Cloud Run revision before declaring Phase 8 complete
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 1 | Execute comprehensive dashboard UAT test plan with agent-browser | 2026-03-04 | 96b1d246 | | [1-execute-comprehensive-dashboard-uat-test](./quick/1-execute-comprehensive-dashboard-uat-test/) |
+| 2 | Fix 3 UAT bugs: SKU exclusion, phantom finishes, publish validation | 2026-03-04 | cf17d6ec | Verified | [2-fix-3-uat-bugs-sku-exclusion-phantom-fin](./quick/2-fix-3-uat-bugs-sku-exclusion-phantom-fin/) |
+
 ## Session Continuity
 
-Last session: 2026-03-04T08:03:57.527Z
-Stopped at: Completed 12-shared-utils-extraction/12-01-PLAN.md
+Last session: 2026-03-04T18:37:00Z
+Stopped at: Completed quick task 2 — fix 3 UAT bugs (SKU exclusion, finish, publish)
 Resume file: None
