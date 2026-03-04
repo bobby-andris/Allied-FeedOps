@@ -56,9 +56,9 @@ steps:
       - '--region'
       - 'us-east1'
       - '--set-secrets'
-      - 'OPENAI_API_KEY=feedops-openai-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=feedops-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=feedops-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=feedops-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=feedops-google-ads-refresh-token:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=feedops-google-ads-login-customer-id:latest,GEMINI_API_KEY=feedops-gemini-api-key:latest,SLACK_WEBHOOK_URL=feedops-slack-webhook-url:latest'
+      - 'OPENAI_API_KEY=feedops-openai-api-key:latest,ANTHROPIC_API_KEY=feedops-anthropic-api-key:latest,SUPABASE_URL=feedops-supabase-url:latest,SUPABASE_KEY=feedops-supabase-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=feedops-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=feedops-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=feedops-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=feedops-google-ads-refresh-token:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=feedops-google-ads-login-customer-id:latest,GEMINI_API_KEY=feedops-gemini-api-key:latest,SLACK_WEBHOOK_URL=feedops-slack-webhook-url:latest'
       - '--set-env-vars'
-      - 'GOOGLE_ADS_CUSTOMER_ID=6253381786,GOOGLE_ADS_API_ENABLED=1,FEEDOPS_ENV_CONTRACT_STRICT=1'
+      - 'GOOGLE_ADS_CUSTOMER_ID=6253381786,GOOGLE_ADS_API_ENABLED=1,FEEDOPS_ENV_CONTRACT_STRICT=1,FEEDOPS_PROVIDER=claude,FEEDOPS_CLAUDE_MODEL=claude-sonnet-4-6,FEEDOPS_GOOGLE_BRIEF_VERSION=v3'
       - '--service-account'
       - 'profit-pilot-runtime@$PROJECT_ID.iam.gserviceaccount.com'
       - '--allow-unauthenticated'
@@ -70,6 +70,29 @@ steps:
       - '900'
       - '--max-instances'
       - '10'
+
+  # Post-deploy health check: verify the new revision is serving and healthy
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-lc'
+      - |
+        SERVICE_URL=$(gcloud run services describe feedops-pipeline \
+          --region=us-east1 --format='value(status.url)')
+        echo "Health checking: $SERVICE_URL/health"
+        # Wait up to 60s for the new revision to become healthy
+        for i in $(seq 1 12); do
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$SERVICE_URL/health" || true)
+          if [ "$STATUS" = "200" ]; then
+            echo "Health check passed (attempt $i)"
+            curl -s "$SERVICE_URL/health" | python3 -m json.tool
+            exit 0
+          fi
+          echo "Attempt $i: got $STATUS, retrying in 5s..."
+          sleep 5
+        done
+        echo "FAILED: Health check did not return 200 after 60s"
+        exit 1
 
 # Store images in Artifact Registry
 images:
