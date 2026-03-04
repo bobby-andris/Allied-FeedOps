@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
     }
     const allOfferIds = [...offerToSku.keys()]
 
-    // 3. Query baselines — prefer variant-level tables, fall back to master-level
+    // 3. Query baselines — per-SKU hybrid: use variant if non-zero, else master
     const baselineMap = new Map<string, {
       avgCtr: number
       avgCvr: number
@@ -154,8 +154,13 @@ export async function GET(request: NextRequest) {
       avgClicks: number
     }>()
 
-    // 3a. Try variant baselines first (joined through variant_index via offer IDs)
-    let usedVariantBaselines = false
+    // 3a. Query variant baselines (aggregated to master_sku level)
+    const variantBaselineAgg = new Map<string, {
+      totalImpr: number
+      totalClicks: number
+      totalCvr: number
+    }>()
+
     if (allOfferIds.length > 0) {
       let varBaselineQuery = supabase
         .from('performance_baselines_variant')
@@ -168,45 +173,33 @@ export async function GET(request: NextRequest) {
 
       const { data: varBaselines } = await varBaselineQuery
 
-      if (varBaselines && varBaselines.length > 0) {
-        usedVariantBaselines = true
-        // Aggregate variant baselines to master_sku level
-        const aggMap = new Map<string, { totalImpr: number; totalClicks: number; totalCvr: number; count: number }>()
-        for (const vb of varBaselines) {
-          const masterSku = offerToSku.get(vb.gmc_offer_id)
-          if (!masterSku) continue
-          const key = `${masterSku}|||${vb.platform}`
-          if (!aggMap.has(key)) {
-            aggMap.set(key, { totalImpr: 0, totalClicks: 0, totalCvr: 0, count: 0 })
-          }
-          const agg = aggMap.get(key)!
-          agg.totalImpr += vb.avg_impressions || 0
-          agg.totalClicks += vb.avg_clicks || 0
-          agg.totalCvr += (vb.avg_cvr || 0) * (vb.avg_impressions || 0) // weighted CVR
-          agg.count++
+      for (const vb of varBaselines || []) {
+        const masterSku = offerToSku.get(vb.gmc_offer_id)
+        if (!masterSku) continue
+        const key = `${masterSku}|||${vb.platform}`
+        if (!variantBaselineAgg.has(key)) {
+          variantBaselineAgg.set(key, { totalImpr: 0, totalClicks: 0, totalCvr: 0 })
         }
-        for (const [key, agg] of aggMap) {
-          const avgCtr = agg.totalImpr > 0 ? agg.totalClicks / agg.totalImpr : 0
-          const avgCvr = agg.totalImpr > 0 ? agg.totalCvr / agg.totalImpr : 0
-          baselineMap.set(key, {
-            avgCtr,
-            avgCvr,
-            avgImpressions: agg.totalImpr,
-            avgClicks: agg.totalClicks,
-          })
-        }
+        const agg = variantBaselineAgg.get(key)!
+        agg.totalImpr += vb.avg_impressions || 0
+        agg.totalClicks += vb.avg_clicks || 0
+        agg.totalCvr += (vb.avg_cvr || 0) * (vb.avg_impressions || 0)
       }
     }
 
-    // 3b. Fall back to master-level baselines if variant tables empty
-    if (!usedVariantBaselines) {
+    // 3b. Query master baselines
+    const masterBaselineMap = new Map<string, {
+      avgCtr: number
+      avgCvr: number
+      avgImpressions: number
+      avgClicks: number
+    }>()
+
+    if (uniqueSkus.length > 0) {
       let baselineQuery = supabase
         .from('performance_baselines')
         .select('master_sku, platform, avg_ctr, avg_cvr, avg_impressions, avg_clicks')
-
-      if (uniqueSkus.length > 0) {
-        baselineQuery = baselineQuery.in('master_sku', uniqueSkus)
-      }
+        .in('master_sku', uniqueSkus)
 
       if (platform && platform !== 'all') {
         baselineQuery = baselineQuery.eq('platform', platform)
@@ -221,7 +214,7 @@ export async function GET(request: NextRequest) {
 
       for (const baseline of baselines || []) {
         const key = `${baseline.master_sku}|||${baseline.platform}`
-        baselineMap.set(key, {
+        masterBaselineMap.set(key, {
           avgCtr: baseline.avg_ctr || 0,
           avgCvr: baseline.avg_cvr || 0,
           avgImpressions: baseline.avg_impressions || 0,
@@ -230,7 +223,26 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 4. Query snapshots — prefer variant-level tables, fall back to master-level
+    // 3c. Per-SKU hybrid: use variant if sum > 0, else fall back to master
+    const allBaselineKeys = new Set([...variantBaselineAgg.keys(), ...masterBaselineMap.keys()])
+    for (const key of allBaselineKeys) {
+      const varAgg = variantBaselineAgg.get(key)
+      if (varAgg && varAgg.totalImpr > 0) {
+        baselineMap.set(key, {
+          avgCtr: varAgg.totalClicks / varAgg.totalImpr,
+          avgCvr: varAgg.totalCvr / varAgg.totalImpr,
+          avgImpressions: varAgg.totalImpr,
+          avgClicks: varAgg.totalClicks,
+        })
+      } else {
+        const master = masterBaselineMap.get(key)
+        if (master) {
+          baselineMap.set(key, master)
+        }
+      }
+    }
+
+    // 4. Query snapshots — per-SKU hybrid: use variant if available, else master
     const snapshotsByKey = new Map<string, Array<{
       snapshot_date: string
       impressions: number
@@ -240,8 +252,16 @@ export async function GET(request: NextRequest) {
       days_since_publish: number | null
     }>>()
 
-    // 4a. Try variant snapshots first
-    let usedVariantSnapshots = false
+    // 4a. Query variant snapshots (aggregated to master_sku level by date)
+    const variantSnapshotsByKey = new Map<string, Array<{
+      snapshot_date: string
+      impressions: number
+      clicks: number
+      ctr: number
+      cvr: number
+      days_since_publish: number | null
+    }>>()
+
     if (allOfferIds.length > 0) {
       let varSnapQuery = supabase
         .from('performance_snapshots_variant')
@@ -256,9 +276,6 @@ export async function GET(request: NextRequest) {
       const { data: varSnapshots } = await varSnapQuery
 
       if (varSnapshots && varSnapshots.length > 0) {
-        usedVariantSnapshots = true
-        // Aggregate variant snapshots to master_sku level by date
-        // Group by master_sku + platform + snapshot_date, then collapse to SKU-platform
         const dateAgg = new Map<string, { impressions: number; clicks: number }>()
         for (const vs of varSnapshots) {
           const masterSku = vs.master_sku || offerToSku.get(vs.gmc_offer_id)
@@ -272,15 +289,14 @@ export async function GET(request: NextRequest) {
           entry.clicks += vs.clicks || 0
         }
 
-        // Convert date-aggregated data to snapshotsByKey format
         for (const [dateKey, data] of dateAgg) {
           const [masterSku, plat, snapDate] = dateKey.split('|||')
           const key = `${masterSku}|||${plat}`
-          if (!snapshotsByKey.has(key)) {
-            snapshotsByKey.set(key, [])
+          if (!variantSnapshotsByKey.has(key)) {
+            variantSnapshotsByKey.set(key, [])
           }
           const ctr = data.impressions > 0 ? data.clicks / data.impressions : 0
-          snapshotsByKey.get(key)!.push({
+          variantSnapshotsByKey.get(key)!.push({
             snapshot_date: snapDate,
             impressions: data.impressions,
             clicks: data.clicks,
@@ -290,23 +306,28 @@ export async function GET(request: NextRequest) {
           })
         }
 
-        // Sort each group by date descending
-        for (const snaps of snapshotsByKey.values()) {
+        for (const snaps of variantSnapshotsByKey.values()) {
           snaps.sort((a, b) => b.snapshot_date.localeCompare(a.snapshot_date))
         }
       }
     }
 
-    // 4b. Fall back to master-level snapshots if variant tables empty
-    if (!usedVariantSnapshots) {
+    // 4b. Query master-level snapshots
+    const masterSnapshotsByKey = new Map<string, Array<{
+      snapshot_date: string
+      impressions: number
+      clicks: number
+      ctr: number
+      cvr: number
+      days_since_publish: number | null
+    }>>()
+
+    if (uniqueSkus.length > 0) {
       let snapshotQuery = supabase
         .from('performance_snapshots')
         .select('master_sku, platform, snapshot_date, impressions, clicks, ctr, cvr, days_since_publish')
         .order('snapshot_date', { ascending: false })
-
-      if (uniqueSkus.length > 0) {
-        snapshotQuery = snapshotQuery.in('master_sku', uniqueSkus)
-      }
+        .in('master_sku', uniqueSkus)
 
       if (platform && platform !== 'all') {
         snapshotQuery = snapshotQuery.eq('platform', platform)
@@ -316,10 +337,24 @@ export async function GET(request: NextRequest) {
 
       for (const snap of allSnapshots || []) {
         const key = `${snap.master_sku}|||${snap.platform}`
-        if (!snapshotsByKey.has(key)) {
-          snapshotsByKey.set(key, [])
+        if (!masterSnapshotsByKey.has(key)) {
+          masterSnapshotsByKey.set(key, [])
         }
-        snapshotsByKey.get(key)!.push(snap)
+        masterSnapshotsByKey.get(key)!.push(snap)
+      }
+    }
+
+    // 4c. Per-SKU hybrid: use variant snapshots if they exist, else master
+    const allSnapshotKeys = new Set([...variantSnapshotsByKey.keys(), ...masterSnapshotsByKey.keys()])
+    for (const key of allSnapshotKeys) {
+      const varSnaps = variantSnapshotsByKey.get(key)
+      if (varSnaps && varSnaps.length > 0) {
+        snapshotsByKey.set(key, varSnaps)
+      } else {
+        const masterSnaps = masterSnapshotsByKey.get(key)
+        if (masterSnaps) {
+          snapshotsByKey.set(key, masterSnaps)
+        }
       }
     }
 
