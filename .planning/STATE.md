@@ -4,8 +4,8 @@ milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
 stopped_at: Completed 12-shared-utils-extraction/12-01-PLAN.md
-last_updated: "2026-03-04T08:03:57.529Z"
-last_activity: "2026-03-04 — Phase 11 Plan 02 complete: 2 duplicate functions removed from generator.py, test import updated to executor.py (DEAD-04)"
+last_updated: "2026-03-04T08:07:43.005Z"
+last_activity: "2026-03-04 — Phase 12 Plan 01 complete: _require_request_id and GenerationBudgetExceededError extracted to feedops/api/utils.py; duplicates removed from persistence.py, job_management.py, generator.py"
 progress:
   total_phases: 13
   completed_phases: 11

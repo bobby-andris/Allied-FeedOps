@@ -14,7 +14,7 @@ Requirements for v1.1 milestone. Each maps to roadmap phases.
 - [x] **DEAD-03**: Remove ~130-line backward-compat re-export block from main.py after test imports updated
 - [x] **DEAD-04**: Remove generator.py duplicate functions already copied to executor.py/hybrid_generation.py (6 functions)
 - [x] **DEAD-05**: Remove ~500 lines of variant generation code behind never-enabled `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag
-- [ ] **DEAD-06**: Consolidate duplicate `_require_request_id()` and `GenerationBudgetExceededError` to single shared location
+- [x] **DEAD-06**: Consolidate duplicate `_require_request_id()` and `GenerationBudgetExceededError` to single shared location
 
 ### Schema
 
@@ -82,7 +82,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEAD-03 | Phase 11 | Complete |
 | DEAD-04 | Phase 11 | Complete |
 | DEAD-05 | Phase 9 | Complete |
-| DEAD-06 | Phase 13 | Pending |
+| DEAD-06 | Phase 13 | Complete |
 | SCHM-01 | Phase 8 | Complete |
 | SCHM-02 | Phase 8 | Complete |
 | SCHM-03 | Phase 8 | Complete |
