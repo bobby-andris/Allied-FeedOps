@@ -1,25 +1,16 @@
 """Candidate generator using LLM providers."""
 
 import asyncio
-import hashlib
-import inspect
 import json
 import logging
 import os
 import re
-import time
 
 from feedops.api.prompt_loader import (
     format_gold_standard_examples_bundle,
     get_category_guidance,
     get_finish_list,
     get_system_prompt,
-)
-from feedops.api.generation_telemetry import estimate_openai_cost_usd_from_usage
-from feedops.api.runtime_controls import (
-    diagnostic_mode_enabled,
-    diagnostic_skip_finish_subcall_enabled,
-    request_cost_usd_cap,
 )
 from feedops.api.prompt_builder import (
     build_bing_prompt,
@@ -34,7 +25,6 @@ from feedops.generation.executor import (
 from feedops.models import Candidate, Claim, ParentSKU, Score
 from feedops.pipeline.evidence import (
     build_evidence_table,
-    filter_evidence_for_copy_context,
     format_evidence_markdown,
 )
 from feedops.pipeline.finish_sentence_placeholder import build_fallback_finish_sentences
@@ -47,12 +37,8 @@ from feedops.pipeline.keyword_placement import (
     validate_candidate_keyword_placement,
 )
 from feedops.pipeline.prompts import (
-    BING_SCHEMA,
     CANDIDATE_SCHEMA,
-    FINISH_SENTENCES_SCHEMA,
     FINISH_CONTEXT_TEMPLATE,
-    GOOGLE_SCHEMA,
-    SHOPIFY_SCHEMA,
     VARIANT_USER_PROMPT_TEMPLATE,
 )
 from feedops.pipeline.segment_strategy import (
@@ -133,64 +119,6 @@ def _platform_completion_cap(platform: str, base_cap: int) -> int:
     if limit is None:
         return normalized_cap
     return min(normalized_cap, limit)
-
-
-def _payload_value_lengths(payload: dict[str, object]) -> dict[str, int]:
-    """Return best-effort character lengths for payload values."""
-    lengths: dict[str, int] = {}
-    for key, value in payload.items():
-        if isinstance(value, str):
-            lengths[key] = len(value.strip())
-        elif value is None:
-            lengths[key] = 0
-        else:
-            lengths[key] = len(str(value))
-    return lengths
-
-
-async def _generate_with_provider_compat(
-    *,
-    provider: LLMProvider,
-    prompt: str,
-    schema: dict[str, object],
-    system_prompt: str,
-    reasoning_effort: str,
-    max_completion_tokens: int,
-) -> dict[str, object]:
-    """Call provider.generate while tolerating legacy test doubles.
-
-    Some older tests still use lightweight provider stubs that only accept
-    `(prompt, schema, system_prompt)`. Runtime providers accept the newer
-    keyword arguments. We introspect the callable and pass only supported args.
-    """
-    generate_fn = provider.generate
-    signature = inspect.signature(generate_fn)
-    accepts_varkw = any(
-        param.kind == inspect.Parameter.VAR_KEYWORD
-        for param in signature.parameters.values()
-    )
-    kwargs: dict[str, object] = {
-        "prompt": prompt,
-        "schema": schema,
-        "system_prompt": system_prompt,
-    }
-    if accepts_varkw or "reasoning_effort" in signature.parameters:
-        kwargs["reasoning_effort"] = reasoning_effort
-    if accepts_varkw or "max_completion_tokens" in signature.parameters:
-        kwargs["max_completion_tokens"] = max_completion_tokens
-    return await generate_fn(**kwargs)
-
-
-def _schema_hash(schema: dict[str, object]) -> str:
-    """Return stable hash for schema diagnostics."""
-    canonical = json.dumps(schema, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-
-
-def _prompt_hash(system_prompt: str, user_prompt: str) -> str:
-    """Return stable hash for per-platform prompt provenance."""
-    combined = f"{system_prompt}\n\n{user_prompt}"
-    return hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
 
 def _resolve_requested_platforms(
@@ -505,20 +433,6 @@ async def generate_per_platform(
             "Ignoring non-v2 prompt_version=%s; per-platform generation is mandatory.",
             prompt_version,
         )
-    normalized_platforms = {
-        str(platform).strip().lower()
-        for platform in (selected_platforms or ("google", "bing", "shopify", "finish"))
-        if str(platform).strip()
-    }
-    normalized_content_types = {
-        str(content_type).strip().lower()
-        for content_type in (selected_content_types or ("title", "description"))
-        if str(content_type).strip()
-    }
-    include_finish = (
-        "description" in normalized_content_types
-        and any(platform in {"google", "bing"} for platform in normalized_platforms)
-    )
     try:
         response = await execute_generation_legacy_payload(
             parent_sku=parent_sku,
