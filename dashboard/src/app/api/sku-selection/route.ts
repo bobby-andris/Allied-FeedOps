@@ -25,11 +25,10 @@ export async function GET(request: Request) {
         .map((a) => a.master_sku)
     )
 
-    // Get SKUs that have approved content (approved_content is non-null)
+    // Get SKUs that have any row in generated_content (regardless of approval status)
     const { data: generatedSkus } = await supabase
       .from('generated_content')
-      .select('master_sku, approved_content')
-      .not('approved_content', 'is', null)
+      .select('master_sku')
 
     const alreadyGeneratedSkus = new Set(
       (generatedSkus || []).map((g) => g.master_sku)

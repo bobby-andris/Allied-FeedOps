@@ -445,6 +445,24 @@ async function getSkuData(urlSku: string) {
 
   const publishedSnapshots = latestProductionPublishSnapshots(publishEvents || [])
 
+  // Filter finish sentences to only finishes that exist in variant_index for this SKU
+  const relevantFinishes = new Set(
+    (variants || []).map((v: VariantIndex) => v.finish).filter(Boolean)
+  )
+
+  const filterFinishSentences = (
+    sentences: Record<string, string> | null
+  ): Record<string, string> | null => {
+    if (!sentences) return null
+    const filtered: Record<string, string> = {}
+    for (const [finish, sentence] of Object.entries(sentences)) {
+      if (relevantFinishes.has(finish)) {
+        filtered[finish] = sentence
+      }
+    }
+    return Object.keys(filtered).length > 0 ? filtered : null
+  }
+
   return {
     content: (content || []) as ContentRecord[],
     images,
@@ -454,8 +472,8 @@ async function getSkuData(urlSku: string) {
     currentContentByPlatform,
     variantCurrentContent,
     finishSentences: {
-      google: googleFinishSentences?.finish_sentences as Record<string, string> | null || null,
-      bing: bingFinishSentences?.finish_sentences as Record<string, string> | null || null,
+      google: filterFinishSentences(googleFinishSentences?.finish_sentences as Record<string, string> | null || null),
+      bing: filterFinishSentences(bingFinishSentences?.finish_sentences as Record<string, string> | null || null),
     },
     performanceBaselines: performanceBaselines || [],
     performanceSnapshots: performanceSnapshots || [],
