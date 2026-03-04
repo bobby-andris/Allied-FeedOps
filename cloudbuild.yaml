@@ -77,18 +77,18 @@ steps:
     args:
       - '-lc'
       - |
-        SERVICE_URL=$(gcloud run services describe feedops-pipeline \
+        SERVICE_URL=$$(gcloud run services describe feedops-pipeline \
           --region=us-east1 --format='value(status.url)')
-        echo "Health checking: $SERVICE_URL/health"
+        echo "Health checking: $$SERVICE_URL/health"
         # Wait up to 60s for the new revision to become healthy
-        for i in $(seq 1 12); do
-          STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$SERVICE_URL/health" || true)
-          if [ "$STATUS" = "200" ]; then
-            echo "Health check passed (attempt $i)"
-            curl -s "$SERVICE_URL/health" | python3 -m json.tool
+        for i in $$(seq 1 12); do
+          STATUS=$$(curl -s -o /dev/null -w '%{http_code}' "$$SERVICE_URL/health" || true)
+          if [ "$$STATUS" = "200" ]; then
+            echo "Health check passed (attempt $$i)"
+            curl -s "$$SERVICE_URL/health" | python3 -m json.tool
             exit 0
           fi
-          echo "Attempt $i: got $STATUS, retrying in 5s..."
+          echo "Attempt $$i: got $$STATUS, retrying in 5s..."
           sleep 5
         done
         echo "FAILED: Health check did not return 200 after 60s"
