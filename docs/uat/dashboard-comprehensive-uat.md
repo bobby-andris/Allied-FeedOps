@@ -224,3 +224,64 @@
 | A: Generate recommends already-generated | OPEN | `dashboard/src/app/api/sku-selection/route.ts:29-36` | Change filter from `approved_content IS NOT NULL` to `ANY row exists in generated_content` |
 | B: Variant count publish failure | OPEN | `dashboard/src/lib/publishing/expand-variants.ts:230` + pipeline `prompts.py` | Pipeline must generate finish sentences for actual variant count, not hardcoded 28 |
 | D: Performance all-or-nothing fallback | FIXED (PR #61) | `dashboard/src/app/api/performance/route.ts` | Per-SKU hybrid: variant if non-zero, else master |
+
+---
+
+## Results — 2026-03-04
+
+**Tested by:** Claude Code (agent-browser + Supabase MCP)
+**Environment:** Production (`https://allied-feed-ops.vercel.app`)
+**Pipeline:** `https://feedops-pipeline-3b43yg32oa-ue.a.run.app` (healthy)
+
+### Summary
+
+| Category | Tests | Pass | Fail | Skip |
+|----------|-------|------|------|------|
+| D: Performance (PR #61 fix) | 3 | 3 | 0 | 0 |
+| A: Generate tab (known bug) | 2 | 0 | 2 | 0 |
+| B: Publishing variant count | 4 | 1 | 2 | 1 |
+| C: Review page regression | 3 | 3 | 0 | 0 |
+| F: General health | 4 | 3 | 0 | 1 |
+| G: Search Insights | 1 | 1 | 0 | 0 |
+| H: Pipeline health | 1 | 1 | 0 | 0 |
+| **Total** | **18** | **12** | **4** | **2** |
+
+### Detailed Results
+
+| Test | Result | Evidence |
+|------|--------|----------|
+| F1 | **PASS** | Login with bobby.andris@avondaledecor.com succeeded. Redirected to Review Queue showing 190 SKUs. |
+| D1 | **PASS** | Baselines show real non-zero numbers. AP-32: 31.3/day baseline, ES-20: 37.87/day, AR-24E: 14.87/day. DB confirms WP-2TB/16-GAL=990.05, CL-55=731.3. |
+| D2 | **PASS** | Snapshot dates: Mar 2-4, 2026. Days since publish: "0d ago", "1d ago" — all reasonable. DB confirms CL-55 snapshots from Mar 1-3 with days_since_publish 2-4. |
+| D3 | **PASS** | Summary cards: 122/122 SKUs with snapshot, Avg CTR Change -13.5%, Avg CVR Change +30.7%, Total Impressions 71,753, Total Clicks 660. All non-zero. |
+| A1 | **FAIL** | 17/17 recommended SKUs checked (DT-HTL/36-5, F-30-RP, DY-41-24, F-10, P-3/3, DY-HTB-1, P-30-RP, TA-72/24, TA-72/30, TA-72/36, FR-20-3, P-130-TPGS, P-220-18-DTB, 420G, 420T, AP-24U, DT-GT-3) ALL have rows in `generated_content`. The exclusion filter misses them entirely. Some SKUs are marked "Not recommended (already generated)" inline (e.g., DT-HTL/24-5, DY-41-18) but the majority pass through. |
+| A2 | **FAIL** | UI shows "Excluded SKUs (70)". DB has 191 distinct master_skus in `generated_content`, 130 with `approved_content IS NOT NULL`. The excluded count (70) doesn't match either number — the filter is too narrow and also limited by the performance data pool. |
+| B1 | **PASS** | DB confirms: 7272D/30 has 25 total variants, 25 unique finishes. Not 28. |
+| B2 | **FAIL** | DB has 28 finish sentences for 7272D/30 (google platform) but only 25 actual variants. 3 extra finishes: Glokzin Teal, Golden Yellow, Flat Troll Blue (not in variant_index for this SKU). Mismatch confirmed. |
+| B3 | **SKIP** | Review page shows "Google is ready to publish" for 7272D/30. Did not execute actual publish per test plan (observation only). Validation does not flag the 28 vs 25 mismatch. |
+| B4 | **FAIL** | No red/yellow validation warnings shown on review page. Validation says "ready to publish" despite 28 finish sentences vs 25 actual variants mismatch in DB. expand-variants.ts:230 would likely throw `finish_sentences_incomplete` at publish time. |
+| C1 | **PASS** | CL-55 review page shows performance section: 1.6K impressions, 0.6% CTR. Real non-zero data displayed. DB confirms avg_impressions=731.3 baseline. |
+| C2 | **PASS** | Navigated to `/review/CL-55?platform=bing`. After page load, Bing tab is [selected]. Platform tab persistence works via URL search params. |
+| C3 | **PASS** | 920D-6 Google title: `{FINISH_NAME} 6-Position Wall Mounted Multi Hook Rack 15.5 Inch - Space-Saving Organizer - Mercury - Allied Brass`. Description ends with `{FINISH_SENTENCE}`. Both placeholders render correctly. |
+| F2 | **PASS** | All sidebar pages load without errors: Overview (Review Queue), Generate, Performance, Batches (6 batches, 5 published), Search Insights, Settings. No crashes or 500 errors. |
+| F3 | **PASS** | 920D-6 visible in Review Queue list ("920D-6 Mercury Collection 6 Position Tie and Belt Rack with Dotted Accent"). Navigated to detail page successfully. |
+| F4 | **SKIP** | Cannot verify browser console errors via agent-browser automation. No visible error UI states on any page visited. |
+| G1 | **PASS** | Search Insights page loads correctly. Shows search input and instructions. Requires SKU input to display data (not a loading issue — it's the expected UX). |
+| H1 | **PASS** | `curl` returns: `{"status":"healthy","service":"feedops-pipeline","version":"1.0.0","product_catalog_count":75770,"supabase_connected":true}` |
+
+### Bugs Confirmed
+
+1. **Bug A (Generate tab exclusion)** — CONFIRMED WORSE THAN EXPECTED. Not just 61 candidate-only SKUs leaking through — the filter is so broken that 17/17 recommended SKUs tested already have rows in `generated_content`. The "Excluded SKUs (70)" count is neither 191 (all generated) nor 130 (approved). Root cause: `sku-selection/route.ts` exclusion logic too narrow.
+
+2. **Bug B (Variant count mismatch)** — CONFIRMED. 7272D/30 has 25 variants but 28 finish sentences in DB. The review page validation shows "ready to publish" without catching this mismatch. The 3 extra finishes (Glokzin Teal, Golden Yellow, Flat Troll Blue) are generated but don't correspond to real variants.
+
+3. **Performance fix (PR #61)** — VERIFIED WORKING. All D1-D3 tests pass. Summary cards show real non-zero data, baselines display correctly, snapshot dates are current.
+
+### Bug Fix Tracking (Updated)
+
+| Bug | Status | Severity | Root Cause | Next Step |
+|-----|--------|----------|------------|-----------|
+| A: Generate recommends already-generated | CONFIRMED | Medium | `sku-selection/route.ts:29-36` — only checks `approved_content IS NOT NULL` | Change to `EXISTS (SELECT 1 FROM generated_content WHERE master_sku = ...)` |
+| B: Variant finish sentence mismatch | CONFIRMED | High | Pipeline generates 28 sentences regardless of actual variant count; `expand-variants.ts:230` will throw | Pipeline must query `variant_index` for actual finishes before generating sentences |
+| B4: Validation doesn't catch mismatch | NEW | Medium | Review page publish validation doesn't compare finish sentence count vs variant count | Add pre-publish validation check in review page |
+| D: Performance all-or-nothing | FIXED ✅ | — | PR #61 merged | Verified working in production |
