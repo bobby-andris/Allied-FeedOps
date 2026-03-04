@@ -108,7 +108,7 @@
 
 </details>
 
-### 🚧 v1.1 Dead Code Cleanup + Data Infrastructure (In Progress)
+### v1.1 Dead Code Cleanup + Data Infrastructure (In Progress)
 
 **Milestone Goal:** Remove dead code from the v1.0 pipeline decomposition, fix the broken daily performance snapshot job, harden data table schemas, normalize entity relationships, and scale baseline coverage from 274 to all ~2,500 master SKUs.
 
@@ -125,6 +125,21 @@
 **Plans**: 1 plan
 Plans:
 - [x] 08-01-PLAN.md — Write and apply migration 042 (dedup + unique constraint + CHECK constraints + FK)
+
+#### Phase 08.1: Data Model Gap Audit (INSERTED)
+
+**Goal:** Audit all data flows for granularity mismatches, create variant-level performance tables, normalize offer IDs across all codepaths, document entity relationships, and scale baseline coverage to all ~2,500 master SKUs.
+**Trigger:** Phase 8 verification revealed variant-level Google Ads performance data is fetched but aggregated away to master_sku level — no variant-level performance tracking exists despite data being available.
+**Scope:** Absorbs Phase 12 entity mapping requirements (ENTM-01 through DATA-03) into audit. Phase 12 will be re-scoped or removed based on audit findings.
+**Requirements**: ENTM-01, ENTM-02, ENTM-03, DATA-01, DATA-02, DATA-03 (moved from Phase 12)
+**Depends on:** Phase 8
+**Plans:** 4 plans
+
+Plans:
+- [ ] 08.1-01-PLAN.md — Create offer ID normalization utility (ENTM-01) + migration 043 variant tables (DATA-02)
+- [ ] 08.1-02-PLAN.md — Apply normalization across 4 codepaths (ENTM-02) + variant dual-write
+- [ ] 08.1-03-PLAN.md — Entity relationship documentation with Mermaid ER diagrams (ENTM-03)
+- [ ] 08.1-04-PLAN.md — Bulk baseline backfill script (DATA-01) + pipeline verification (DATA-02, DATA-03)
 
 #### Phase 9: Trivial Dead Code Removal
 **Goal**: All zero-caller orphan functions are deleted from the codebase — no test changes required, ruff and pytest stay green after each deletion
@@ -162,17 +177,10 @@ Plans:
 **Plans**: TBD
 
 #### Phase 12: Entity Mapping and Bulk Coverage
-**Goal**: Offer ID normalization is applied at every data integration boundary; all ~2,500 master SKUs have performance baselines instead of the current 274
-**Depends on**: Phase 8, Phase 10, Phase 11
-**Requirements**: ENTM-01, ENTM-02, ENTM-03, DATA-01, DATA-02, DATA-03
-**Success Criteria** (what must be TRUE):
-  1. A `normalize_offer_id()` utility exists and is applied at every Google Ads integration boundary before any data query runs
-  2. A test confirms that `normalize_offer_id("shopify_US_123_456")` and `normalize_offer_id("shopify_us_123_456")` both return the same canonical form
-  3. A 50-SKU throttled test run completes successfully with no `RESOURCE_EXHAUSTED` errors before the full catalog sweep is attempted
-  4. After the full baseline backfill, `SELECT COUNT(DISTINCT master_sku) FROM performance_baselines` returns a value greater than 2,400 (up from 274)
-  5. The entity relationship map document exists at `docs/architecture/entity-relationships.md` and correctly diagrams `variant_index` as the hub
-  6. Daily snapshot verification: the morning after backfill completes, snapshot count in `performance_snapshots` reflects new SKUs being captured
-**Plans**: TBD
+**Goal**: ABSORBED — Requirements ENTM-01 through DATA-03 moved to Phase 8.1 (Data Model Gap Audit). This phase will be re-scoped or removed based on Phase 8.1 audit findings.
+**Depends on**: Phase 8.1
+**Requirements**: (moved to Phase 8.1)
+**Plans**: TBD — pending Phase 8.1 audit results
 
 #### Phase 13: Shared Utils Extraction
 **Goal**: The duplicated `_require_request_id()` and `GenerationBudgetExceededError` exist in exactly one location — circular import between persistence.py and job_management.py is resolved cleanly
@@ -188,7 +196,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 9 → 10 (parallel with 9) → 11 (after 9) → 12 (after 8, 10, 11) → 13 (after 11).
+v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 8.1 → 9 → 10 (parallel with 9) → 11 (after 9) → 12 (after 8.1) → 13 (after 11).
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -200,6 +208,7 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 9 �
 | 6. Model Evaluation | v1.0 | 3/3 | Complete | 2026-03-03 |
 | 7. Bing Fix | v1.0 | 0/TBD | Deferred | - |
 | 8. Schema Hardening | v1.1 | 1/1 | Complete | 2026-03-04 |
+| 8.1. Data Model Gap Audit | v1.1 | 0/4 | Planning complete | - |
 | 9. Trivial Dead Code Removal | v1.1 | 0/TBD | Not started | - |
 | 10. Image Wiring | v1.1 | 0/TBD | Not started | - |
 | 11. Test-Import Cleanup and Re-export Removal | v1.1 | 0/TBD | Not started | - |
