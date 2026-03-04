@@ -4,10 +4,10 @@ milestone: v1.1
 milestone_name: Dead Code Cleanup + Data Infrastructure
 status: executing
 stopped_at: Completed 11-test-import-cleanup-re-export-removal/11-02-PLAN.md
-last_updated: "2026-03-04T07:16:16.154Z"
+last_updated: "2026-03-04T07:30:47.393Z"
 last_activity: "2026-03-04 — Phase 11 Plan 02 complete: 2 duplicate functions removed from generator.py, test import updated to executor.py (DEAD-04)"
 progress:
-  total_phases: 14
+  total_phases: 13
   completed_phases: 10
   total_plans: 24
   completed_plans: 21
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 11 (Test-Import Cleanup and Re-export Removal) — COMPLETE
-Plan: 02 complete — Phase 11 done, next is Phase 12
+Plan: 02 complete — Phase 11 done, next is Phase 12 (Shared Utils Extraction)
 Status: In progress
 Last activity: 2026-03-04 — Phase 11 Plan 02 complete: 2 duplicate functions removed from generator.py, test import updated to executor.py (DEAD-04)
 
@@ -92,8 +92,7 @@ Progress: [█████████░] 88%
 
 ### Blockers/Concerns
 - Phase 9/11 ordering critical: DEAD-02 (test imports) must precede DEAD-03 (re-export removal) and DEAD-04 (generator.py cleanup)
-- Phase 12 pre-condition: ENTM-01 (offer ID normalization) must be applied before DATA-01 (bulk backfill) runs
-- Phase 12 quota risk: 2,500 SKU backfill consumes ~19% of Google Ads daily quota in one shot — 50-SKU test gate required first
+- (Resolved) Old Phase 12 pre-condition and quota risk no longer apply — requirements completed in Phase 8.1
 - Slack webhook binding: Verify `SLACK_WEBHOOK_URL` is bound to current Cloud Run revision before declaring Phase 8 complete
 
 ## Session Continuity

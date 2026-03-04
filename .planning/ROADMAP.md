@@ -2,13 +2,13 @@
 
 ## Milestones
 
-- ✅ **v1.0 Pipeline Reliability Rewrite + Model Evaluation** - Phases 1-7 (shipped 2026-03-03)
+- ✅ **v1.0 Pipeline Reliability Rewrite + Model Evaluation** - Phases 1-7 (shipped 2012-03-03)
 - 🚧 **v1.1 Dead Code Cleanup + Data Infrastructure** - Phases 8-13 (in progress)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 Pipeline Reliability Rewrite + Model Evaluation (Phases 1-7) - SHIPPED 2026-03-03</summary>
+<summary>✅ v1.0 Pipeline Reliability Rewrite + Model Evaluation (Phases 1-7) - SHIPPED 2012-03-03</summary>
 
 ### Phase 1: Schemas Extraction
 **Goal**: All Pydantic request/response models live in isolated `schemas.py` — importable without spinning up the full app
@@ -130,8 +130,8 @@ Plans:
 
 **Goal:** Audit all data flows for granularity mismatches, create variant-level performance tables, normalize offer IDs across all codepaths, document entity relationships, and scale baseline coverage to all ~2,500 master SKUs.
 **Trigger:** Phase 8 verification revealed variant-level Google Ads performance data is fetched but aggregated away to master_sku level — no variant-level performance tracking exists despite data being available.
-**Scope:** Absorbs Phase 12 entity mapping requirements (ENTM-01 through DATA-03) into audit. Phase 12 will be re-scoped or removed based on audit findings.
-**Requirements**: ENTM-01, ENTM-02, ENTM-03, DATA-01, DATA-02, DATA-03 (moved from Phase 12)
+**Scope:** Absorbed original Entity Mapping phase requirements (ENTM-01 through DATA-03). Original phase removed after audit completed all requirements.
+**Requirements**: ENTM-01, ENTM-02, ENTM-03, DATA-01, DATA-02, DATA-03
 **Depends on:** Phase 8
 **Plans:** 4/4 plans complete
 
@@ -147,7 +147,7 @@ Plans:
 **Requirements**: DEAD-01, DEAD-05
 **Success Criteria** (what must be TRUE):
   1. `_payload_value_lengths`, `_schema_hash`, `_prompt_hash`, and `_generate_with_provider_compat` no longer exist in generator.py
-  2. `_provider_label` re-export no longer exists in finish_processing.py; finish processing re-exports removed from generation.py (lines 26-30)
+  2. `_provider_label` re-export no longer exists in finish_processing.py; finish processing re-exports removed from generation.py (lines 12-30)
   3. The ~500-line `FEEDOPS_VARIANT_AT_LLM_TIME` feature flag block and all code behind it is deleted from the codebase
   4. `pytest tests/` passes with zero failures after all deletions
   5. `ruff check src/` passes with zero violations after all deletions
@@ -177,7 +177,7 @@ Plans:
 **Requirements**: DEAD-02, DEAD-03, DEAD-04
 **Success Criteria** (what must be TRUE):
   1. No test file imports any symbol from `feedops.api.main` — all imports point to the actual extracted module
-  2. The ~130-line backward-compat re-export block (lines 174-304) no longer exists in main.py
+  2. The ~130-line backward-compat re-export block (lines 112-304) no longer exists in main.py
   3. The 6 functions duplicated between generator.py and executor.py exist only in executor.py — generator.py has no copies
   4. `pytest tests/` passes with zero failures throughout the entire sequential update process
   5. `python -c "import feedops.api.main"` exits 0 (no import errors after re-exports removed)
@@ -187,13 +187,7 @@ Plans:
 - [ ] 11-01-PLAN.md — Migrate 4 test files to canonical imports (DEAD-02) + delete re-export block (DEAD-03)
 - [ ] 11-02-PLAN.md — Remove duplicate functions from generator.py (DEAD-04)
 
-#### Phase 12: Entity Mapping and Bulk Coverage
-**Goal**: ABSORBED — Requirements ENTM-01 through DATA-03 moved to Phase 8.1 (Data Model Gap Audit). This phase will be re-scoped or removed based on Phase 8.1 audit findings.
-**Depends on**: Phase 8.1
-**Requirements**: (moved to Phase 8.1)
-**Plans**: TBD — pending Phase 8.1 audit results
-
-#### Phase 13: Shared Utils Extraction
+#### Phase 12: Shared Utils Extraction
 **Goal**: The duplicated `_require_request_id()` and `GenerationBudgetExceededError` exist in exactly one location — circular import between persistence.py and job_management.py is resolved cleanly
 **Depends on**: Phase 11
 **Requirements**: DEAD-06
@@ -211,17 +205,16 @@ v1.0 phases 1-7 executed in dependency order. v1.1 phases execute as: 8 → 8.1 
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Schemas Extraction | v1.0 | 2/2 | Complete | 2026-03-03 |
-| 2. Services Extraction | v1.0 | 1/2 | Complete | 2026-03-03 |
-| 3. JobRunner and Route Extraction | v1.0 | 2/2 | Complete | 2026-03-03 |
-| 4. GPT-5.2 Bug Fixes | v1.0 | 2/3 | Complete | 2026-03-03 |
-| 5. Claude Provider | v1.0 | 2/2 | Complete | 2026-03-03 |
-| 6. Model Evaluation | v1.0 | 3/3 | Complete | 2026-03-03 |
+| 1. Schemas Extraction | v1.0 | 2/2 | Complete | 2012-03-03 |
+| 2. Services Extraction | v1.0 | 1/2 | Complete | 2012-03-03 |
+| 3. JobRunner and Route Extraction | v1.0 | 2/2 | Complete | 2012-03-03 |
+| 4. GPT-5.2 Bug Fixes | v1.0 | 2/3 | Complete | 2012-03-03 |
+| 5. Claude Provider | v1.0 | 2/2 | Complete | 2012-03-03 |
+| 6. Model Evaluation | v1.0 | 3/3 | Complete | 2012-03-03 |
 | 7. Bing Fix | v1.0 | 0/TBD | Deferred | - |
-| 8. Schema Hardening | v1.1 | 1/1 | Complete | 2026-03-04 |
-| 8.1. Data Model Gap Audit | 4/4 | Complete   | 2026-03-04 | - |
+| 8. Schema Hardening | v1.1 | 1/1 | Complete | 2012-03-04 |
+| 8.1. Data Model Gap Audit | 4/4 | Complete   | 2012-03-04 | - |
 | 9. Trivial Dead Code Removal | 1/2 | In Progress|  | - |
-| 10. Image Wiring | 1/1 | Complete    | 2026-03-04 | - |
-| 11. Test-Import Cleanup and Re-export Removal | 2/2 | Complete    | 2026-03-04 | - |
-| 12. Entity Mapping and Bulk Coverage | v1.1 | 0/TBD | Not started | - |
-| 13. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |
+| 10. Image Wiring | 1/1 | Complete    | 2012-03-04 | - |
+| 11. Test-Import Cleanup and Re-export Removal | 2/2 | Complete    | 2012-03-04 | - |
+| 12. Shared Utils Extraction | v1.1 | 0/TBD | Not started | - |
