@@ -156,35 +156,23 @@ Core workflow:
 - `collection-storytelling` - Collection DNA for 41 named collections
 - `google-shopping-content` - Google Shopping title/description optimization
 
-### GPT-5.2 Known Issues (to fix in v1.3a)
-
-See full research: `docs/research/gpt52-best-practices.md`
-
-1. **BUG**: `temperature=0.7` always passed alongside `reasoning_effort` — mutually exclusive on GPT-5.2 (`openai_provider.py:168-185`)
-2. **BUG**: `reasoning_effort` from env var `FEEDOPS_REASONING_EFFORT` — if unset, no reasoning sent (GPT-5.2 defaults to zero reasoning)
-3. Using legacy `json_object` instead of `json_schema` strict mode — wastes tokens on retry loops
-4. No `prompt_cache_retention: "24h"` — cache expires in 5-10 min during batch runs
-5. Gold standard examples in user prompt break cacheable prefix
-6. System prompt uses `=== ===` headers instead of XML tags (GPT-5.2 parses XML better)
-7. Vague length targets ("target 600-800") instead of hard constraints
-
 ## Current Roadmap
 
 **Master plan**: `docs/plans/2026-02-21-strategic-milestone-assessment.md` (10-part document)
-**New milestone brief**: `docs/setup/pipeline-rewrite-brief.md`
+**GSD roadmap**: `.planning/ROADMAP.md`
 
-- **v1.3a**: Content Generation Excellence — COMPLETE (prompts, skills, GPT-5.2 fixes)
-- **v1.3b**: Architecture Validation & Data Persistence — COMPLETE (batch reliability, hybrid generation)
+- **v1.0**: Pipeline Reliability Rewrite + Model Evaluation — COMPLETE (main.py decomposed, GPT-5.2 bugs fixed, Claude provider live)
+- **v1.1**: Dead Code Cleanup + Data Infrastructure — COMPLETE (dead code removed, schemas hardened, offer ID normalized, image wiring)
 - **v1.3c**: Actionable Shopping Intelligence — PAUSED (distribution scoring, revenue leakage)
-- **Next**: Pipeline Reliability Rewrite + Model Evaluation — decompose main.py, fix GPT-5.2 bugs, evaluate Claude vs GPT-5.2
+- **Next**: TBD — run `/gsd:new-milestone` (candidates: Bing content fix, dashboard data model migration, pipeline enhancements)
 - **v1.4**: Closed-Loop Optimization — performance-informed regeneration
 
-## What's Implemented (v1.2 Complete)
+## What's Implemented
 
 **Dashboard pages**: Overview, SKU review (3 variants), variant review, performance baselines/snapshots, batches/publishing, competitor intelligence, search insights, evidence table, settings, regeneration, SKU selection, post-publish monitoring
-**Pipeline**: Single-SKU generation, batch generation, hybrid multi-SKU generation, lifestyle image generation, search term sync, performance capture
+**Pipeline**: Single-SKU generation, batch generation, hybrid multi-SKU generation, lifestyle image generation, search term sync, performance capture. Decomposed into 9 focused modules + shared utils. Claude Sonnet 4.6 as primary provider.
 **Publishing**: Google Sheets (structured fields), Shopify (product-level + CDN lifecycle), variant expansion (28 finishes)
-**Data collection**: Auto-triggered baselines, search terms, keyword planner (via `ensure-data.ts`)
+**Data collection**: Auto-triggered baselines, search terms, keyword planner (via `ensure-data.ts`). Schema-hardened with proper constraints.
 
 ## Content Generation
 
