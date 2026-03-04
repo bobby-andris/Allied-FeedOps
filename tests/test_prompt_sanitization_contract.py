@@ -8,11 +8,11 @@ import inspect
 
 from feedops.api.prompt_builder import build_google_prompt
 from feedops.models.parent_sku import ParentSKU
-from feedops.pipeline.generator import (
+from feedops.generation.executor import (
     _platform_completion_cap,
     _platform_reasoning_effort,
-    generate_per_platform,
 )
+from feedops.pipeline.generator import generate_per_platform
 from feedops.pipeline.prompts import (
     BING_BRIEF,
     BING_SCHEMA,
@@ -208,7 +208,6 @@ def test_generator_v2_imports_only_platform_specific_builders() -> None:
 
 def test_ab_harness_imports_only_platform_specific_builders() -> None:
     """ab_prompt_test.py must NOT import build_core_prompt (the v1 legacy path)."""
-    import importlib.util
     from pathlib import Path
 
     script_path = Path(__file__).resolve().parents[1] / "scripts" / "ab_prompt_test.py"

@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import os
 import re
 
 from feedops.api.prompt_loader import (
@@ -70,53 +69,6 @@ class GenerationBudgetExceededError(RuntimeError):
             f" platform={platform} estimated_cost_usd={estimated_cost_usd:.6f}"
             f" cap_usd={cap_usd:.6f}"
         )
-
-
-def _platform_reasoning_effort(platform: str, default_reasoning_effort: str) -> str:
-    """Resolve per-platform reasoning effort."""
-    if platform == "finish":
-        return "low"
-    return default_reasoning_effort
-
-
-def _platform_completion_cap(platform: str, base_cap: int) -> int:
-    """Apply per-platform completion caps for v2 generation.
-
-    We intentionally *bound* completion budgets to reduce long-tail latency and
-    runaway spend during strict JSON generation. Callers can pass a lower cap,
-    but platform-specific hard limits prevent overly large completions.
-
-    Defaults are tuned to avoid GPT-5.x strict-JSON truncation for description
-    generation while remaining bounded by request-level cost and retry limits.
-    Limits are configurable by env when tighter controls are needed.
-    """
-    normalized_cap = max(1, int(base_cap))
-    default_cap = max(1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_DEFAULT", "8000")))
-    finish_cap = max(
-        1,
-        int(
-            os.getenv(
-                "FEEDOPS_PLATFORM_COMPLETION_CAP_FINISH",
-                os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_DEFAULT", "2000"),
-            )
-        ),
-    )
-    platform_limits = {
-        "google": max(
-            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_GOOGLE", str(default_cap)))
-        ),
-        "bing": max(
-            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_BING", str(default_cap)))
-        ),
-        "shopify": max(
-            1, int(os.getenv("FEEDOPS_PLATFORM_COMPLETION_CAP_SHOPIFY", str(default_cap)))
-        ),
-        "finish": finish_cap,
-    }
-    limit = platform_limits.get(platform)
-    if limit is None:
-        return normalized_cap
-    return min(normalized_cap, limit)
 
 
 def _resolve_requested_platforms(
