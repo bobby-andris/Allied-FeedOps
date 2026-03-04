@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 
 from feedops.api.persistence import _assembled_prompt_hash
-from feedops.api.prompt_loader import get_finish_list, get_platform_system_prompt
+from feedops.api.prompt_loader import get_finish_list, get_finish_list_for_sku, get_platform_system_prompt
 from feedops.api.runtime_controls import finish_sentence_regeneration_enabled
 from feedops.observability import log_event
 from feedops.observability.metrics import metrics_registry
@@ -27,7 +27,7 @@ def _build_finish_sentences_user_prompt(
     platform: str,
 ) -> str:
     """Build finish-sentence prompt for Google/Bing variant descriptions."""
-    finish_names = get_finish_list()
+    finish_names = get_finish_list_for_sku(master_sku)
     finish_list_markdown = "\n".join(f'- "{finish}"' for finish in finish_names)
     finish_schema_template = ",\n".join(
         f'    "{finish}": "One product-specific sentence..."'
@@ -69,7 +69,7 @@ def _validate_finish_sentences_payload(
     platform: str,
 ) -> dict[str, str]:
     """Normalize + validate finish sentences and log rejection reasons."""
-    finish_names = get_finish_list()
+    finish_names = get_finish_list_for_sku(master_sku)
     accepted, rejected = normalize_and_validate_finish_sentences(
         raw=raw,
         finish_names=finish_names,
@@ -115,7 +115,7 @@ async def _enforce_finish_sentence_parity(
     """Apply regenerate-equivalent finish handling for Google/Bing descriptions."""
     _generate_with_metrics = _get_generate_with_metrics()
 
-    finish_names = get_finish_list()
+    finish_names = get_finish_list_for_sku(master_sku)
     fallback_finish_sentences = build_fallback_finish_sentences(finish_names)
     sanitized_content = strip_hardcoded_finish_names(
         strip_generic_finish_count_claims(content),
@@ -192,14 +192,14 @@ async def _enforce_finish_sentence_parity(
         master_sku=master_sku,
         platform=platform,
     )
-    if len(validated_finish_sentences) != len(get_finish_list()):
+    if len(validated_finish_sentences) != len(finish_names):
         logger.warning(
-            "Finish sentence generation returned incomplete canonical coverage "
+            "Finish sentence generation returned incomplete coverage "
             "for %s/%s (%s/%s accepted)",
             master_sku,
             platform,
             len(validated_finish_sentences),
-            len(get_finish_list()),
+            len(finish_names),
         )
         metrics_registry.increment(
             "validation_failure_total",
