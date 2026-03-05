@@ -939,7 +939,10 @@ async def test_process_batch_job_never_writes_partial_status(monkeypatch):
     assert job_updates
     assert all(update.get("status") != "partial" for update in job_updates)
     final_status = [update for update in job_updates if "status" in update][-1]
-    assert final_status["status"] == "failed"
+    # Partial success (1 completed, 1 failed) is "completed" — only all-failures is "failed"
+    assert final_status["status"] == "completed"
+    assert final_status["failed_skus"] == 1
+    assert final_status["completed_skus"] == 1
 
 
 @pytest.mark.asyncio

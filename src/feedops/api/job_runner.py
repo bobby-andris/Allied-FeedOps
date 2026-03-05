@@ -141,12 +141,7 @@ class JobRunner:
         dry_run: bool,
         options: dict | None = None,
     ) -> None:
-        """Batch mode: simple counter tracking, direct SKU list.
-
-        Identical logic to old process_batch_job(). Only additions:
-        - Cancellation check at top of SKU loop (JOBS-05)
-        - Conversion from top-level function to instance method (self)
-        """
+        """Batch mode: simple counter tracking, direct SKU list."""
         ensure_generation_enabled(operation="process_batch_job")
         supabase = get_client()
 
@@ -167,36 +162,36 @@ class JobRunner:
         if normalized_options["descriptions"]:
             content_types.append("description")
 
-        for sku in skus:
-            # JOBS-05: Cancellation check at SKU boundary
-            if self._is_cancelled():
-                logger.info("Job %s: cancellation requested before %s, stopping.", job_id, sku)
-                supabase.table("batch_generation_jobs").update({
-                    "status": "failed",
-                    "error_message": "Job cancelled",
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                }).eq("id", job_id).execute()
-                return
+        provider = get_provider()
+        try:
+            for sku in skus:
+                # JOBS-05: Cancellation check at SKU boundary
+                if self._is_cancelled():
+                    logger.info("Job %s: cancellation requested before %s, stopping.", job_id, sku)
+                    supabase.table("batch_generation_jobs").update({
+                        "status": "failed",
+                        "error_message": "Job cancelled",
+                        "completed_at": datetime.now(timezone.utc).isoformat(),
+                    }).eq("id", job_id).execute()
+                    return
 
-            canonical_sku = sku
-            try:
-                canonical_sku = resolve_canonical_master_sku(supabase, sku)
-                # Update SKU status
-                _upsert_batch_job_sku_status(
-                    supabase=supabase,
-                    job_id=job_id,
-                    master_sku=canonical_sku,
-                    status="processing",
-                    started_at=datetime.now(timezone.utc).isoformat(),
-                )
-
-                # Load and generate for this SKU
-                parent_sku = load_parent_sku_from_supabase(canonical_sku)
-                if not parent_sku:
-                    raise ValueError(f"SKU not found: {canonical_sku}")
-
-                provider = get_provider()
+                canonical_sku = sku
                 try:
+                    canonical_sku = resolve_canonical_master_sku(supabase, sku)
+                    # Update SKU status
+                    _upsert_batch_job_sku_status(
+                        supabase=supabase,
+                        job_id=job_id,
+                        master_sku=canonical_sku,
+                        status="processing",
+                        started_at=datetime.now(timezone.utc).isoformat(),
+                    )
+
+                    # Load and generate for this SKU
+                    parent_sku = load_parent_sku_from_supabase(canonical_sku)
+                    if not parent_sku:
+                        raise ValueError(f"SKU not found: {canonical_sku}")
+
                     generated = await asyncio.wait_for(
                         generate_per_platform(
                             parent_sku=parent_sku,
@@ -216,212 +211,235 @@ class JobRunner:
                         ),
                         timeout=300.0,
                     )
-                finally:
-                    await close_provider(provider)
-                prompt_hashes = generated.get("prompt_hashes", {})
-                system_prompts = generated.get("system_prompts", {})
-                user_prompts = generated.get("user_prompts", {})
-                usage_by_platform = generated.get("usage_by_platform", {})
-                latencies = generated.get("latency_by_platform", {})
-                parse_by_platform = generated.get("parse_by_platform", {})
-                retry_by_platform = generated.get("retry_by_platform", {})
+                    prompt_hashes = generated.get("prompt_hashes", {})
+                    system_prompts = generated.get("system_prompts", {})
+                    user_prompts = generated.get("user_prompts", {})
+                    usage_by_platform = generated.get("usage_by_platform", {})
+                    latencies = generated.get("latency_by_platform", {})
+                    parse_by_platform = generated.get("parse_by_platform", {})
+                    retry_by_platform = generated.get("retry_by_platform", {})
 
-                if not dry_run:
-                    primary_content_type = content_types[0] if content_types else None
-                    for platform in platforms:
-                        for content_type in content_types:
-                            platform_telemetry = _extract_scoped_telemetry(
-                                platforms=_telemetry_scope_for_content(
-                                    platform=platform,
-                                    content_type=content_type,
-                                    generated=generated,
-                                ),
-                                usage_by_platform=usage_by_platform,
-                                latency_by_platform=latencies,
-                                retry_by_platform=retry_by_platform,
-                            )
-                            field_key = _content_field_key(platform, content_type)
-                            content = str(generated.get(field_key, "")).strip()
-                            include_platform_telemetry = content_type == primary_content_type
-                            _persist_generated_content_and_history(
-                                supabase=supabase,
-                                master_sku=canonical_sku,
-                                platform=platform,
-                                content_type=content_type,
-                                content=content,
-                                generation_model=_provider_label(provider),
-                                prompt_hash=str(
-                                    prompt_hashes.get(
-                                        platform,
-                                        get_platform_system_prompt_hash(platform),
-                                    )
-                                ),
-                                system_prompt=str(system_prompts.get(platform, "")),
-                                user_prompt=str(user_prompts.get(platform, "")),
-                                mode="full_generation_v2",
-                                tokens_used=platform_telemetry["tokens_used"]
-                                if include_platform_telemetry
-                                else 0,
-                                cost_usd=platform_telemetry["cost_usd"]
-                                if include_platform_telemetry
-                                else 0.0,
-                                latency_ms=platform_telemetry["latency_ms"]
-                                if include_platform_telemetry
-                                else 0,
-                                provider_attempt_count=platform_telemetry["provider_attempt_count"]
-                                if include_platform_telemetry
-                                else 0,
-                                parse_retry_count=platform_telemetry["parse_retry_count"]
-                                if include_platform_telemetry
-                                else 0,
-                                generation_diagnostics={
-                                    "selected_platforms": list(platforms),
-                                    "usage_by_platform": usage_by_platform
-                                    if isinstance(usage_by_platform, dict)
-                                    else {},
-                                    "latency_by_platform": latencies
-                                    if isinstance(latencies, dict)
-                                    else {},
-                                    "parse_by_platform": parse_by_platform
-                                    if isinstance(parse_by_platform, dict)
-                                    else {},
-                                    "retry_by_platform": retry_by_platform
-                                    if isinstance(retry_by_platform, dict)
-                                    else {},
-                                    **_extract_query_intent_generation_diagnostics(generated),
-                                },
-                                request_id=lineage_request_id,
-                            )
-                            _emit_generation_summary(
-                                endpoint="process_batch_job",
-                                request_id=request_id,
-                                job_id=job_id,
-                                master_sku=canonical_sku,
-                                platform=platform,
-                                content_type=content_type,
-                                mode="full_generation_v2",
-                                result_state="completed",
-                                tokens_used=platform_telemetry["tokens_used"]
-                                if include_platform_telemetry
-                                else 0,
-                                cost_usd=platform_telemetry["cost_usd"]
-                                if include_platform_telemetry
-                                else 0.0,
-                                latency_ms=platform_telemetry["latency_ms"]
-                                if include_platform_telemetry
-                                else 0,
-                                provider_attempt_count=platform_telemetry["provider_attempt_count"]
-                                if include_platform_telemetry
-                                else 0,
-                                parse_retry_count=platform_telemetry["parse_retry_count"]
-                                if include_platform_telemetry
-                                else 0,
-                            )
-
-                    _persist_finish_prompt_lineage(
-                        supabase=supabase,
-                        master_sku=canonical_sku,
-                        generated=generated,
-                        mode="full_generation_v2",
-                        generation_model=_provider_label(provider),
-                        generation_diagnostics={
-                            "selected_platforms": list(platforms),
-                            "usage_by_platform": usage_by_platform
-                            if isinstance(usage_by_platform, dict)
-                            else {},
-                            "latency_by_platform": latencies
-                            if isinstance(latencies, dict)
-                            else {},
-                            "parse_by_platform": parse_by_platform
-                            if isinstance(parse_by_platform, dict)
-                            else {},
-                            "retry_by_platform": retry_by_platform
-                            if isinstance(retry_by_platform, dict)
-                            else {},
-                        },
-                        request_id=lineage_request_id,
-                    )
-
-                    finish_sentences = generated.get("finish_sentences", {})
-                    if "description" in content_types:
-                        for platform in ("google", "bing"):
-                            if platform in platforms and _should_persist_finish_sentences(
-                                platform=platform,
-                                content_type="description",
-                                finish_sentences=finish_sentences,
-                            ):
-                                persist_finish_sentences(
+                    if not dry_run:
+                        primary_content_type = content_types[0] if content_types else None
+                        for platform in platforms:
+                            for content_type in content_types:
+                                platform_telemetry = _extract_scoped_telemetry(
+                                    platforms=_telemetry_scope_for_content(
+                                        platform=platform,
+                                        content_type=content_type,
+                                        generated=generated,
+                                    ),
+                                    usage_by_platform=usage_by_platform,
+                                    latency_by_platform=latencies,
+                                    retry_by_platform=retry_by_platform,
+                                )
+                                field_key = _content_field_key(platform, content_type)
+                                content = str(generated.get(field_key, "")).strip()
+                                include_platform_telemetry = content_type == primary_content_type
+                                _persist_generated_content_and_history(
                                     supabase=supabase,
                                     master_sku=canonical_sku,
                                     platform=platform,
-                                    finish_sentences=finish_sentences,
+                                    content_type=content_type,
+                                    content=content,
+                                    generation_model=_provider_label(provider),
+                                    prompt_hash=str(
+                                        prompt_hashes.get(
+                                            platform,
+                                            get_platform_system_prompt_hash(platform),
+                                        )
+                                    ),
+                                    system_prompt=str(system_prompts.get(platform, "")),
+                                    user_prompt=str(user_prompts.get(platform, "")),
+                                    mode="full_generation_v2",
+                                    tokens_used=platform_telemetry["tokens_used"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    cost_usd=platform_telemetry["cost_usd"]
+                                    if include_platform_telemetry
+                                    else 0.0,
+                                    latency_ms=platform_telemetry["latency_ms"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    provider_attempt_count=platform_telemetry["provider_attempt_count"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    parse_retry_count=platform_telemetry["parse_retry_count"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    generation_diagnostics={
+                                        "selected_platforms": list(platforms),
+                                        "usage_by_platform": usage_by_platform
+                                        if isinstance(usage_by_platform, dict)
+                                        else {},
+                                        "latency_by_platform": latencies
+                                        if isinstance(latencies, dict)
+                                        else {},
+                                        "parse_by_platform": parse_by_platform
+                                        if isinstance(parse_by_platform, dict)
+                                        else {},
+                                        "retry_by_platform": retry_by_platform
+                                        if isinstance(retry_by_platform, dict)
+                                        else {},
+                                        **_extract_query_intent_generation_diagnostics(generated),
+                                    },
+                                    request_id=lineage_request_id,
+                                )
+                                _emit_generation_summary(
+                                    endpoint="process_batch_job",
+                                    request_id=request_id,
+                                    job_id=job_id,
+                                    master_sku=canonical_sku,
+                                    platform=platform,
+                                    content_type=content_type,
+                                    mode="full_generation_v2",
+                                    result_state="completed",
+                                    tokens_used=platform_telemetry["tokens_used"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    cost_usd=platform_telemetry["cost_usd"]
+                                    if include_platform_telemetry
+                                    else 0.0,
+                                    latency_ms=platform_telemetry["latency_ms"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    provider_attempt_count=platform_telemetry["provider_attempt_count"]
+                                    if include_platform_telemetry
+                                    else 0,
+                                    parse_retry_count=platform_telemetry["parse_retry_count"]
+                                    if include_platform_telemetry
+                                    else 0,
                                 )
 
-                completed += 1
+                        _persist_finish_prompt_lineage(
+                            supabase=supabase,
+                            master_sku=canonical_sku,
+                            generated=generated,
+                            mode="full_generation_v2",
+                            generation_model=_provider_label(provider),
+                            generation_diagnostics={
+                                "selected_platforms": list(platforms),
+                                "usage_by_platform": usage_by_platform
+                                if isinstance(usage_by_platform, dict)
+                                else {},
+                                "latency_by_platform": latencies
+                                if isinstance(latencies, dict)
+                                else {},
+                                "parse_by_platform": parse_by_platform
+                                if isinstance(parse_by_platform, dict)
+                                else {},
+                                "retry_by_platform": retry_by_platform
+                                if isinstance(retry_by_platform, dict)
+                                else {},
+                            },
+                            request_id=lineage_request_id,
+                        )
 
-                # Update SKU as completed
-                _upsert_batch_job_sku_status(
-                    supabase=supabase,
-                    job_id=job_id,
-                    master_sku=canonical_sku,
-                    status="completed",
-                    completed_at=datetime.now(timezone.utc).isoformat(),
+                        finish_sentences = generated.get("finish_sentences", {})
+                        if "description" in content_types:
+                            for platform in ("google", "bing"):
+                                if platform in platforms and _should_persist_finish_sentences(
+                                    platform=platform,
+                                    content_type="description",
+                                    finish_sentences=finish_sentences,
+                                ):
+                                    persist_finish_sentences(
+                                        supabase=supabase,
+                                        master_sku=canonical_sku,
+                                        platform=platform,
+                                        finish_sentences=finish_sentences,
+                                    )
+
+                    completed += 1
+
+                    # Update SKU as completed
+                    _upsert_batch_job_sku_status(
+                        supabase=supabase,
+                        job_id=job_id,
+                        master_sku=canonical_sku,
+                        status="completed",
+                        completed_at=datetime.now(timezone.utc).isoformat(),
+                    )
+
+                except Exception as e:
+                    failed += 1
+                    logger.error(f"Batch SKU {sku} failed: {e}")
+
+                    # Update SKU as failed
+                    _upsert_batch_job_sku_status(
+                        supabase=supabase,
+                        job_id=job_id,
+                        master_sku=canonical_sku,
+                        status="failed",
+                        completed_at=datetime.now(timezone.utc).isoformat(),
+                        error_message=str(e),
+                    )
+                    _emit_generation_summary(
+                        endpoint="process_batch_job",
+                        request_id=request_id,
+                        job_id=job_id,
+                        master_sku=canonical_sku,
+                        platform=None,
+                        content_type=None,
+                        mode="full_generation_v2",
+                        result_state="failed",
+                    )
+
+                # Update job progress (protected against transient DB errors)
+                try:
+                    supabase.table("batch_generation_jobs").update(
+                        {"completed_skus": completed, "failed_skus": failed}
+                    ).eq("id", job_id).execute()
+                except Exception as progress_err:
+                    logger.error("Job progress update failed for %s: %s", job_id, progress_err)
+
+            # Mark job complete — partial success is still "completed"
+            final_status = "failed" if completed == 0 and failed > 0 else "completed"
+            final_payload = {
+                "status": final_status,
+                "completed_skus": completed,
+                "failed_skus": failed,
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            }
+            if failed > 0:
+                final_payload["error_message"] = (
+                    f"Completed {completed} of {len(skus)} SKUs; {failed} failed"
                 )
+            supabase.table("batch_generation_jobs").update(final_payload).eq("id", job_id).execute()
 
-            except Exception as e:
-                failed += 1
-                logger.error(f"Batch SKU {sku} failed: {e}")
-
-                # Update SKU as failed
-                _upsert_batch_job_sku_status(
-                    supabase=supabase,
-                    job_id=job_id,
-                    master_sku=canonical_sku,
-                    status="failed",
-                    completed_at=datetime.now(timezone.utc).isoformat(),
-                    error_message=str(e),
-                )
-                _emit_generation_summary(
-                    endpoint="process_batch_job",
-                    request_id=request_id,
-                    job_id=job_id,
-                    master_sku=canonical_sku,
-                    platform=None,
-                    content_type=None,
-                    mode="full_generation_v2",
-                    result_state="failed",
-                )
-
-            # Update job progress
-            supabase.table("batch_generation_jobs").update(
-                {"completed_skus": completed, "failed_skus": failed}
-            ).eq("id", job_id).execute()
-
-        # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
-        final_status = "completed" if failed == 0 else "failed"
-        final_payload = {
-            "status": final_status,
-            "completed_skus": completed,
-            "failed_skus": failed,
-            "completed_at": datetime.now(timezone.utc).isoformat(),
-        }
-        if failed > 0 and completed > 0:
-            final_payload["error_message"] = (
-                f"Completed {completed} of {len(skus)} SKUs; {failed} failed"
+            logger.info(f"Batch job {job_id} finished: {completed} completed, {failed} failed")
+            _emit_generation_summary(
+                endpoint="process_batch_job",
+                request_id=request_id,
+                job_id=job_id,
+                master_sku="*batch*",
+                platform=None,
+                content_type=None,
+                mode="full_generation_v2",
+                result_state=final_status,
             )
-        supabase.table("batch_generation_jobs").update(final_payload).eq("id", job_id).execute()
 
-        logger.info(f"Batch job {job_id} finished: {completed} completed, {failed} failed")
-        _emit_generation_summary(
-            endpoint="process_batch_job",
-            request_id=request_id,
-            job_id=job_id,
-            master_sku="*batch*",
-            platform=None,
-            content_type=None,
-            mode="full_generation_v2",
-            result_state=final_status,
-        )
+        except Exception as e:
+            logger.error(f"Batch processing error: {e}")
+            supabase.table("batch_generation_jobs").update({
+                "status": "failed",
+                "completed_skus": completed,
+                "failed_skus": failed,
+                "error_message": f"Batch processing error: {str(e)[:450]}",
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", job_id).execute()
+            _emit_generation_summary(
+                endpoint="process_batch_job",
+                request_id=request_id,
+                job_id=job_id,
+                master_sku="*batch*",
+                platform=None,
+                content_type=None,
+                mode="full_generation_v2",
+                result_state="failed",
+            )
+        finally:
+            await close_provider(provider)
 
     # =========================================================================
     # Hybrid mode (JOBS-01, JOBS-02, JOBS-04, JOBS-06 parity with process_hybrid_batch_job)
@@ -816,9 +834,10 @@ class JobRunner:
                     except Exception as progress_err:
                         logger.error("Progress update failed for %s: %s", variant_sku, progress_err)
 
-            # Mark job complete (batch_generation_jobs only supports queued/processing/completed/failed)
+            # Mark job complete — partial success is still "completed"
             total_failures = requested_failed + expanded_failed
-            final_status = "completed" if total_failures == 0 else "failed"
+            total_completed = requested_completed + expanded_completed
+            final_status = "failed" if total_completed == 0 and total_failures > 0 else "completed"
             final_error: str | None = None
             if total_failures > 0:
                 final_error = (
