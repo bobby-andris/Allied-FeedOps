@@ -71,7 +71,7 @@ async def _app_lifespan(_app: FastAPI):
         from feedops.db.supabase_client import get_client
         from datetime import datetime, timezone, timedelta
         sb = get_client()
-        stale_cutoff = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+        stale_cutoff = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
         stale = sb.table("batch_generation_jobs") \
             .select("id") \
             .eq("status", "processing") \
