@@ -3,7 +3,8 @@
 import { useMemo, useCallback, useState, useRef, useEffect } from "react"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import {
   Select,
   SelectContent,
@@ -11,6 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 import { skuToUrlPath } from "@/lib/sku-utils"
 import type { PlatformProgress } from "@/lib/review/platform-progress"
 import type { PlatformContentState } from "@/lib/review/platform-progress"
@@ -211,12 +221,17 @@ function SkuPreviewPanel({
   optimisticApprovals,
   onApprove,
   onClose,
+  onDelete,
 }: {
   sku: SkuRow
   optimisticApprovals: Set<string>
   onApprove: (platform: string) => void
   onClose: () => void
+  onDelete: (masterSku: string) => void
 }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const hasPublished = sku.platform_progress.some(p => p.state === 'published')
+
   return (
     <div className="border-l-4 border-primary/30 bg-muted/20 ml-4">
       {/* Header row: title + prominent Open Full Review button */}
@@ -276,8 +291,17 @@ function SkuPreviewPanel({
         {/* Lifestyle image lifecycle */}
         <LifestyleImageBadge images={sku.lifestyle_images} />
 
-        {/* Close link */}
-        <div className="flex justify-end">
+        {/* Actions: Delete & Close */}
+        <div className="flex justify-between items-center">
+          <button
+            onClick={(e) => { e.stopPropagation(); setConfirmOpen(true) }}
+            disabled={hasPublished}
+            title={hasPublished ? 'Cannot delete published SKUs' : 'Delete all generated content and reset to ungenerated'}
+            className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="h-3 w-3" />
+            Delete &amp; Reset
+          </button>
           <button
             onClick={(e) => { e.stopPropagation(); onClose() }}
             className="text-xs text-muted-foreground hover:text-foreground"
@@ -286,6 +310,32 @@ function SkuPreviewPanel({
           </button>
         </div>
       </div>
+
+      {/* Confirmation dialog */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent showCloseButton={false} onClick={(e) => e.stopPropagation()}>
+          <DialogHeader>
+            <DialogTitle>Delete &amp; Reset SKU</DialogTitle>
+            <DialogDescription>
+              Delete all generated content for <strong>{sku.master_sku}</strong>? This will remove it from the review queue and allow it to be re-generated.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setConfirmOpen(false)
+                onDelete(sku.master_sku)
+              }}
+            >
+              Delete &amp; Reset
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -322,6 +372,32 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
     else params.set('platform', platform)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }, [searchParams, pathname, router])
+
+  // Track deleted SKUs for optimistic removal from list
+  const [deletedSkus, setDeletedSkus] = useState<Set<string>>(new Set())
+
+  const handleDeleteReset = useCallback(async (masterSku: string) => {
+    try {
+      const res = await fetch('/api/review/reset-sku', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ master_sku: masterSku }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        toast.error(data.error ?? 'Failed to reset SKU')
+        return
+      }
+      const data = await res.json()
+      // Optimistically remove from list
+      setDeletedSkus(prev => new Set([...prev, masterSku]))
+      setExpandedSku(null)
+      const totalDeleted = Object.values(data.deleted as Record<string, number>).reduce((a: number, b: number) => a + b, 0)
+      toast.success(`Reset ${masterSku} — ${totalDeleted} rows deleted`)
+    } catch {
+      toast.error('Network error resetting SKU')
+    }
+  }, [])
 
   const handleQuickApprove = useCallback(async (masterSku: string, platform: string) => {
     // Optimistic update
@@ -374,9 +450,11 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
     })
   }, [skus])
 
-  // Filter SKUs by active status and platform
+  // Filter SKUs by active status and platform (excluding deleted)
   const filteredSkus = useMemo(() => {
     return skus.filter(sku => {
+      if (deletedSkus.has(sku.master_sku)) return false
+
       const platformsToCheck = activePlatform === 'all'
         ? sku.platform_progress
         : sku.platform_progress.filter(p => p.platform === activePlatform)
@@ -396,7 +474,7 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
 
       return platformsToCheck.some(p => p.state === targetState)
     })
-  }, [skus, activeStatus, activePlatform])
+  }, [skus, activeStatus, activePlatform, deletedSkus])
 
   return (
     <div>
@@ -543,6 +621,7 @@ export function ReviewListClient({ skus }: ReviewListClientProps) {
                     optimisticApprovals={optimisticApprovals[sku.master_sku] ?? new Set()}
                     onApprove={(platform) => handleQuickApprove(sku.master_sku, platform)}
                     onClose={() => setExpandedSku(null)}
+                    onDelete={handleDeleteReset}
                   />
                 </div>
               )}
